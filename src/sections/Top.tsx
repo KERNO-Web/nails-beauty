@@ -8,9 +8,11 @@ const go = (id: string) => (e: React.MouseEvent) => (e.preventDefault(), scrollT
 
 export function Header({ data }: { data: Data }) {
   const [scrolled, setScrolled] = useState(false)
+  const [top, setTop] = useState(true)
   const [open, setOpen] = useState(false)
   useEffect(() => {
-    const on = () => setScrolled(window.scrollY > 8)
+    // Пока виден первый экран, имя студии стоит на фото — в шапке его не дублируем
+    const on = () => (setScrolled(window.scrollY > 8), setTop(window.scrollY < 160))
     on()
     window.addEventListener('scroll', on, { passive: true })
     return () => window.removeEventListener('scroll', on)
@@ -30,7 +32,7 @@ export function Header({ data }: { data: Data }) {
   ]
   const nav = (id: string) => (e: React.MouseEvent) => (setOpen(false), go(id)(e))
   return (
-    <header className={`header ${scrolled || open ? 'is-scrolled' : ''}`}>
+    <header className={`header ${scrolled || open ? 'is-scrolled' : ''} ${top && !open ? 'at-top' : ''}`}>
       <div className="wrap-wide header-row">
         <a className="brand" href="#top" aria-label={`${s.name} — на главную`}>
           {s.logo ? <img src={s.logo} alt="" /> : <span className="brand-name">{s.name}</span>}
@@ -65,30 +67,8 @@ export function Header({ data }: { data: Data }) {
   )
 }
 
-/** Подгоняет кегль строки под ширину контейнера (масштабная «шапка журнала») */
-function useFitText<T extends HTMLElement>() {
-  const ref = useRef<T>(null)
-  useLayoutEffect(() => {
-    const el = ref.current
-    const box = el?.parentElement
-    if (!el || !box) return
-    const fit = () => {
-      const ratio = parseFloat(getComputedStyle(box).getPropertyValue('--fit')) || 1
-      el.style.fontSize = '100px'
-      const w = el.scrollWidth
-      if (w) el.style.fontSize = `${(100 * box.clientWidth * ratio) / w}px`
-    }
-    fit()
-    document.fonts?.ready.then(fit)
-    const ro = new ResizeObserver(fit)
-    ro.observe(box)
-    return () => ro.disconnect()
-  }, [])
-  return ref
-}
-
-/** Масштабная надпись отстаёт от прокрутки — лёгкая глубина, не больше 48px */
-function useDrift<T extends HTMLElement>(k = 0.06, max = 48) {
+/** Фото внутри кадра чуть сдвигается при прокрутке — единственный «эффект» страницы */
+export function useCropDrift<T extends HTMLElement>(range = 36) {
   const ref = useRef<T>(null)
   useEffect(() => {
     const el = ref.current
@@ -97,77 +77,80 @@ function useDrift<T extends HTMLElement>(k = 0.06, max = 48) {
     const on = () => {
       cancelAnimationFrame(raf)
       raf = requestAnimationFrame(() => {
-        el.style.transform = `translate3d(0, ${Math.min(window.scrollY * k, max).toFixed(1)}px, 0)`
+        const r = el.parentElement!.getBoundingClientRect()
+        const vh = window.innerHeight
+        if (r.bottom < 0 || r.top > vh) return
+        const k = Math.max(-1, Math.min(1, (r.top + r.height / 2 - vh / 2) / vh))
+        el.style.transform = `translate3d(0, ${(k * range).toFixed(1)}px, 0) scale(1.08)`
       })
     }
     on()
     window.addEventListener('scroll', on, { passive: true })
-    return () => (cancelAnimationFrame(raf), window.removeEventListener('scroll', on))
-  }, [k, max])
+    window.addEventListener('resize', on)
+    return () => (cancelAnimationFrame(raf), window.removeEventListener('scroll', on), window.removeEventListener('resize', on))
+  }, [range])
   return ref
 }
 
 export function Hero({ data }: { data: Data }) {
   const s = data.studio
   const near = nearestSlot(data)
-  const index = data.services.filter((x) => x.category !== 'extra').slice(0, 5)
-  const mast = useFitText<HTMLSpanElement>()
-  const drift = useDrift<HTMLDivElement>()
+  const prices = data.services.filter((x) => x.category !== 'extra').map((x) => x.price)
+  const minPrice = prices.length ? Math.min(...prices) : 0
+  const hero = useRef<HTMLElement>(null)
+  const tail = useRef<HTMLSpanElement>(null)
+  const media = useCropDrift<HTMLDivElement>(28)
+
+  // Фото начинается там, где кончается последняя строка заголовка: строка уходит под край снимка
+  useLayoutEffect(() => {
+    const el = hero.current
+    const t = tail.current
+    if (!el || !t) return
+    const fit = () => {
+      const x = t.getBoundingClientRect().right - el.getBoundingClientRect().left
+      el.style.setProperty('--tuck', `${Math.round(x)}px`)
+    }
+    fit()
+    document.fonts?.ready.then(fit)
+    document.fonts?.addEventListener('loadingdone', fit)
+    const ro = new ResizeObserver(fit)
+    ro.observe(el)
+    if (t.parentElement) ro.observe(t.parentElement)
+    return () => (ro.disconnect(), document.fonts?.removeEventListener('loadingdone', fit))
+  }, [])
+
+  const meta = [minPrice ? `от ${fmtPrice(minPrice)}` : '', near ? `ближайшее окно — ${dayHuman(near.iso, false)}, ${fmtTime(near.time)}` : '', s.address.split(',').slice(0, 2).join(',')].filter(Boolean)
+
   return (
-    <section className="cover" id="top">
-      <div className="wrap-wide cover-grid">
-        <p className="cover-meta cover-in">
-          <span>Выпуск 01</span>
-          <span>{s.city}</span>
-          <span>{new Date().getFullYear()}</span>
-        </p>
-
-        <div className="cover-mast" ref={drift} aria-hidden>
-          <span ref={mast} className="cover-in">
-            {s.name}
-          </span>
+    <section className="hero" id="top" ref={hero}>
+      <p className="hero-mark hero-in" aria-hidden>
+        {s.name}
+      </p>
+      <div className="hero-photo hero-in">
+        <div className="hero-media" ref={media}>
+          <Photo photo={s.heroPhoto} w={900} sizes="(min-width: 1024px) 62vw, 100vw" alt="Работа студии: длинный миндаль, ультрамарин с прозрачным кончиком" fetchPriority="high" />
         </div>
-
-        <figure className="cover-photo cover-in d1">
-          <div className="cover-frame">
-            <Photo photo={s.heroPhoto} w={680} sizes="(min-width: 1024px) 40vw, 88vw" alt="Маникюр мастеров студии" fetchPriority="high" />
-          </div>
-          {near && (
-            <figcaption>
-              <a href="#booking" onClick={go('booking')}>
-                Ближайшее окно — {dayHuman(near.iso, false)}, {fmtTime(near.time)}
-              </a>
-            </figcaption>
-          )}
-        </figure>
-
-        <div className="cover-copy cover-in d2">
-          <h1>Маникюр, на&nbsp;который легко записаться</h1>
-          <p>Цены и свободное время видно сразу — без переписки.</p>
-          <div className="cover-cta">
-            <a className="btn btn-primary" href="#booking" onClick={go('booking')}>
-              Записаться <Arrow size={16} className="arrow" />
-            </a>
-            <a className="cover-link" href="#works" onClick={go('works')}>
-              Смотреть работы
-            </a>
-          </div>
+      </div>
+      <div className="hero-text">
+        <h1 className="hero-in d1">
+          Выберите
+          <br />
+          маникюр
+          <br />
+          глазами&nbsp;—
+          <br />
+          <span ref={tail}>и&nbsp;сразу время.</span>
+        </h1>
+        <p className="hero-lead hero-in d2">Цены, работы и&nbsp;свободные окна&nbsp;— на&nbsp;одной странице. Без переписки в&nbsp;директе.</p>
+        <div className="hero-cta hero-in d2">
+          <a className="btn btn-primary" href="#booking" onClick={go('booking')}>
+            Записаться <Arrow size={16} className="arrow" />
+          </a>
+          <a className="text-link" href="#works" onClick={go('works')}>
+            Смотреть работы
+          </a>
         </div>
-
-        {index.length > 1 && (
-          <ol className="cover-index cover-in d2" aria-label="Услуги и цены">
-            {index.map((x, i) => (
-              <li key={x.id}>
-                <span className="n">{String(i + 1).padStart(2, '0')}</span>
-                <span className="t">{x.title}</span>
-                <span className="p">
-                  {x.priceFrom ? 'от ' : ''}
-                  {fmtPrice(x.price)}
-                </span>
-              </li>
-            ))}
-          </ol>
-        )}
+        <p className="hero-meta hero-in d2">{meta.join(' · ')}</p>
       </div>
     </section>
   )

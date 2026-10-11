@@ -2,7 +2,7 @@
 // Фото: id снимков Unsplash (photo-…) или любые ссылки/пути (/photos/1.jpg).
 import type { Data } from './types'
 
-export const DATA_VERSION = 2
+export const DATA_VERSION = 3
 
 export const demo: Data = {
   version: DATA_VERSION,
@@ -18,8 +18,8 @@ export const demo: Data = {
     whatsapp: '79135552418',
     vk: 'lumi_nails',
     reviewsUrl: '',
-    accent: '#8B243D',
-    heroPhoto: 'photo-1610992015762-45dca7fa3a85',
+    accent: '#1B2CC1',
+    heroPhoto: 'photo-1772322586634-9867476143b9',
     heroPhoto2: 'photo-1648844421727-cde6c4246b13',
     stepMin: 30,
     bufferMin: 0,

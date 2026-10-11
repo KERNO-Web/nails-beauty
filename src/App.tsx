@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Booking } from './sections/Booking'
-import { Benefits, Contacts, Final, Footer, Reviews, StickyCta } from './sections/Bottom'
-import { HowItWorks, Masters, Services, Works } from './sections/Showcase'
+import { Benefits, Closing, Reviews, StickyCta } from './sections/Bottom'
+import { BookingIntro, Interlude, Masters, Services, Works } from './sections/Showcase'
 import { Header, Hero } from './sections/Top'
 import { useData } from './lib/store'
 import { useReveal } from './lib/ui'
@@ -51,15 +51,14 @@ function Site() {
         <Hero data={data} />
         <Services data={data} />
         <Works data={data} />
+        <Interlude />
         <Masters data={data} />
-        <HowItWorks data={data} />
+        <BookingIntro data={data} />
         <Booking data={data} />
         <Benefits />
         <Reviews data={data} />
-        <Contacts data={data} />
-        <Final data={data} />
       </main>
-      <Footer data={data} />
+      <Closing data={data} />
       <StickyCta data={data} />
     </>
   )

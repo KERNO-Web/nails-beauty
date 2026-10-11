@@ -1,34 +1,33 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { Data } from '../data/types'
-import { Arrow, Phone, Telegram, VK, WhatsApp } from '../lib/icons'
+import { Arrow } from '../lib/icons'
 import { dateOf, dayHuman, fmtTime, hoursSummary, monthPrep, nearestSlot } from '../lib/slots'
-import { Avatar, scrollToId } from '../lib/ui'
+import { scrollToId } from '../lib/ui'
 
 export function Benefits() {
   const items = [
-    { t: 'Свободное время видно сразу', d: 'Не нужно спрашивать «а когда есть окошко?» — все окна уже в расписании.' },
-    { t: 'Цены перед глазами', d: 'У каждой услуги — стоимость и длительность. Без сюрпризов на кассе.' },
-    { t: 'Запись в полночь — тоже запись', d: 'Выбираете время, когда удобно вам, а не когда мастер может ответить.' },
-    { t: 'Пара минут вместо переписки', d: 'Услуга, время, имя и телефон. Больше ничего не спрашиваем.' },
-    { t: 'Напомним накануне', d: 'Мастер напишет за день до визита — ничего не забудется.' },
+    { t: 'Свободное время видно сразу', d: 'Не нужно спрашивать «а когда есть окошко?» — все окна уже в расписании.' },
+    { t: 'Цены перед глазами', d: 'У каждой услуги — стоимость и длительность. Без сюрпризов на кассе.' },
+    { t: 'Мастера выбираете сами', d: 'Или записываетесь к любому, у кого раньше окно.' },
+    { t: 'Запись в полночь — тоже запись', d: 'Выбираете время, когда удобно вам, а не когда мастер может ответить.' },
   ]
   return (
-    <section className="section benefits">
-      <div className="wrap ben-wrap">
-        <header className="sec-head">
-          <p className="eyebrow reveal">Почему так удобнее</p>
-          <h2 className="reveal d1">
-            Записаться проще, <em>чем написать</em>
-          </h2>
-        </header>
-        <ul className="ben-list">
+    <section className="benefits">
+      <div className="wrap-wide ben-grid">
+        <h2 className="reveal">
+          Записаться проще,
+          <br />
+          чем написать.
+        </h2>
+        <ol className="ben-list">
           {items.map((it, i) => (
-            <li key={i} className={`reveal d${i % 3}`}>
+            <li key={i} className="reveal">
+              <span className="n">{String(i + 1).padStart(2, '0')}</span>
               <b>{it.t}</b>
               <span>{it.d}</span>
             </li>
           ))}
-        </ul>
+        </ol>
       </div>
     </section>
   )
@@ -37,34 +36,25 @@ export function Benefits() {
 export function Reviews({ data }: { data: Data }) {
   if (!data.reviews.length) return null
   return (
-    <section className="section" id="reviews">
-      <div className="wrap">
-        <header className="sec-head split">
-          <p className="eyebrow reveal">Отзывы</p>
-          <h2 className="reveal d1">
-            Что говорят <em>после</em> визита
-          </h2>
+    <section className="reviews-sec" id="reviews">
+      <div className="wrap-wide">
+        <header className="rev-head">
+          <p className="label reveal">Отзывы</p>
           {data.studio.reviewsUrl && (
-            <a className="link reveal d2" href={data.studio.reviewsUrl} target="_blank" rel="noreferrer">
-              Все отзывы на картах <Arrow size={16} />
+            <a className="text-link reveal" href={data.studio.reviewsUrl} target="_blank" rel="noreferrer">
+              Все отзывы на картах <Arrow size={14} />
             </a>
           )}
         </header>
         <div className="reviews">
-          {data.reviews.map((r, i) => (
-            <article key={r.id} className={`review reveal d${i % 3}`}>
-              <p>{r.text}</p>
-              <footer>
-                <Avatar name={r.name} size={40} />
-                <span>
-                  <b>{r.name}</b>
-                  <small>
-                    {r.service} · в {monthPrep(r.date)}
-                    {dateOf(r.date).getFullYear() !== new Date().getFullYear() ? ` ${dateOf(r.date).getFullYear()}` : ''}
-                  </small>
-                </span>
-              </footer>
-            </article>
+          {data.reviews.map((r) => (
+            <figure key={r.id} className="review reveal">
+              <blockquote>{r.text}</blockquote>
+              <figcaption>
+                <b>{r.name}</b> · {r.service}, в&nbsp;{monthPrep(r.date)}
+                {dateOf(r.date).getFullYear() !== new Date().getFullYear() ? ` ${dateOf(r.date).getFullYear()}` : ''}
+              </figcaption>
+            </figure>
           ))}
         </div>
       </div>
@@ -72,29 +62,52 @@ export function Reviews({ data }: { data: Data }) {
   )
 }
 
-export function Contacts({ data }: { data: Data }) {
+/** Финал: контакты, карта и большое имя студии */
+export function Closing({ data }: { data: Data }) {
   const s = data.studio
   const [lon, lat] = s.map
   const hours = hoursSummary(data)
+  const near = nearestSlot(data)
   const mapSrc = `https://yandex.ru/map-widget/v1/?ll=${lon}%2C${lat}&z=16&pt=${lon}%2C${lat}%2Cpm2rdm`
   const routeUrl = `https://yandex.ru/maps/?rtext=~${lat}%2C${lon}&rtt=auto`
+  const mark = useRef<HTMLSpanElement>(null)
+  // Имя студии во всю ширину — кегль подгоняем под контейнер
+  useLayoutEffect(() => {
+    const el = mark.current
+    const box = el?.parentElement
+    if (!el || !box) return
+    const fit = () => {
+      el.style.fontSize = '100px'
+      if (el.scrollWidth) el.style.fontSize = `${(100 * box.clientWidth) / el.scrollWidth}px`
+    }
+    fit()
+    document.fonts?.ready.then(fit)
+    const ro = new ResizeObserver(fit)
+    ro.observe(box)
+    return () => ro.disconnect()
+  }, [s.name])
+  const links = [
+    s.phone && { href: `tel:${s.phone.replace(/[^\d+]/g, '')}`, label: s.phone },
+    s.telegram && { href: `https://t.me/${s.telegram}`, label: 'Telegram', ext: true },
+    s.whatsapp && { href: `https://wa.me/${s.whatsapp}`, label: 'WhatsApp', ext: true },
+    s.vk && { href: `https://vk.com/${s.vk}`, label: 'ВКонтакте', ext: true },
+  ].filter(Boolean) as { href: string; label: string; ext?: boolean }[]
   return (
-    <section className="section section-alt" id="contacts">
-      <div className="wrap">
-        <header className="sec-head">
-          <p className="eyebrow reveal">Контакты</p>
-          <h2 className="reveal d1">
-            Ждём вас <em>в гости</em>
-          </h2>
-        </header>
-        <div className="contacts">
-          <div className="contact-card reveal">
-            <div>
-              <p className="contact-addr">{s.address}</p>
-              <p className="contact-note">
-                {s.city}. {s.addressNote}
-              </p>
-            </div>
+    <footer className="closing" id="contacts">
+      <div className="wrap-wide">
+        <div className="closing-grid">
+          <div className="closing-col">
+            <p className="label">Адрес</p>
+            <p className="closing-addr">{s.address}</p>
+            <p className="muted">
+              {s.city}. {s.addressNote}
+            </p>
+            <a className="text-link" href={routeUrl} target="_blank" rel="noreferrer">
+              Построить маршрут <Arrow size={14} />
+            </a>
+          </div>
+          <div className="closing-col">
+            <p className="label">Часы</p>
             <dl className="hours" aria-label="Часы работы">
               {hours.map((h) => (
                 <div key={h.days} className={h.text === 'выходной' ? 'off' : ''}>
@@ -103,70 +116,42 @@ export function Contacts({ data }: { data: Data }) {
                 </div>
               ))}
             </dl>
-            <div className="socials">
-              {s.telegram && (
-                <a className="social" href={`https://t.me/${s.telegram}`} target="_blank" rel="noreferrer">
-                  <Telegram /> Telegram
-                </a>
-              )}
-              {s.whatsapp && (
-                <a className="social" href={`https://wa.me/${s.whatsapp}`} target="_blank" rel="noreferrer">
-                  <WhatsApp /> WhatsApp
-                </a>
-              )}
-              {s.vk && (
-                <a className="social" href={`https://vk.com/${s.vk}`} target="_blank" rel="noreferrer">
-                  <VK /> ВКонтакте
-                </a>
-              )}
-              {s.phone && (
-                <a className="social" href={`tel:${s.phone.replace(/[^\d+]/g, '')}`}>
-                  <Phone /> Позвонить
-                </a>
-              )}
-            </div>
           </div>
-          <div className="map reveal d1">
-            <iframe src={mapSrc} title={`Карта: ${s.address}`} loading="lazy" allowFullScreen />
-            <a className="btn btn-sm btn-primary map-link" href={routeUrl} target="_blank" rel="noreferrer">
-              Построить маршрут
+          <div className="closing-col">
+            <p className="label">Связь</p>
+            <ul className="closing-links">
+              {links.map((l) => (
+                <li key={l.href}>
+                  <a href={l.href} {...(l.ext ? { target: '_blank', rel: 'noreferrer' } : {})}>
+                    {l.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="closing-cta">
+            <a className="btn btn-primary" href="#booking" onClick={(e) => (e.preventDefault(), scrollToId('booking'))}>
+              Записаться онлайн <Arrow size={16} className="arrow" />
             </a>
+            {near && (
+              <p className="muted">
+                Ближайшее окно — {dayHuman(near.iso)}, {fmtTime(near.time)}
+              </p>
+            )}
+          </div>
+          <div className="closing-map">
+            <iframe src={mapSrc} title={`Карта: ${s.address}`} loading="lazy" allowFullScreen />
           </div>
         </div>
-      </div>
-    </section>
-  )
-}
-
-export function Final({ data }: { data: Data }) {
-  const near = nearestSlot(data)
-  return (
-    <section className="final">
-      <div className="wrap">
-        <h2 className="reveal">
-          Красиво, понятно — <em>и уже в календаре</em>
-        </h2>
-        {near && (
-          <p className="reveal d1">
-            Ближайшее свободное окно — {dayHuman(near.iso)} в {fmtTime(near.time)}
-          </p>
-        )}
-        <a className="btn btn-primary reveal d2" href="#booking" onClick={(e) => (e.preventDefault(), scrollToId('booking'))}>
-          Записаться онлайн <Arrow />
-        </a>
-      </div>
-    </section>
-  )
-}
-
-export function Footer({ data }: { data: Data }) {
-  return (
-    <footer className="footer">
-      <div className="wrap">
-        <span>
-          © {new Date().getFullYear()} {data.studio.name} {data.studio.kind}, {data.studio.city}
-        </span>
-        <a href="#/admin">Кабинет мастера</a>
+        <p className="closing-mark" aria-hidden>
+          <span ref={mark}>{s.name}</span>
+        </p>
+        <div className="closing-legal">
+          <span>
+            © {new Date().getFullYear()} {s.name} {s.kind}, {s.city}
+          </span>
+          <a href="#/admin">Кабинет мастера</a>
+        </div>
       </div>
     </footer>
   )

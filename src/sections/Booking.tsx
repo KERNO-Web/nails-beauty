@@ -110,14 +110,11 @@ export function Booking({ data }: { data: Data }) {
   const whenText = sel.date ? `${dayHuman(sel.date)}${chosenSlot ? `, ${fmtTime(chosenSlot.time)}` : ''}` : ''
 
   return (
-    <section className={`section section-alt booking`} id="booking">
-      <div className="wrap">
-        <header className="sec-head">
-          <p className="eyebrow reveal">Онлайн-запись</p>
-          <h2 className="reveal d1">
-            Выберите <em>своё время</em>
-          </h2>
-          <p className="reveal d2">Здесь только реально свободные окна — их видит и мастер. Занятое время зачёркнуто.</p>
+    <section className="booking" id="booking">
+      <div className="wrap-wide">
+        <header className="bk-head">
+          <h2>Онлайн-запись</h2>
+          <p>Только реально свободные окна — их видит и&nbsp;мастер. Занятое время зачёркнуто.</p>
         </header>
 
         {done ? (
@@ -128,7 +125,7 @@ export function Booking({ data }: { data: Data }) {
               {/* 1. Услуга */}
               <div className={`step ${service ? 'is-done' : ''}`}>
                 <div className="step-head">
-                  <span className="step-n">{service ? <Check size={14} /> : 1}</span>
+                  <span className="step-n">{service ? <Check size={14} /> : '01'}</span>
                   <span className="step-title">Услуга</span>
                 </div>
                 <div className="step-body">
@@ -174,7 +171,7 @@ export function Booking({ data }: { data: Data }) {
               {multi && (
                 <div className={`step ${service ? 'is-done' : 'is-locked'}`}>
                   <div className="step-head">
-                    <span className="step-n">{service ? <Check size={14} /> : 2}</span>
+                    <span className="step-n">{service ? <Check size={14} /> : '02'}</span>
                     <span className="step-title">Мастер</span>
                   </div>
                   <div className="step-body">
@@ -207,7 +204,7 @@ export function Booking({ data }: { data: Data }) {
               {/* 3. Дата и время */}
               <div className={`step ${chosenSlot ? 'is-done' : ''} ${service ? '' : 'is-locked'}`} ref={timeRef}>
                 <div className="step-head">
-                  <span className="step-n">{chosenSlot ? <Check size={14} /> : stepN(3)}</span>
+                  <span className="step-n">{chosenSlot ? <Check size={14} /> : `0${stepN(3)}`}</span>
                   <span className="step-title">Дата и время</span>
                   {!service && <span className="step-value">сначала выберите услугу</span>}
                 </div>
@@ -258,7 +255,7 @@ export function Booking({ data }: { data: Data }) {
               {/* 4. Контакты */}
               <div className={`step ${contactsFilled && ready ? 'is-done' : ''}`} ref={contactRef}>
                 <div className="step-head">
-                  <span className="step-n">{contactsFilled && ready ? <Check size={14} /> : stepN(4)}</span>
+                  <span className="step-n">{contactsFilled && ready ? <Check size={14} /> : `0${stepN(4)}`}</span>
                   <span className="step-title">Ваши контакты</span>
                 </div>
                 <div className="step-body fields">
