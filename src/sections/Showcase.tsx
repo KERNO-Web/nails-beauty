@@ -386,7 +386,7 @@ function MasterCard({ data, m, single }: { data: Data; m: Master; single: boolea
   const works = data.works.filter((w) => w.masterId === m.id)
   const services = m.serviceIds.length ? data.services.filter((s) => m.serviceIds.includes(s.id)) : []
   const next = nextSlotOf(data, m)
-  // Портрета нет — вместо него три работы мастера тем же силуэтом, что и на первом экране
+  // На месте мастера — его настоящее фото (m.photo). Только если фото нет — три его работы
   const fallback = (works.length ? works : data.works).slice(0, 3)
   return (
     <article className={`master ${single ? 'is-single' : ''}`}>

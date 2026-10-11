@@ -887,7 +887,7 @@ function StudioTab({ data }: { data: Data }) {
               <Field label="Специализация">
                 <input className="input" value={m.role} onChange={(e) => setMaster(m.id, { role: e.target.value })} />
               </Field>
-              <PhotoField label="Портрет (необязательно)" wide optional value={m.photo ?? ''} onChange={(v) => setMaster(m.id, { photo: v })} />
+              <PhotoField label="Фото мастера — настоящее, если есть (без фото на сайте показываются его работы)" wide optional value={m.photo ?? ''} onChange={(v) => setMaster(m.id, { photo: v })} />
               <Field label="Стаж, лет (только если это правда)">
                 <input className="input" inputMode="numeric" value={m.years ?? ''} onChange={(e) => setMaster(m.id, { years: Number(e.target.value.replace(/\D/g, '')) || undefined })} />
               </Field>
