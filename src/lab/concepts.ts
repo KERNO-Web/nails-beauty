@@ -53,19 +53,12 @@ export const CONCEPTS: Concept[] = [
   },
 ]
 
-const KEY = 'nail-studio:concept'
 const isId = (x: unknown): x is ConceptId => CONCEPTS.some((c) => c.id === x)
 
+/** Утверждена концепция «Живой материал» — она по умолчанию; две другие доступны только по ссылке ?concept=type|color */
 function initial(): ConceptId {
   const q = new URLSearchParams(location.search).get('concept')
-  if (isId(q)) return q
-  try {
-    const s = localStorage.getItem(KEY)
-    if (isId(s)) return s
-  } catch {
-    /* приватный режим */
-  }
-  return 'material'
+  return isId(q) ? q : 'material'
 }
 
 let current: ConceptId = initial()
@@ -84,11 +77,6 @@ export function setConcept(id: ConceptId) {
   if (id === current) return
   const apply = () => {
     current = id
-    try {
-      localStorage.setItem(KEY, id)
-    } catch {
-      /* ничего */
-    }
     const url = new URL(location.href)
     url.searchParams.set('concept', id)
     history.replaceState(null, '', url)

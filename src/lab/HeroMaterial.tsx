@@ -2,11 +2,12 @@
 // маникюра; по краю — перламутровый отлив, блик идёт за курсором, от капли отделяются и сливаются обратно
 // две маленькие. При прокрутке капля растекается на весь экран и фото открывается целиком.
 // Шейдер на чистом WebGL (без библиотек). Нет WebGL или фото не отдаёт CORS — статичная версия на CSS.
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { Data } from '../data/types'
 import { photoUrl, typo } from '../lib/ui'
 import type { Concept } from './concepts'
 import { HeroCta, HeroFacts } from './HeroParts'
+import { COPIES, LEAD, useTypeLab } from './typeLab'
 
 const VERT = `attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }`
 
@@ -29,7 +30,8 @@ float scene(vec2 p){
   float t = uTime;
   float wob = 0.035*sin(3.0*a + t*0.9) + 0.025*sin(5.0*a - t*1.25) + 0.018*sin(2.0*a + t*0.55 + 1.7);
   vec2 md = uMouse - uCenter;
-  float pull = 0.07*smoothstep(1.7*uRadius, 0.2*uRadius, length(md))*pow(max(cos(a - atan(md.y, md.x)), 0.0), 4.0);
+  // Капля тянется к курсору; у самого центра направление не определено — там тяга плавно гаснет
+  float pull = 0.07*smoothstep(1.7*uRadius, 0.2*uRadius, length(md))*smoothstep(0.15*uRadius, 0.6*uRadius, length(md))*pow(max(cos(a - atan(md.y, md.x)), 0.0), 4.0);
   float r = uRadius*(1.0 + (wob + pull)*(1.0 - uGrow));
   float s = length(d) - r;
   // Две капли-спутника: отрываются и сливаются с основной
@@ -82,13 +84,26 @@ void main(){
   col *= mix(0.8, 1.0, mix(h, 1.0, uGrow));
   // Объём: тень к низу, мягкий свет сверху
   col *= 1.0 - 0.28*edge*smoothstep(0.1, -0.9, N.y);
-  // Блик за курсором
-  vec3 L = normalize(vec3((uMouse - uCenter)/max(uRadius, 1.0)*0.55, 1.0));
-  vec3 H = normalize(L + vec3(0.0, 0.0, 1.0));
-  float spec = pow(max(dot(N, H), 0.0), 90.0)*0.85 + pow(max(dot(N, H), 0.0), 12.0)*0.08;
-  col += spec*(1.0 - uGrow);
+  // Свет. Раньше блик считался от нормали по всей капле: середина у неё плоская (нормаль смотрит на зрителя),
+  // и когда курсор оказывался над центром, блик ложился на всю середину — фото выгорало в белое.
+  // Теперь: 1) блик только там, где поверхность изгибается (у края); 2) небольшое отражение-«окно»,
+  // которое смещается по кругу вслед за курсором, но не заходит в середину; 3) мягкое плечо яркости вместо клиппинга.
+  vec2 toL = uMouse - uCenter;
+  vec2 dirL = length(toL) > 1.0 ? normalize(toL) : vec2(-0.6, 0.8);
+  vec3 L = normalize(vec3(dirL*0.85, 0.75));
+  vec3 Hh = normalize(L + vec3(0.0, 0.0, 1.0));
+  float curve = smoothstep(0.04, 0.45, 1.0 - h);
+  float rimSpec = pow(max(dot(N, Hh), 0.0), 40.0)*curve*0.6;
+  vec2 spot = uCenter + dirL*uRadius*0.6;
+  vec2 ds = p - spot;
+  vec2 along = vec2(-dirL.y, dirL.x);
+  float win = exp(-(pow(dot(ds, along)/(uRadius*0.2), 2.0) + pow(dot(ds, dirL)/(uRadius*0.055), 2.0)));
+  col += vec3(1.0, 0.985, 0.975)*(rimSpec + win*0.34)*(1.0 - uGrow);
   // Тонкий светлый ободок
-  col += vec3(0.9, 0.88, 0.95)*smoothstep(3.5, 0.0, abs(sd + 1.5))*0.22*(1.0 - uGrow);
+  col += vec3(0.9, 0.88, 0.95)*smoothstep(3.5, 0.0, abs(sd + 1.5))*0.18*(1.0 - uGrow);
+  // Мягкое плечо: всё выше 0.8 плавно сжимается к ~0.97 — без выбитого белого
+  vec3 over = max(col - 0.8, 0.0);
+  col = min(col, 0.8) + 0.17*(1.0 - exp(-over/0.17));
 
   // Ореол вокруг капли
   float halo = exp(-max(sd, 0.0)/(uRadius*0.18))*0.07*(1.0 - inside)*(1.0 - uGrow);
@@ -105,12 +120,46 @@ function compile(gl: WebGLRenderingContext, type: number, src: string) {
   return sh
 }
 
-export function HeroMaterial({ data, concept }: { data: Data; concept: Concept }) {
+export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
   const s = data.studio
   const photo = s.heroPhoto || data.works.find((w) => w.featured)?.photo || data.works[0]?.photo || ''
   const section = useRef<HTMLElement>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
   const [gl, setGl] = useState<'pending' | 'on' | 'off'>('pending')
+  const lab = useTypeLab()
+  const copy = COPIES.find((c) => c.id === lab.copy) ?? COPIES[0]
+  const title = useRef<HTMLDivElement>(null)
+
+  // Заголовок не шире своей колонки: меряем реальные строки после загрузки шрифта и при необходимости уменьшаем кегль
+  useLayoutEffect(() => {
+    const box = title.current
+    const h1 = box?.querySelector('h1')
+    if (!box || !h1) return
+    const widest = () =>
+      Math.max(
+        ...[...h1.children].map((el) => {
+          const r = document.createRange()
+          r.selectNodeContents(el)
+          return r.getBoundingClientRect().width
+        }),
+      )
+    // Несколько проходов: у переменных шрифтов с оптическим размером ширина букв меняется вместе с кеглем
+    const fit = () => {
+      h1.style.fontSize = ''
+      let size = parseFloat(getComputedStyle(h1).fontSize)
+      for (let i = 0; i < 4; i++) {
+        const w = widest()
+        if (w <= box.clientWidth) break
+        size = Math.floor((size * box.clientWidth * 0.98) / w)
+        h1.style.fontSize = `${size}px`
+      }
+    }
+    fit()
+    document.fonts?.ready.then(fit)
+    const ro = new ResizeObserver(fit)
+    ro.observe(box)
+    return () => ro.disconnect()
+  }, [lab.font, lab.copy])
 
   useEffect(() => {
     const cv = canvas.current
@@ -197,12 +246,21 @@ export function HeroMaterial({ data, concept }: { data: Data; concept: Concept }
       sec.style.setProperty('--grow', state.grow.toFixed(3))
       kick()
     }
+    // Свет в покое — сверху слева; курсор мыши его ведёт, уход курсора плавно возвращает на место.
+    // Касания пальцем не трогают свет — на телефоне не остаётся «залипшего» состояния
+    const rest = () => {
+      const g = geometry()
+      state.tx = g.cx - g.radius * 0.9
+      state.ty = g.cy - g.radius * 0.9
+    }
     const onMove = (e: PointerEvent) => {
+      if (e.pointerType !== 'mouse') return
       const r = cv.getBoundingClientRect()
       state.tx = (e.clientX - r.left) * dpr
       state.ty = (e.clientY - r.top) * dpr
       kick()
     }
+    const onLeave = () => (rest(), kick())
     const onResize = () => (layout(), kick())
 
     const img = new Image()
@@ -228,9 +286,9 @@ export function HeroMaterial({ data, concept }: { data: Data; concept: Concept }
       ready = true
       setGl('on')
       layout()
-      const g = geometry()
-      state.tx = state.mx = g.cx + g.radius * 0.5
-      state.ty = state.my = g.cy - g.radius * 0.6
+      rest()
+      state.mx = state.tx
+      state.my = state.ty
       onScroll()
       kick()
     }
@@ -245,6 +303,7 @@ export function HeroMaterial({ data, concept }: { data: Data; concept: Concept }
     window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', onResize)
     sec.addEventListener('pointermove', onMove)
+    sec.addEventListener('pointerleave', onLeave)
     return () => {
       alive = false
       cancelAnimationFrame(raf)
@@ -252,6 +311,7 @@ export function HeroMaterial({ data, concept }: { data: Data; concept: Concept }
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onResize)
       sec.removeEventListener('pointermove', onMove)
+      sec.removeEventListener('pointerleave', onLeave)
       // Контекст не теряем принудительно: в StrictMode эффект запускается дважды на том же canvas
     }
   }, [photo])
@@ -270,8 +330,14 @@ export function HeroMaterial({ data, concept }: { data: Data; concept: Concept }
           <p className="h-kicker">
             {s.name} · {s.kind} · {s.city}
           </p>
-          <h1>{typo(concept.title)}</h1>
-          <p className="h-lead">{typo(concept.lead)}</p>
+          <div className={`m-title hf-${lab.font}`} ref={title}>
+            <h1 aria-label={copy.text}>
+              {copy.lines.map((l) => (
+                <span key={l}>{l}</span>
+              ))}
+            </h1>
+          </div>
+          <p className="h-lead">{typo(LEAD)}</p>
           <HeroCta />
         </div>
         <div className="wrap-wide m-foot">
