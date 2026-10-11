@@ -225,9 +225,11 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
       const wide = state.w / dpr >= 900
       // На компьютере капля справа от текста; на телефоне — между кнопкой и адресом, не заходя ни на то, ни на другое
       const gap = state.footTop - state.copyBottom
-      const cx = wide ? state.w * 0.68 : state.w * 0.56
+      // На телефоне — строго по центру по горизонтали и посередине свободного места; размер — от ширины экрана
+      // (36 %), меньше — только если не помещается по высоте. Так капля одинаково «сидит» на любом телефоне
+      const cx = wide ? state.w * 0.68 : state.w * 0.5
       const cy = wide ? state.h * 0.52 : state.copyBottom + gap / 2
-      const base = wide ? Math.min(state.w * 0.2, state.h * 0.33) : Math.max(40 * dpr, Math.min(state.w * 0.34, gap / 2 - 18 * dpr))
+      const base = wide ? Math.min(state.w * 0.2, state.h * 0.33) : Math.max(48 * dpr, Math.min(state.w * 0.36, gap / 2 - 22 * dpr))
       const far = Math.hypot(state.w, state.h) * 0.62
       const g = state.grow
       const ease = g * g * (3 - 2 * g)

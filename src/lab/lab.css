@@ -848,3 +848,25 @@ html[data-concept] .master-visual.has-works {
     gap: 24px;
   }
 }
+
+/* Телефон: под текстом — только капля и блок адреса. «Цены / ближайшее окно» есть ниже (прайс и кнопка записи),
+   на коротких экранах прячем подзаголовок, чтобы капля не сжималась в точку */
+@media (max-width: 899px) {
+  .m-foot .m-facts {
+    display: none;
+  }
+  .m-fallback {
+    width: min(72vw, 34svh);
+    top: auto;
+    bottom: calc(150px + 4svh);
+    translate: -50% 0;
+  }
+}
+@media (max-width: 899px) and (max-height: 740px) {
+  .m-copy .h-lead {
+    display: none;
+  }
+  .m-copy {
+    gap: 12px;
+  }
+}

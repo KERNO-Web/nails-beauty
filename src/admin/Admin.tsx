@@ -7,6 +7,8 @@ import { addDays, busyOf, canDo, dateOf, dayFull, dayHuman, daySlots, fmtDuratio
 import { cancelBooking, createBooking, resetDemo, uid, update, useData } from '../lib/store'
 import { Avatar, photoUrl } from '../lib/ui'
 import { saveImage } from '../lib/media'
+import { useAdminManifest } from '../lib/push'
+import { NotifyBanner } from './Notify'
 import './admin.css'
 
 type Tab = 'bookings' | 'schedule' | 'services' | 'works' | 'reviews' | 'studio'
@@ -22,6 +24,8 @@ const TABS: { id: Tab; label: string }[] = [
 export default function Admin() {
   const data = useData()
   const [tab, setTab] = useState<Tab>('bookings')
+  // Кабинет ставится на рабочий стол своей иконкой и открывается сразу в кабинете
+  useAdminManifest(true)
   return (
     <div className="adm">
       <header className="adm-top">
@@ -43,6 +47,7 @@ export default function Admin() {
         </nav>
       </header>
       <main className="adm-wrap adm-main">
+        <NotifyBanner data={data} />
         {tab === 'bookings' && <Bookings data={data} />}
         {tab === 'schedule' && <Schedule data={data} />}
         {tab === 'services' && <Services data={data} />}

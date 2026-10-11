@@ -9,6 +9,7 @@ import { HeroMaterial } from './lab/HeroMaterial'
 import { HeroType } from './lab/HeroType'
 import { useData } from './lib/store'
 import { useMediaVersion } from './lib/media'
+import { useAdminManifest } from './lib/push'
 import { applyTheme } from './lib/theme'
 import { useReveal } from './lib/ui'
 
@@ -29,12 +30,15 @@ export default function App() {
   // Фото, загруженные с устройства, читаются из базы после старта — перерисовываем страницу, когда готовы
   useMediaVersion()
   const route = useRoute()
+  // Ставим на рабочий стол сайт или кабинет — у каждого свой манифест (имя, иконка, стартовая страница)
+  useAdminManifest(route === 'admin')
 
   const concept = useConcept()
   // Тема — на <html>, чтобы её видели все слои (и окна поверх страницы). На сайте сейчас тема концепции из лаборатории
   useEffect(() => {
     const site = route === 'site'
-    applyTheme(site ? concept.theme : data.theme)
+    // Кабинет — в тех же цветах, что и сайт
+    applyTheme(concept.theme)
     const root = document.documentElement
     if (site) {
       root.dataset.concept = concept.id
