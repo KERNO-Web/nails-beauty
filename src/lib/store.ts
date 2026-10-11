@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from 'react'
 import { DATA_VERSION, demo } from '../data/demo'
 import type { Booking, Data } from '../data/types'
+import { reportBooking, reportCancel } from './push'
 import { daySlots } from './slots'
 
 const KEY = 'nail-studio:data'
@@ -117,9 +118,12 @@ export function createBooking(input: BookingInput): { ok: true; booking: Booking
     createdAt: new Date().toISOString(),
   }
   update((d) => ({ ...d, bookings: [...d.bookings, booking] }))
+  // Сервер уведомлений (если настроен): мастеру — пуш о записи, клиентке — напоминания по расписанию
+  reportBooking(data, booking)
   return { ok: true, booking }
 }
 
 export function cancelBooking(id: string) {
   update((d) => ({ ...d, bookings: d.bookings.map((b) => (b.id === id ? { ...b, status: 'cancelled' } : b)) }))
+  reportCancel(data, id)
 }

@@ -10,6 +10,7 @@ export const demo: Data = {
     name: 'LUMI',
     kind: 'nail studio',
     city: 'Красноярск',
+    timezone: 'Asia/Krasnoyarsk',
     address: 'пр. Мира, 30, 2 этаж',
     addressNote: 'Вход с торца, домофон 24. Рядом парковка у ТЦ.',
     map: [92.8724, 56.0113],

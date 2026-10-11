@@ -5,7 +5,9 @@ import { Arrow, Calendar, Check, ChevronLeft, ChevronRight, People, Telegram } f
 import { resetSelection, select, useSelection } from '../lib/selection'
 import { canDo, dateOf, dayFull, dayHuman, daySlots, daysAhead, fmtDuration, fmtTime, monthName, plural, priceLabel, WD_SHORT, weekdayOf } from '../lib/slots'
 import { createBooking } from '../lib/store'
+import { remindHours } from '../lib/push'
 import { Avatar } from '../lib/ui'
+import { RemindCard } from '../notify/Remind'
 
 const PARTS = [
   { label: 'Утро', to: 12 * 60 },
@@ -450,11 +452,8 @@ function icsFor(data: Data, b: BookingT) {
     `DTEND:${at(b.start + b.minutes)}`,
     `SUMMARY:${s?.title ?? 'Маникюр'} — ${data.studio.name}`,
     `LOCATION:${data.studio.city}\\, ${data.studio.address.replace(/,/g, '\\,')}`,
-    'BEGIN:VALARM',
-    'TRIGGER:-PT3H',
-    'ACTION:DISPLAY',
-    'DESCRIPTION:Напоминание о записи',
-    'END:VALARM',
+    // Календарь телефона напомнит сам — за 24, 12, 3 и 1 час (studio.reminders), без сервера и установки
+    ...remindHours(data.studio).flatMap((h) => ['BEGIN:VALARM', `TRIGGER:-PT${h}H`, 'ACTION:DISPLAY', 'DESCRIPTION:Напоминание о записи', 'END:VALARM']),
     'END:VEVENT',
     'END:VCALENDAR',
   ].join('\r\n')
@@ -510,6 +509,7 @@ function Done({ data, booking, onAgain }: { data: Data; booking: BookingT; onAga
           )}
         </dl>
       </div>
+      <RemindCard data={data} booking={booking} />
       <div className="done-actions">
         <button className="btn btn-primary" onClick={() => icsFor(data, booking)}>
           <Calendar /> В календарь

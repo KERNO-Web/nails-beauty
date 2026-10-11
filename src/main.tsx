@@ -7,6 +7,7 @@ import './styles.css'
 import './site.css'
 import './booking.css'
 import './lab/lab.css'
+import './notify/notify.css'
 
 // Показать страницу, когда загрузятся шрифты (кириллица и латиница); страховка на 2,5 с — в index.html
 const sample = 'Аа Яя Aa 0'

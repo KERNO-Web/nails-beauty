@@ -3,6 +3,7 @@ import { Booking } from './sections/Booking'
 import { Closing, Reviews, StickyCta } from './sections/Bottom'
 import { Masters, Services, Works } from './sections/Showcase'
 import { Header } from './sections/Top'
+import { RemindPrompt } from './notify/Remind'
 import { useConcept } from './lab/concepts'
 import { HeroColor } from './lab/HeroColor'
 import { HeroMaterial } from './lab/HeroMaterial'
@@ -83,6 +84,7 @@ function Site() {
       </main>
       <Closing data={data} />
       <StickyCta data={data} />
+      <RemindPrompt data={data} />
     </>
   )
 }

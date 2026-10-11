@@ -1,0 +1,15 @@
+{
+  "name": "nail-studio-push",
+  "private": true,
+  "type": "module",
+  "description": "Сервер уведомлений: мастеру — о новых записях, клиентке — напоминания перед визитом",
+  "scripts": {
+    "start": "node index.mjs",
+    "keys": "web-push generate-vapid-keys",
+    "test": "node --test test.mjs"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "web-push": "^3.6.7"
+  }
+}
