@@ -2,7 +2,7 @@
 // Фото: id снимков Unsplash (photo-…) или любые ссылки/пути (/photos/1.jpg).
 import type { Data } from './types'
 
-export const DATA_VERSION = 6
+export const DATA_VERSION = 7
 
 export const demo: Data = {
   version: DATA_VERSION,
@@ -126,18 +126,18 @@ export const demo: Data = {
     },
   ],
   works: [
-    { id: 'w1', photo: 'photo-1610992015732-2449b76344bc', tag: 'nude', title: 'Молочный нюд, миндаль', serviceId: 'manicure-gel', masterId: 'vera' },
-    { id: 'w2', photo: 'photo-1667207229737-0adf3c700d5e', tag: 'french', title: 'Тонкий френч', serviceId: 'manicure-gel', masterId: 'anna' },
-    { id: 'w3', photo: 'photo-1772322586634-9867476143b9', tag: 'bright', title: 'Ультрамарин, длинный миндаль', serviceId: 'extension', masterId: 'anna' },
-    { id: 'w4', photo: 'photo-1648844421727-cde6c4246b13', tag: 'minimal', title: 'Прозрачный нюд с акцентом', serviceId: 'manicure-gel', masterId: 'vera' },
-    { id: 'w5', photo: 'photo-1735236007245-9dc6e28bbe56', tag: 'design', title: 'Зимняя роспись', serviceId: 'design', masterId: 'anna' },
-    { id: 'w6', photo: 'photo-1643648854897-7b5845b4c04c', tag: 'nude', title: 'Розовый беж, короткий овал', serviceId: 'manicure-gel', masterId: 'vera' },
-    { id: 'w7', photo: 'photo-1519014816548-bf5fe059798b', tag: 'bright', title: 'Ягодный с надписью', serviceId: 'design', masterId: 'anna' },
-    { id: 'w8', photo: 'photo-1772322586702-73125782bd99', tag: 'design', title: 'Голубое омбре', serviceId: 'design', masterId: 'anna' },
-    { id: 'w9', photo: 'photo-1630843599725-32ead7671867', tag: 'minimal', title: 'Короткий квадрат, светлый', serviceId: 'manicure-gel', masterId: 'vera' },
-    { id: 'w10', photo: 'photo-1684609365994-a144ee021c88', tag: 'design', title: 'Шампань с мерцанием', serviceId: 'extension', masterId: 'anna', featured: true },
-    { id: 'w11', photo: 'photo-1612887390768-fb02affea7a6', tag: 'nude', title: 'Пудровый розовый', serviceId: 'manicure-gel', masterId: 'vera' },
-    { id: 'w12', photo: 'photo-1571290274554-6a2eaa771e5f', tag: 'bright', title: 'Цветные кончики', serviceId: 'design', masterId: 'anna' },
+    { id: 'w1', photo: 'photo-1610992015732-2449b76344bc', tag: 'nude', title: 'Молочный нюд, миндаль', serviceId: 'manicure-gel', masterId: 'vera', tone: '#E9D6CB' },
+    { id: 'w2', photo: 'photo-1667207229737-0adf3c700d5e', tag: 'french', title: 'Тонкий френч', serviceId: 'manicure-gel', masterId: 'anna', tone: '#F1E6DC' },
+    { id: 'w3', photo: 'photo-1772322586634-9867476143b9', tag: 'bright', title: 'Ультрамарин, длинный миндаль', serviceId: 'extension', masterId: 'anna', tone: '#2B3FA8' },
+    { id: 'w4', photo: 'photo-1648844421727-cde6c4246b13', tag: 'minimal', title: 'Прозрачный нюд с акцентом', serviceId: 'manicure-gel', masterId: 'vera', tone: '#E7C3BC' },
+    { id: 'w5', photo: 'photo-1735236007245-9dc6e28bbe56', tag: 'design', title: 'Зимняя роспись', serviceId: 'design', masterId: 'anna', tone: '#B9C7D8' },
+    { id: 'w6', photo: 'photo-1643648854897-7b5845b4c04c', tag: 'nude', title: 'Розовый беж, короткий овал', serviceId: 'manicure-gel', masterId: 'vera', tone: '#D8A496' },
+    { id: 'w7', photo: 'photo-1519014816548-bf5fe059798b', tag: 'bright', title: 'Ягодный с надписью', serviceId: 'design', masterId: 'anna', tone: '#8E1730' },
+    { id: 'w8', photo: 'photo-1772322586702-73125782bd99', tag: 'design', title: 'Голубое омбре', serviceId: 'design', masterId: 'anna', tone: '#9DB8D6' },
+    { id: 'w9', photo: 'photo-1630843599725-32ead7671867', tag: 'minimal', title: 'Короткий квадрат, светлый', serviceId: 'manicure-gel', masterId: 'vera', tone: '#EADCD2' },
+    { id: 'w10', photo: 'photo-1684609365994-a144ee021c88', tag: 'design', title: 'Шампань с мерцанием', serviceId: 'extension', masterId: 'anna', featured: true, tone: '#C9A574' },
+    { id: 'w11', photo: 'photo-1612887390768-fb02affea7a6', tag: 'nude', title: 'Пудровый розовый', serviceId: 'manicure-gel', masterId: 'vera', tone: '#D99AA5' },
+    { id: 'w12', photo: 'photo-1571290274554-6a2eaa771e5f', tag: 'bright', title: 'Цветные кончики', serviceId: 'design', masterId: 'anna', tone: '#E3643C' },
   ],
   reviews: [
     {

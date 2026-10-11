@@ -46,3 +46,11 @@ export function applyTheme(t: Theme) {
   root.setProperty('--nail', nailMask(t.nailShape))
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', t.accent)
 }
+
+/** Временно сменить акцент (выбранный оттенок). Слишком светлый к фону оттенок не берём — кнопки потеряются */
+export function applyAccent(color: string, t: Theme) {
+  const use = contrast(color, t.paper) >= 2.4 ? color : t.accent
+  const root = document.documentElement.style
+  root.setProperty('--accent', use)
+  root.setProperty('--on-accent', contrast(use, t.paper) >= contrast(use, t.ink) ? t.paper : t.ink)
+}

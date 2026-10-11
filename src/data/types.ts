@@ -56,6 +56,8 @@ export type Work = {
   featured?: boolean
   /** Точка фокуса при кадрировании, как CSS object-position: '50% 30%' */
   focus?: string
+  /** Основной цвет покрытия на снимке, #RRGGBB (необязательно) — для выбора по цвету */
+  tone?: string
 }
 
 export type Review = {

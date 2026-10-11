@@ -4,6 +4,7 @@ import App from './App'
 import './styles.css'
 import './site.css'
 import './booking.css'
+import './lab/lab.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

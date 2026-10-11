@@ -1,14 +1,6 @@
 /* ============================================================
-   «Пять ногтей»: работы студии стоят на первом экране как маникюр — пять окон
-   в форме ногтевой пластины поднимаются из линии кутикулы. Тот же силуэт (--nail)
-   повторяется в ценах, у мастеров и в выбранном окне записи.
+   Общий каркас страницы: шапка, цены, галерея, мастера. Первые экраны концепций — в lab/lab.css
    ============================================================ */
-
-@property --gx {
-  syntax: '<number>';
-  inherits: true;
-  initial-value: 0.5;
-}
 
 /* ============ Шапка ============ */
 .header {
@@ -16,7 +8,7 @@
   inset: 0 0 auto;
   z-index: 50;
   height: var(--header);
-  color: var(--on-accent);
+  color: var(--hero-fg, var(--ink));
   transition:
     background-color 0.35s var(--ease),
     color 0.35s var(--ease),
@@ -67,8 +59,8 @@
 }
 .header-cta {
   margin-left: auto;
-  background: var(--on-accent);
-  color: var(--accent);
+  background: var(--hero-fg, var(--ink));
+  color: var(--hero-bg, var(--paper));
   min-height: 40px;
   padding: 0 18px;
 }
@@ -110,252 +102,6 @@
   .menu-btn,
   .menu {
     display: none;
-  }
-}
-
-/* ============ Первый экран ============ */
-.hero-field {
-  position: relative;
-  overflow: hidden;
-  background: var(--accent);
-  color: var(--on-accent);
-  padding-top: calc(var(--header) + 20px);
-}
-/* Тень у «кутикулы»: ногти уходят под поверхность, а не обрезаются */
-.hero-field::after {
-  content: '';
-  position: absolute;
-  inset: auto 0 0;
-  height: 56px;
-  background: linear-gradient(to top, rgba(8, 8, 20, 0.28), transparent);
-  pointer-events: none;
-  z-index: 2;
-}
-.hero-grid {
-  display: grid;
-  gap: 28px;
-}
-.hero-kicker {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.78;
-  margin-bottom: 14px;
-}
-.hero-copy {
-  container-type: inline-size;
-}
-/* Размер заголовка — от ширины колонки: длинное слово («разглядывать») не наезжает на фото.
-   Для заголовков со словами длиннее 12 букв стоит проверить вид на 1024 px */
-.hero-copy h1 {
-  max-width: 13ch;
-  font-size: min(clamp(2.05rem, 1.1rem + 3.6vw, 5rem), 11.4cqi);
-}
-.hero-lead {
-  margin-top: 18px;
-  max-width: 40ch;
-  font-size: 16px;
-  line-height: 1.5;
-  opacity: 0.86;
-  text-wrap: pretty;
-}
-
-.hand {
-  --under: 260px;
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: clamp(8px, 2.6vw, 22px);
-  height: clamp(240px, 34svh, 400px);
-  animation: sweep 7s ease-in-out 1.6s infinite;
-}
-.hand.is-tracking {
-  animation: none;
-}
-@keyframes sweep {
-  0% {
-    --gx: -0.3;
-  }
-  55%,
-  100% {
-    --gx: 1.3;
-  }
-}
-.nail {
-  --ext: calc(var(--scroll, 0) * var(--grow, 0.12) * 1px);
-  position: relative;
-  bottom: 0;
-  display: block;
-  flex: 1 1 0;
-  max-width: 148px;
-  height: calc(var(--h) * 100% + var(--under));
-  margin-bottom: calc(var(--under) * -1);
-  -webkit-mask: var(--nail) top / 100% auto no-repeat;
-  mask: var(--nail) top / 100% auto no-repeat;
-  background: color-mix(in oklab, var(--ink) 35%, var(--accent));
-  transform: translate3d(0, calc(var(--ext) * -1), 0);
-  animation: nail-rise 1.25s var(--ease-out) both;
-  animation-delay: calc(var(--i) * 85ms + 120ms);
-  transition: bottom 0.5s var(--ease-out);
-}
-.nail img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 38%;
-}
-/* Объём: блик по левому краю, тень по правому, свет на кончике */
-.nail::before,
-.nail::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-.nail::before {
-  background:
-    radial-gradient(ellipse 60% 9% at 42% 4%, rgba(255, 255, 255, 0.5), transparent 70%),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.3) 11%, rgba(255, 255, 255, 0) 26%, rgba(0, 0, 0, 0) 72%, rgba(10, 10, 30, 0.26) 100%);
-}
-/* Блик топа: одна полоса света идёт через все пять ногтей — за курсором или сама по себе */
-.nail::after {
-  --local: calc(var(--gx) * var(--n, 5) - var(--i));
-  background: linear-gradient(104deg, transparent 43%, rgba(255, 255, 255, 0.16) 46%, rgba(255, 255, 255, 0.7) 50%, rgba(255, 255, 255, 0.16) 54%, transparent 57%) no-repeat;
-  background-size: 260% 100%;
-  background-position: calc((1.3 - var(--local)) / 1.6 * 100%) 0;
-  mix-blend-mode: screen;
-}
-.hand.is-tracking .nail::after {
-  transition: background-position 0.35s var(--ease-out);
-}
-@media (hover: hover) {
-  .nail:hover {
-    bottom: 18px;
-  }
-}
-@keyframes nail-rise {
-  from {
-    translate: 0 calc(100% - var(--under) + 40px);
-  }
-}
-.hand.n5 {
-  --n: 5;
-}
-.hand.n4 {
-  --n: 4;
-}
-.hand.n3 {
-  --n: 3;
-}
-.hand.n2 {
-  --n: 2;
-}
-.hand.n1 {
-  --n: 1;
-}
-.hand.n1 .nail {
-  max-width: 220px;
-}
-
-/* Линия кутикулы: под ногтями — главные факты и запись */
-.hero-base {
-  background: var(--paper);
-  position: relative;
-  z-index: 3;
-}
-.hero-base-row {
-  display: grid;
-  gap: 18px;
-  padding-top: 20px;
-  padding-bottom: 28px;
-}
-.hero-facts {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px 20px;
-  margin: 0;
-}
-.hero-facts div {
-  min-width: 0;
-}
-.hero-facts dt {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-}
-.hero-facts dd {
-  margin: 3px 0 0;
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 500;
-  letter-spacing: -0.03em;
-  line-height: 1.2;
-}
-.hero-fact-addr {
-  grid-column: 1 / -1;
-}
-.hero-cta {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-.hero-cta .btn {
-  flex: 1;
-}
-.hero-cta .text-link {
-  flex: none;
-}
-
-@media (min-width: 640px) {
-  .hand {
-    height: clamp(300px, 44svh, 460px);
-  }
-  .hero-cta .btn {
-    flex: none;
-  }
-}
-
-@media (min-width: 900px) {
-  .hero-field {
-    padding-top: calc(var(--header) + 28px);
-  }
-  .hero-grid {
-    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-    align-items: end;
-    gap: clamp(24px, 4vw, 64px);
-    min-height: max(500px, calc(100svh - var(--header) - 28px - 112px));
-  }
-  .hero-copy {
-    align-self: center;
-    padding-bottom: 6vh;
-  }
-  .hand {
-    height: min(100%, 640px);
-    min-height: 420px;
-    justify-content: flex-end;
-  }
-  .hero-base-row {
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    gap: 32px;
-    padding-top: 24px;
-    padding-bottom: 28px;
-  }
-  .hero-facts {
-    display: flex;
-    gap: clamp(24px, 4vw, 64px);
-  }
-  .hero-facts dd {
-    font-size: 18px;
-  }
-  .hero-fact-addr {
-    grid-column: auto;
   }
 }
 
