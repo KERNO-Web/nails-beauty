@@ -8,17 +8,25 @@ import { daySlots } from './slots'
 
 const KEY = 'nail-studio:data'
 
+/** Сервер уведомлений из сборки (выкладка на свой сервер подставляет ключ и адрес — deploy/) */
+const ENV_PUSH =
+  import.meta.env.VITE_VAPID_PUBLIC_KEY && import.meta.env.VITE_PUSH_SERVER
+    ? { vapidPublicKey: import.meta.env.VITE_VAPID_PUBLIC_KEY as string, server: import.meta.env.VITE_PUSH_SERVER as string }
+    : undefined
+
 function load(): Data {
+  let d = structuredClone(demo)
   try {
     const raw = localStorage.getItem(KEY)
     if (raw) {
-      const d = JSON.parse(raw) as Data
-      if (d.version === DATA_VERSION) return d
+      const saved = JSON.parse(raw) as Data
+      if (saved.version === DATA_VERSION) d = saved
     }
   } catch {
     /* пустое или битое хранилище — берём демо */
   }
-  return structuredClone(demo)
+  if (ENV_PUSH && !d.studio.push) d.studio.push = ENV_PUSH
+  return d
 }
 
 let data: Data = load()
