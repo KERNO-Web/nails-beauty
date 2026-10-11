@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import type { Data, Review } from '../data/types'
 import { Arrow, Star } from '../lib/icons'
 import { fmtRating, reviewsCount, reviewsSource, routeUrl } from '../lib/place'
-import { dateOf, dayHuman, fmtTime, hoursSummary, MONTHS_NOM, nearestSlot, plural } from '../lib/slots'
-import { initialOf, scrollToId, typo } from '../lib/ui'
+import { dateOf, dayHuman, fmtTime, hoursSummary, MONTHS_NOM, nearestSlot } from '../lib/slots'
+import { scrollToId, typo } from '../lib/ui'
 
 /** Дата отзыва: «сентябрь 2026» */
 function reviewDate(iso: string) {
@@ -11,7 +11,7 @@ function reviewDate(iso: string) {
   return `${MONTHS_NOM[d.getMonth()].toLowerCase()} ${d.getFullYear()}`
 }
 
-/** Звёзды — только для настоящей оценки отзыва */
+/** Звёзды — только для настоящей оценки */
 function Stars({ value, size = 16 }: { value: number; size?: number }) {
   const n = Math.max(0, Math.min(5, Math.round(value)))
   return (
@@ -23,125 +23,109 @@ function Stars({ value, size = 16 }: { value: number; size?: number }) {
   )
 }
 
-/** Главный отзыв: отмеченный featured, иначе самый свежий из содержательных (от 80 знаков) */
-function orderReviews(list: Review[]) {
+/** До трёх отзывов: отмеченный featured, дальше самые свежие. Остальные — по ссылке на источник */
+function pickReviews(list: Review[]) {
   const byDate = [...list].sort((a, b) => b.date.localeCompare(a.date))
   const lead = byDate.find((r) => r.featured) ?? byDate.find((r) => r.text.length >= 80) ?? byDate[0]
-  return [lead, ...byDate.filter((r) => r !== lead)]
+  return [lead, ...byDate.filter((r) => r !== lead)].slice(0, 3)
 }
 
-const PREVIEW = 240
-
-function ReviewText({ text, big }: { text: string; big?: boolean }) {
-  const [open, setOpen] = useState(false)
-  const long = text.length > PREVIEW + 40
-  // Обрезаем по слову; полный текст — по кнопке (и для скринридеров он доступен целиком после раскрытия)
-  const short = long && !open ? text.slice(0, text.lastIndexOf(' ', PREVIEW)) + '…' : text
-  return (
-    <>
-      <blockquote className={big ? 'rv-quote is-big' : 'rv-quote'}>{typo(short)}</blockquote>
-      {long && (
-        <button className="rv-more" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
-          {open ? 'Свернуть' : 'Читать полностью'}
-        </button>
-      )}
-    </>
-  )
-}
-
-function ReviewMeta({ r }: { r: Review }) {
-  const source = r.source && (r.url ? (
-    <a href={r.url} target="_blank" rel="noreferrer">
-      {r.source}
-    </a>
-  ) : (
-    r.source
-  ))
-  return (
-    <figcaption className="rv-meta">
-      <span className="rv-avatar" aria-hidden>
-        {initialOf(r.name)}
-      </span>
-      <span className="rv-who">
-        <b>{r.name}</b>
-        <small>
-          {[r.service, reviewDate(r.date)].filter(Boolean).join(' · ')}
-          {source && <> · {source}</>}
-        </small>
-      </span>
-    </figcaption>
-  )
-}
+const PREVIEW = 220
 
 export function Reviews({ data }: { data: Data }) {
-  const [all, setAll] = useState(false)
+  const [idx, setIdx] = useState(0)
+  const [open, setOpen] = useState(false)
   if (!data.reviews.length) return null
   const src = reviewsSource(data.studio)
-  const [lead, ...rest] = orderReviews(data.reviews)
-  const side = rest.slice(0, 2)
-  const more = rest.slice(2)
+  const picked = pickReviews(data.reviews)
+  const r = picked[Math.min(idx, picked.length - 1)]
+  const long = r.text.length > PREVIEW + 30
+  const text = long && !open ? r.text.slice(0, r.text.lastIndexOf(' ', PREVIEW)) + '…' : r.text
+  const choose = (i: number) => (setIdx(i), setOpen(false))
+  const ext = { target: '_blank', rel: 'noreferrer' }
   return (
     <section className="reviews-sec" id="reviews">
       <div className="wrap-wide">
-        <header className="sec-head rv-head">
-          <h2>Отзывы</h2>
-          <div className="rv-summary">
-            {src?.rating && src.count ? (
-              <a className="rv-score" href={src.url} target="_blank" rel="noreferrer">
-                <b>{fmtRating(src.rating)}</b>
-                <span>
-                  <Stars value={src.rating} size={15} />
-                  <small>
-                    {reviewsCount(src.count)} в&nbsp;{src.name}
-                  </small>
-                </span>
+        <h2 className="rv-title">Отзывы</h2>
+        <div className="rv-layout">
+          {/* Репутация: оценка, количество и источник — только из настроек студии, с настоящей ссылкой */}
+          <div className="rv-anchor">
+            {src?.rating ? (
+              <>
+                <p className="rv-score">
+                  <b>{fmtRating(src.rating)}</b>
+                  <Stars value={src.rating} size={20} />
+                </p>
+                <p className="rv-source">
+                  {src.count ? (
+                    <a href={src.url} {...ext}>
+                      {reviewsCount(src.count)}
+                    </a>
+                  ) : null}
+                  {src.count && src.name ? ' в\u00a0' : ''}
+                  {src.name}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="rv-anchor-title">Отзывы наших клиентов</p>
+                <p className="rv-anchor-note">
+                  {src ? `Больше отзывов${src.name ? ` — в\u00a0${src.name}` : ''}.` : 'Пишут после визита — публикуем с\u00a0их согласия.'}
+                </p>
+              </>
+            )}
+            {src ? (
+              <a className="btn btn-line rv-all" href={src.url} {...ext}>
+                Все отзывы <span aria-hidden>↗</span>
               </a>
             ) : (
-              <p>Что говорят клиентки после визита.</p>
-            )}
-            {src && (
-              <a className="text-link" href={src.url} target="_blank" rel="noreferrer">
-                Все отзывы{src.name ? ` в\u00a0${src.name}` : ''} <Arrow size={14} />
-              </a>
+              <button className="btn btn-line rv-all" onClick={() => scrollToId('booking')}>
+                Записаться <Arrow size={16} />
+              </button>
             )}
           </div>
-        </header>
-        <div className={`rv-grid ${side.length ? '' : 'is-solo'}`}>
-          <figure className="rv-card rv-lead reveal">
-            {lead.rating ? <Stars value={lead.rating} size={18} /> : null}
-            <ReviewText text={lead.text} big />
-            <ReviewMeta r={lead} />
-          </figure>
-          {side.length > 0 && (
-            <div className="rv-side">
-              {side.map((r, i) => (
-                <figure key={r.id} className={`rv-card reveal d${i + 1}`}>
-                  {r.rating ? <Stars value={r.rating} /> : null}
-                  <ReviewText text={r.text} />
-                  <ReviewMeta r={r} />
-                </figure>
-              ))}
-            </div>
-          )}
+
+          <div className="rv-voice">
+            <figure className="rv-featured" key={r.id} aria-live="polite">
+              {r.rating ? <Stars value={r.rating} size={16} /> : null}
+              <blockquote id="rv-text">{typo(text)}</blockquote>
+              {long && (
+                <button className="rv-more" aria-expanded={open} aria-controls="rv-text" onClick={() => setOpen((v) => !v)}>
+                  {open ? 'Свернуть' : 'Читать полностью'}
+                </button>
+              )}
+              <figcaption className="rv-meta">
+                <b>{r.name}</b>
+                <span>
+                  {[r.service, reviewDate(r.date)].filter(Boolean).join(' · ')}
+                  {r.source && (
+                    <>
+                      {' · '}
+                      {r.url ? (
+                        <a href={r.url} {...ext}>
+                          {r.source}
+                        </a>
+                      ) : (
+                        r.source
+                      )}
+                    </>
+                  )}
+                </span>
+                {r.demo && <em className="rv-demo">пример для демо</em>}
+              </figcaption>
+            </figure>
+            {picked.length > 1 && (
+              <div className="rv-pick" role="group" aria-label="Выбрать отзыв">
+                {picked.map((x, i) => (
+                  <button key={x.id} className="rv-tab" aria-pressed={i === idx} onClick={() => choose(i)}>
+                    <b>{x.name}</b>
+                    <span>{x.service}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-        {more.length > 0 &&
-          (all ? (
-            <div className="rv-rest">
-              {more.map((r) => (
-                <figure key={r.id} className="rv-card">
-                  {r.rating ? <Stars value={r.rating} /> : null}
-                  <ReviewText text={r.text} />
-                  <ReviewMeta r={r} />
-                </figure>
-              ))}
-            </div>
-          ) : (
-            <div className="rv-foot">
-              <button className="btn btn-line" onClick={() => setAll(true)}>
-                Ещё {more.length} {plural(more.length, 'отзыв', 'отзыва', 'отзывов')}
-              </button>
-            </div>
-          ))}
       </div>
     </section>
   )

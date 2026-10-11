@@ -2,7 +2,7 @@
 // Фото: id снимков Unsplash (photo-…) или любые ссылки/пути (/photos/1.jpg).
 import type { Data } from './types'
 
-export const DATA_VERSION = 8
+export const DATA_VERSION = 9
 
 export const demo: Data = {
   version: DATA_VERSION,
@@ -141,6 +141,7 @@ export const demo: Data = {
   reviews: [
     {
       id: 'r1',
+      demo: true,
       name: 'Ксения',
       service: 'Маникюр + покрытие',
       date: '2026-09-28',
@@ -148,6 +149,7 @@ export const demo: Data = {
     },
     {
       id: 'r2',
+      demo: true,
       name: 'Дарья',
       service: 'Наращивание',
       date: '2026-09-17',
@@ -155,6 +157,7 @@ export const demo: Data = {
     },
     {
       id: 'r3',
+      demo: true,
       name: 'Марина',
       service: 'Педикюр + покрытие',
       date: '2026-10-02',
@@ -162,6 +165,7 @@ export const demo: Data = {
     },
     {
       id: 'r4',
+      demo: true,
       name: 'Алина',
       service: 'Коррекция',
       date: '2026-10-06',

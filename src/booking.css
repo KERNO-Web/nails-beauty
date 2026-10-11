@@ -666,186 +666,222 @@ textarea.input {
   gap: 10px;
 }
 
-/* ============ Отзывы ============ */
-/* ============ Отзывы ============
-   Отступ сверху небольшой: над отзывами уже есть нижний отступ блока записи (оба на одном фоне) */
+/* ============ Отзывы: репутация + голоса клиентов ============
+   Только шрифты сайта без засечек: заголовок и цитата — Jost, подписи — Onest.
+   Без карточек: два поля 38/62, между ними тонкая линия. Единственный жест — линия акцента под выбранным отзывом */
 .reviews-sec {
-  padding: clamp(8px, 2vw, 24px) 0 clamp(72px, 9vw, 128px);
+  /* Сверху почти без отступа: над отзывами нижний отступ блока записи, фон общий */
+  padding: clamp(8px, 2vw, 24px) 0 clamp(72px, 9vw, 120px);
 }
-.rv-head h2 {
+.rv-title {
+  font-family: var(--font-heading);
+  font-weight: 500;
   font-size: clamp(2.2rem, 1.4rem + 2.6vw, 3.8rem);
+  letter-spacing: -0.035em;
+  margin-bottom: clamp(24px, 3vw, 40px);
 }
-.rv-summary {
+.rv-layout {
   display: grid;
-  gap: 10px;
-  justify-items: start;
+  gap: 28px;
+  border-top: 1px solid var(--line-2);
+  padding-top: 28px;
 }
-.rv-summary p {
-  color: var(--ink-2);
+.rv-anchor {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 14px;
 }
 .rv-score {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 14px;
-  text-decoration: none;
-  color: inherit;
+  gap: 16px;
+  margin: 0;
 }
-.rv-score > b {
+.rv-score b {
   font-family: var(--font-heading);
-  font-size: 46px;
   font-weight: 500;
-  line-height: 1;
-  letter-spacing: -0.03em;
-}
-.rv-score > span {
-  display: grid;
-  gap: 4px;
-}
-.rv-score small {
-  font-size: 14px;
-  color: var(--ink-2);
+  font-size: clamp(64px, 5rem + 2vw, 112px);
+  line-height: 0.9;
+  letter-spacing: -0.045em;
 }
 .stars {
   display: inline-flex;
-  gap: 2px;
+  gap: 3px;
   color: #c8962e;
 }
-.rv-grid {
-  display: grid;
-  gap: 14px;
-}
-.rv-side {
-  display: grid;
-  gap: 14px;
-}
-.rv-card {
+.rv-source {
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 18px;
-  padding: 26px 24px 22px;
-  border-radius: 22px;
-  background: var(--surface);
-  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: 16px;
+  color: var(--ink);
 }
-/* Главный отзыв — тёмный, с мягким перламутровым бликом, как у капли на первом экране */
-.rv-lead {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-  padding: 34px 28px 26px;
-  background: #171315;
-  color: #eee8e2;
-  box-shadow: none;
+.rv-source a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+  color: inherit;
+  text-underline-offset: 3px;
 }
-.rv-lead::before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  right: -18%;
-  top: -40%;
-  width: 70%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 40%, rgba(236, 214, 230, 0.22), rgba(190, 200, 240, 0.08) 45%, transparent 70%);
-  filter: blur(8px);
-}
-.rv-quote {
+.rv-anchor-title {
   margin: 0;
-  font-size: 17px;
-  line-height: 1.55;
-  text-wrap: pretty;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: clamp(24px, 1.2rem + 1vw, 32px);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  max-width: 14ch;
 }
-.rv-quote.is-big {
-  font-family: var(--font-display);
-  font-size: clamp(22px, 1.6rem + 0.6vw, 32px);
-  line-height: 1.32;
-  letter-spacing: -0.01em;
+.rv-anchor-note {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink-2);
   max-width: 30ch;
 }
+.rv-all {
+  margin-top: 6px;
+}
+.rv-voice {
+  display: grid;
+  gap: 28px;
+  min-width: 0;
+}
+.rv-featured {
+  margin: 0;
+  display: grid;
+  gap: 18px;
+  justify-items: start;
+  animation: rv-in 0.32s var(--ease-out);
+}
+@keyframes rv-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+.rv-featured blockquote {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: clamp(20px, 1rem + 0.9vw, 27px);
+  line-height: 1.38;
+  letter-spacing: -0.012em;
+  max-width: min(100%, 680px);
+  text-wrap: pretty;
+  color: var(--ink);
+}
 .rv-more {
-  margin-top: -8px;
-  font-size: 14px;
+  margin-top: -6px;
+  min-height: 44px;
+  font-size: 15px;
   font-weight: 600;
+  color: var(--ink);
   text-decoration: underline;
-  text-underline-offset: 3px;
-  color: inherit;
-  min-height: 32px;
+  text-underline-offset: 4px;
 }
 .rv-meta {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: auto;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  font-size: 15px;
+  color: var(--ink-2);
 }
-.rv-avatar {
+.rv-meta b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.rv-meta a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+.rv-demo {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  color: var(--ink-2);
+}
+/* Переключатель: имена клиентов в строку; под выбранным — линия акцента, которая «дорисовывается» */
+.rv-pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 28px;
+  border-top: 1px solid var(--line);
+}
+.rv-tab {
+  position: relative;
   display: grid;
-  place-items: center;
-  flex: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--bg-2);
-  font-family: var(--font-heading);
-  font-weight: 500;
-  font-size: 17px;
-}
-.rv-lead .rv-avatar {
-  background: rgba(238, 232, 226, 0.12);
-}
-.rv-who {
-  display: grid;
+  justify-items: start;
   gap: 2px;
-  min-width: 0;
-  line-height: 1.3;
+  min-height: 56px;
+  padding: 12px 0 10px;
+  text-align: left;
+  color: var(--ink-2);
+  transition: color 0.2s var(--ease);
 }
-.rv-who b {
+.rv-tab b {
   font-weight: 600;
   font-size: 15px;
 }
-.rv-who small {
+.rv-tab span {
   font-size: 13px;
-  color: var(--ink-2);
 }
-.rv-lead .rv-who small {
-  color: rgba(238, 232, 226, 0.62);
+.rv-tab::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1px;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s var(--ease-out);
 }
-.rv-who a {
-  color: inherit;
+.rv-tab[aria-pressed='true'] {
+  color: var(--ink);
 }
-.rv-rest {
-  display: grid;
-  gap: 14px;
-  margin-top: 14px;
+.rv-tab[aria-pressed='true']::before {
+  transform: scaleX(1);
 }
-.rv-foot {
-  display: flex;
-  justify-content: center;
-  margin-top: 22px;
+@media (max-width: 599px) {
+  .rv-pick {
+    flex-wrap: nowrap;
+    gap: 22px;
+  }
+  .rv-tab span {
+    display: none;
+  }
+}
+@media (hover: hover) {
+  .rv-tab:hover {
+    color: var(--ink);
+  }
 }
 @media (min-width: 900px) {
-  .rv-grid {
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    gap: 18px;
+  .rv-layout {
+    grid-template-columns: minmax(0, 38fr) minmax(0, 62fr);
+    gap: 0;
+    padding-top: 36px;
   }
-  .rv-grid.is-solo {
-    grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+  .rv-anchor {
+    padding-right: clamp(24px, 4vw, 64px);
   }
-  .rv-lead {
-    padding: 48px 48px 36px;
-    gap: 28px;
+  .rv-voice {
+    padding-left: clamp(28px, 4vw, 64px);
+    border-left: 1px solid var(--line-2);
+    gap: 36px;
   }
-  .rv-side {
-    gap: 18px;
-  }
-  .rv-card {
-    padding: 30px 30px 26px;
-  }
-  .rv-rest {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
-    margin-top: 18px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rv-featured {
+    animation: none;
   }
 }
 
