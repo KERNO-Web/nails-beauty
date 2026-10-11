@@ -167,7 +167,7 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
     })
     ro.observe(box)
     return () => (ro.disconnect(), document.fonts?.removeEventListener('loadingdone', fit))
-  }, [lab.font, lab.copy])
+  }, [lab.hero, lab.copy])
 
   useEffect(() => {
     const cv = canvas.current
@@ -338,7 +338,7 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
           <p className="h-kicker">
             {s.name} · {s.kind} · {s.city}
           </p>
-          <div className={`m-title hf-${lab.font}`} ref={title}>
+          <div className="m-title" ref={title}>
             <h1 aria-label={copy.text}>
               {copy.lines.map((l) => (
                 <span key={l}>{l}</span>

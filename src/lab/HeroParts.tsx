@@ -62,30 +62,38 @@ export function LabSwitch() {
   }, [on])
   if (!on) return null
   return (
-    <div className="lab" role="group" aria-label="Внутренний просмотр: шрифт и текст первого экрана">
+    <div className="lab" role="group" aria-label="Внутренний просмотр: шрифты и текст">
       <span className="lab-tag">Внутренний просмотр</span>
-      <div className="lab-group">
-        <span className="lab-name">Шрифт</span>
-        <div className="lab-seg">
-          {FONTS.map((f) => (
-            <button key={f.id} aria-pressed={lab.font === f.id} onClick={() => setTypeLab({ font: f.id })} title={f.note}>
-              <b>{f.letter}</b>
-              <span>{f.label}</span>
-            </button>
+      <label className="lab-pick">
+        <span>Заголовок</span>
+        <select value={lab.hero} onChange={(e) => setTypeLab({ hero: e.target.value })}>
+          {FONTS.map((f, i) => (
+            <option key={f.id} value={f.id}>
+              {i + 1}. {f.label} — {f.note}
+            </option>
           ))}
-        </div>
-      </div>
-      <div className="lab-group lab-copy">
-        <span className="lab-name" title="Сравнивать после выбора шрифта">Текст</span>
-        <div className="lab-seg">
+        </select>
+      </label>
+      <label className="lab-pick">
+        <span>Услуги</span>
+        <select value={lab.names} onChange={(e) => setTypeLab({ names: e.target.value })}>
+          {FONTS.map((f, i) => (
+            <option key={f.id} value={f.id}>
+              {i + 1}. {f.label} — {f.note}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="lab-pick">
+        <span>Текст</span>
+        <select value={lab.copy} onChange={(e) => setTypeLab({ copy: e.target.value as (typeof COPIES)[number]['id'] })}>
           {COPIES.map((c) => (
-            <button key={c.id} aria-pressed={lab.copy === c.id} onClick={() => setTypeLab({ copy: c.id })} title={c.text}>
-              <b>{c.id}</b>
-              <span>{c.text}</span>
-            </button>
+            <option key={c.id} value={c.id}>
+              {c.text}
+            </option>
           ))}
-        </div>
-      </div>
+        </select>
+      </label>
     </div>
   )
 }

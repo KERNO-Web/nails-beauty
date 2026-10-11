@@ -4,7 +4,7 @@ import { Closing, Reviews, StickyCta } from './sections/Bottom'
 import { Masters, Services, Works } from './sections/Showcase'
 import { Header } from './sections/Top'
 import { useConcept } from './lab/concepts'
-import { FONTS, useTypeLab } from './lab/typeLab'
+import { fontById, useTypeLab } from './lab/typeLab'
 import { HeroColor } from './lab/HeroColor'
 import { LabSwitch } from './lab/HeroParts'
 import { HeroMaterial } from './lab/HeroMaterial'
@@ -38,16 +38,22 @@ export default function App() {
     const root = document.documentElement
     if (site) {
       root.dataset.concept = concept.id
-      // У «Живого материала» шрифт заголовков — выбранный в полосе просмотра, один на весь сайт
-      const hf = FONTS.find((f) => f.id === lab.font) ?? FONTS[0]
-      root.dataset.hf = concept.id === 'material' ? hf.id : ''
-      root.style.setProperty('--font-display', concept.id === 'material' ? hf.family : concept.display)
+      // У «Живого материала» шрифты — выбранные в полосе просмотра: заголовков (на весь сайт) и названий услуг
+      const material = concept.id === 'material'
+      const hf = fontById(lab.hero)
+      const nf = fontById(lab.names)
+      root.style.setProperty('--font-display', material ? hf.family : concept.display)
+      root.style.setProperty('--hero-w', String(hf.hero.w))
+      root.style.setProperty('--hero-ls', hf.hero.ls)
+      root.style.setProperty('--hero-scale', String(hf.hero.scale))
+      root.style.setProperty('--font-names', nf.family)
+      root.style.setProperty('--names-w', String(nf.name.w))
+      root.style.setProperty('--names-ls', nf.name.ls)
     } else {
       delete root.dataset.concept
-      delete root.dataset.hf
       root.style.removeProperty('--font-display')
     }
-  }, [data.theme, concept, route, lab.font])
+  }, [data.theme, concept, route, lab.hero, lab.names])
   useEffect(() => {
     document.title = route === 'admin' ? `Кабинет — ${data.studio.name}` : `${data.studio.name} — маникюр и педикюр, онлайн-запись`
   }, [data.studio.name, route])

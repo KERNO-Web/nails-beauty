@@ -27,7 +27,7 @@ export const CONCEPTS: Concept[] = [
     label: 'Живой материал',
     note: 'жидкий глянец',
     theme: { accent: '#5E4A55', paper: '#E9E6E2', ink: '#141113', nailShape: 'oval' },
-    display: "'Wix Madefor Display Variable', system-ui, sans-serif",
+    display: "'Jost Variable', system-ui, sans-serif",
     title: 'Ровный глянец, чистая кутикула',
     lead: 'Маникюр и педикюр с покрытием, которое держится три–четыре недели. Окна на ближайшие дни видно сразу.',
   },
