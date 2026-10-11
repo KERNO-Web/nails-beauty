@@ -8,15 +8,14 @@ import { Photo, typo, useMedia } from '../lib/ui'
 import type { Concept } from './concepts'
 import { HeroCta, HeroFacts } from './HeroParts'
 
-/** Строки — первые слова услуг без повторов, по очереди из каждой категории: «Маникюр», «Педикюр», «Дизайн»… */
+/** Строки — первые слова услуг без повторов: сначала по одной из каждой категории («Маникюр», «Педикюр», «Дизайн»),
+ * потом остальные услуги для рук и ног, дополнительные — в последнюю очередь */
 export function serviceWords(data: Data, max = 4) {
-  const groups = (['hands', 'feet', 'extra'] as const).map((c) => data.services.filter((s) => s.category === c).map((s) => s.title.split(/[\s+,]+/)[0]))
+  const first = (c: string) => data.services.filter((s) => s.category === c).map((s) => s.title.split(/[\s+,]+/)[0])
+  const [hands, feet, extra] = [first('hands'), first('feet'), first('extra')]
+  const order = [hands[0], feet[0], extra[0], ...hands.slice(1), ...feet.slice(1), ...extra.slice(1)]
   const words: string[] = []
-  for (let round = 0; words.length < max && groups.some((g) => g.length > round); round++)
-    for (const g of groups) {
-      const w = g[round]
-      if (w && words.length < max && !words.some((x) => x.toLowerCase() === w.toLowerCase())) words.push(w)
-    }
+  for (const w of order) if (w && words.length < max && !words.some((x) => x.toLowerCase() === w.toLowerCase())) words.push(w)
   return words.length ? words : [data.studio.name]
 }
 
