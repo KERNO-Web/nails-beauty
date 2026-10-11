@@ -98,3 +98,14 @@ export function useMedia(query: string) {
   }, [query])
   return on
 }
+
+/** Корешок секции: номер, название и короткий контекст. Повторяется в каждой секции — это и есть «система» страницы */
+export function Spine({ n, title, note }: { n: number; title: string; note?: string }) {
+  return (
+    <div className="spine">
+      <span className="spine-n">{String(n).padStart(2, '0')}</span>
+      <span className="spine-t">{title}</span>
+      {note && <span className="spine-note">{note}</span>}
+    </div>
+  )
+}

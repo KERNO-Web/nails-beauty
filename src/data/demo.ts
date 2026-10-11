@@ -2,7 +2,7 @@
 // Фото: id снимков Unsplash (photo-…) или любые ссылки/пути (/photos/1.jpg).
 import type { Data } from './types'
 
-export const DATA_VERSION = 3
+export const DATA_VERSION = 5
 
 export const demo: Data = {
   version: DATA_VERSION,
@@ -18,8 +18,8 @@ export const demo: Data = {
     whatsapp: '79135552418',
     vk: 'lumi_nails',
     reviewsUrl: '',
-    accent: '#1B2CC1',
-    heroPhoto: 'photo-1772322586634-9867476143b9',
+    accent: '#7F363F',
+    heroPhoto: 'photo-1643648854897-7b5845b4c04c',
     heroPhoto2: 'photo-1648844421727-cde6c4246b13',
     stepMin: 30,
     bufferMin: 0,
@@ -57,7 +57,7 @@ export const demo: Data = {
       minutes: 105,
       price: 2200,
       category: 'hands',
-      photo: 'photo-1517837317028-6ce34fd27c34',
+      photo: 'photo-1630843599725-32ead7671867',
       popular: true,
     },
     {
@@ -120,7 +120,7 @@ export const demo: Data = {
   ],
   works: [
     { id: 'w1', photo: 'photo-1610992015732-2449b76344bc', tag: 'nude', title: 'Молочный нюд, миндаль', serviceId: 'manicure-gel', masterId: 'vera' },
-    { id: 'w2', photo: 'photo-1667207229737-0adf3c700d5e', tag: 'french', title: 'Тонкий френч', serviceId: 'manicure-gel', masterId: 'anna', featured: true },
+    { id: 'w2', photo: 'photo-1667207229737-0adf3c700d5e', tag: 'french', title: 'Тонкий френч', serviceId: 'manicure-gel', masterId: 'anna' },
     { id: 'w3', photo: 'photo-1772322586634-9867476143b9', tag: 'bright', title: 'Ультрамарин, длинный миндаль', serviceId: 'extension', masterId: 'anna' },
     { id: 'w4', photo: 'photo-1648844421727-cde6c4246b13', tag: 'minimal', title: 'Прозрачный нюд с акцентом', serviceId: 'manicure-gel', masterId: 'vera' },
     { id: 'w5', photo: 'photo-1735236007245-9dc6e28bbe56', tag: 'design', title: 'Зимняя роспись', serviceId: 'design', masterId: 'anna' },
@@ -128,7 +128,7 @@ export const demo: Data = {
     { id: 'w7', photo: 'photo-1519014816548-bf5fe059798b', tag: 'bright', title: 'Ягодный с надписью', serviceId: 'design', masterId: 'anna' },
     { id: 'w8', photo: 'photo-1772322586702-73125782bd99', tag: 'design', title: 'Голубое омбре', serviceId: 'design', masterId: 'anna' },
     { id: 'w9', photo: 'photo-1630843599725-32ead7671867', tag: 'minimal', title: 'Короткий квадрат, светлый', serviceId: 'manicure-gel', masterId: 'vera' },
-    { id: 'w10', photo: 'photo-1684609365994-a144ee021c88', tag: 'design', title: 'Шампань с мерцанием', serviceId: 'extension', masterId: 'anna' },
+    { id: 'w10', photo: 'photo-1684609365994-a144ee021c88', tag: 'design', title: 'Шампань с мерцанием', serviceId: 'extension', masterId: 'anna', featured: true },
     { id: 'w11', photo: 'photo-1612887390768-fb02affea7a6', tag: 'nude', title: 'Пудровый розовый', serviceId: 'manicure-gel', masterId: 'vera' },
     { id: 'w12', photo: 'photo-1571290274554-6a2eaa771e5f', tag: 'bright', title: 'Цветные кончики', serviceId: 'design', masterId: 'anna' },
   ],

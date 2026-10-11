@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Data } from '../data/types'
 import { Arrow } from '../lib/icons'
 import { dateOf, dayHuman, fmtTime, hoursSummary, monthPrep, nearestSlot } from '../lib/slots'
@@ -70,22 +70,6 @@ export function Closing({ data }: { data: Data }) {
   const near = nearestSlot(data)
   const mapSrc = `https://yandex.ru/map-widget/v1/?ll=${lon}%2C${lat}&z=16&pt=${lon}%2C${lat}%2Cpm2rdm`
   const routeUrl = `https://yandex.ru/maps/?rtext=~${lat}%2C${lon}&rtt=auto`
-  const mark = useRef<HTMLSpanElement>(null)
-  // Имя студии во всю ширину — кегль подгоняем под контейнер
-  useLayoutEffect(() => {
-    const el = mark.current
-    const box = el?.parentElement
-    if (!el || !box) return
-    const fit = () => {
-      el.style.fontSize = '100px'
-      if (el.scrollWidth) el.style.fontSize = `${(100 * box.clientWidth) / el.scrollWidth}px`
-    }
-    fit()
-    document.fonts?.ready.then(fit)
-    const ro = new ResizeObserver(fit)
-    ro.observe(box)
-    return () => ro.disconnect()
-  }, [s.name])
   const links = [
     s.phone && { href: `tel:${s.phone.replace(/[^\d+]/g, '')}`, label: s.phone },
     s.telegram && { href: `https://t.me/${s.telegram}`, label: 'Telegram', ext: true },
@@ -144,7 +128,7 @@ export function Closing({ data }: { data: Data }) {
           </div>
         </div>
         <p className="closing-mark" aria-hidden>
-          <span ref={mark}>{s.name}</span>
+          {s.name}
         </p>
         <div className="closing-legal">
           <span>

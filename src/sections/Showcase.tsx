@@ -2,9 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import type { Data, Master, ServiceCategory, Work, WorkTag } from '../data/types'
 import { Arrow, ChevronLeft, ChevronRight, Close } from '../lib/icons'
 import { select } from '../lib/selection'
-import { daySlots, daysAhead, dayHuman, canDo, fmtDuration, fmtTime, priceLabel } from '../lib/slots'
-import { Photo, photoUrl, scrollToId, useMedia } from '../lib/ui'
-import { useCropDrift } from './Top'
+import { daySlots, daysAhead, dayHuman, canDo, fmtDuration, fmtTime, plural, priceLabel } from '../lib/slots'
+import { Photo, photoUrl, scrollToId, Spine } from '../lib/ui'
 
 const CATEGORY: Record<ServiceCategory, string> = { hands: 'Руки', feet: 'Ноги', extra: 'Дополнительно' }
 const nn = (i: number) => String(i + 1).padStart(2, '0')
@@ -14,7 +13,7 @@ function bookService(serviceId: string, masterId?: string) {
   scrollToId('booking')
 }
 
-/* ---------- Услуги: оглавление + фото справа ---------- */
+/* ---------- Услуги: список — главный объект, фото — поддержка ---------- */
 
 export function Services({ data }: { data: Data }) {
   const groups = (Object.keys(CATEGORY) as ServiceCategory[])
@@ -25,71 +24,69 @@ export function Services({ data }: { data: Data }) {
   let n = 0
   return (
     <section className="services" id="services">
-      <div className="wrap-wide svc-grid">
-        <header className="svc-head">
-          <p className="label reveal">Услуги</p>
-          <h2 className="reveal d1">
-            Цена и&nbsp;время&nbsp;—
-            <br />
-            до&nbsp;записи
-          </h2>
-          <p className="reveal d2">«От» стоит только там, где итог зависит от&nbsp;длины и&nbsp;дизайна. Мастер назовёт его до&nbsp;начала работы.</p>
-        </header>
-        <div className="svc-index">
-          {groups.map((g) => (
-            <div key={g.c} className="svc-group">
-              {groups.length > 1 && <p className="svc-group-title">{CATEGORY[g.c]}</p>}
-              <ul>
-                {g.items.map((s) => {
-                  const i = n++
-                  return (
-                    <li key={s.id}>
-                      <button
-                        className={`svc-row ${s.id === cur?.id ? 'is-active' : ''}`}
-                        onClick={() => bookService(s.id)}
-                        onMouseEnter={() => setActive(s.id)}
-                        onFocus={() => setActive(s.id)}
-                        aria-label={`${s.title}, ${fmtDuration(s.minutes)}, ${priceLabel(s)}. Записаться`}
-                      >
-                        <span className="svc-n">{nn(i)}</span>
-                        <span className="svc-main">
-                          <span className="svc-title">{s.title}</span>
-                          <span className="svc-note">{s.note}</span>
-                        </span>
-                        <span className="svc-meta">
-                          <b className="num">{priceLabel(s)}</b>
-                          <span>{fmtDuration(s.minutes)}</span>
-                        </span>
-                        <span className="svc-go" aria-hidden>
-                          <Arrow size={18} />
-                        </span>
-                      </button>
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <figure className="svc-visual" aria-hidden>
-          <div className="svc-frame">
-            {data.services.map((s) => (
-              <Photo key={s.id} photo={s.photo} w={640} sizes="36vw" loading="lazy" className={s.id === cur?.id ? 'is-on' : ''} />
+      <div className="wrap-wide sec-grid">
+        <Spine n={2} title="Услуги и цены" note={`${data.services.length} ${plural(data.services.length, 'услуга', 'услуги', 'услуг')}`} />
+        <div className="sec-body svc-layout">
+          <header className="sec-intro">
+            <h2>Цена и&nbsp;время&nbsp;— сразу</h2>
+            <p>«От» стоит только там, где итог зависит от&nbsp;длины и&nbsp;дизайна. Нажмите на&nbsp;услугу, чтобы выбрать время.</p>
+          </header>
+          <div className="svc-index">
+            {groups.map((g) => (
+              <div key={g.c} className="svc-group">
+                {groups.length > 1 && <p className="svc-group-title">{CATEGORY[g.c]}</p>}
+                <ul>
+                  {g.items.map((s) => {
+                    const i = n++
+                    return (
+                      <li key={s.id}>
+                        <button
+                          className={`svc-row ${s.id === cur?.id ? 'is-active' : ''}`}
+                          onClick={() => bookService(s.id)}
+                          onMouseEnter={() => setActive(s.id)}
+                          onFocus={() => setActive(s.id)}
+                          aria-label={`${s.title}, ${fmtDuration(s.minutes)}, ${priceLabel(s)}. Выбрать время`}
+                        >
+                          <span className="svc-n">{nn(i)}</span>
+                          <span className="svc-main">
+                            <span className="svc-title">{s.title}</span>
+                            <span className="svc-note">{s.note}</span>
+                          </span>
+                          <span className="svc-meta">
+                            <b className="num">{priceLabel(s)}</b>
+                            <span>{fmtDuration(s.minutes)}</span>
+                          </span>
+                          <span className="svc-go" aria-hidden>
+                            <Arrow size={18} />
+                          </span>
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
             ))}
           </div>
-          {cur && (
-            <figcaption>
-              <span>{cur.title}</span>
-              <span className="num">{priceLabel(cur)}</span>
-            </figcaption>
-          )}
-        </figure>
+          <figure className="svc-visual" aria-hidden>
+            <div className="frame">
+              {data.services.map((s) => (
+                <Photo key={s.id} photo={s.photo} w={560} sizes="28vw" loading="lazy" className={s.id === cur?.id ? 'is-on' : ''} />
+              ))}
+            </div>
+            {cur && (
+              <figcaption className="tag">
+                <span>{cur.title}</span>
+                <b className="num">{priceLabel(cur)}</b>
+              </figcaption>
+            )}
+          </figure>
+        </div>
       </div>
     </section>
   )
 }
 
-/* ---------- Работы: редакционная раскладка ---------- */
+/* ---------- Работы: одна главная работа + ритм ---------- */
 
 const TAGS: { id: WorkTag | 'all'; label: string }[] = [
   { id: 'all', label: 'Все' },
@@ -112,21 +109,18 @@ export function Works({ data }: { data: Data }) {
     const fi = Math.max(0, items.findIndex((w) => w.featured))
     return items.length ? [items[fi], ...items.filter((_, i) => i !== fi)] : []
   }, [data.works, data.studio.heroPhoto, tag])
-  const desktop = useMedia('(min-width: 900px)')
-  const shown = all ? list : list.slice(0, desktop ? 8 : 6)
+  const shown = all ? list : list.slice(0, 6)
   const serviceOf = (w: Work) => data.services.find((s) => s.id === w.serviceId)
   const masterOf = (w: Work) => (data.masters.length > 1 ? data.masters.find((m) => m.id === w.masterId) : undefined)
-  const drift = useCropDrift<HTMLSpanElement>(18)
 
   return (
     <section className="works" id="works">
-      <div className="wrap-wide">
-        <header className="works-head">
-          <h2 className="works-title" aria-label="Работы">
-            <span ref={drift}>Работы</span>
-          </h2>
-          <div className="works-side">
-            <p>Нажмите на&nbsp;фото, чтобы рассмотреть, и&nbsp;запишитесь на&nbsp;такой&nbsp;же дизайн.</p>
+      <div className="wrap-wide sec-grid">
+        <Spine n={3} title="Работы" note={`${pool.length} ${plural(pool.length, 'работа', 'работы', 'работ')} мастеров`} />
+        <div className="sec-body">
+          <header className="sec-intro works-intro">
+            <h2>Выберите дизайн по&nbsp;фото</h2>
+            <p>Нажмите на&nbsp;снимок, чтобы рассмотреть, и&nbsp;запишитесь на&nbsp;такой&nbsp;же.</p>
             <div className="tabs" role="group" aria-label="Стиль">
               {tags.map((t) => (
                 <button key={t.id} className="tab" aria-pressed={tag === t.id} onClick={() => (setTag(t.id), setAll(false))}>
@@ -134,40 +128,41 @@ export function Works({ data }: { data: Data }) {
                 </button>
               ))}
             </div>
+          </header>
+          <div className="gallery" key={tag}>
+            {shown.map((w, i) => {
+              const s = serviceOf(w)
+              const m = masterOf(w)
+              const lead = i === 0
+              return (
+                <figure key={w.id} className={`work ${lead ? 'is-lead' : ''}`} style={{ animationDelay: `${Math.min(i, 8) * 0.04}s` }}>
+                  <button className="frame work-img" onClick={() => setOpen(i)} aria-label={`Открыть: ${w.title}`}>
+                    <Photo photo={w.photo} w={lead ? 900 : 520} sizes={lead ? '(min-width: 900px) 50vw, 100vw' : '(min-width: 900px) 26vw, 100vw'} alt={w.title} loading={i < 3 ? 'eager' : 'lazy'} />
+                  </button>
+                  <figcaption className={lead ? 'tag' : ''}>
+                    <span>
+                      <b>{w.title}</b>
+                      {(s || m) && <small>{[s?.title, m?.name].filter(Boolean).join(' · ')}</small>}
+                    </span>
+                    {s && (
+                      <button className="text-link" onClick={() => bookService(s.id, m?.id)}>
+                        Хочу так же <Arrow size={14} />
+                      </button>
+                    )}
+                  </figcaption>
+                </figure>
+              )
+            })}
+            {!list.length && <p className="gallery-empty">Здесь пока нет работ.</p>}
           </div>
-        </header>
-        <div className="gallery" key={tag}>
-          {shown.map((w, i) => {
-            const s = serviceOf(w)
-            const m = masterOf(w)
-            return (
-              <figure key={w.id} className={`work w${i % 8}`} style={{ animationDelay: `${Math.min(i, 8) * 0.04}s` }}>
-                <button className="work-img" onClick={() => setOpen(i)} aria-label={`Открыть: ${w.title}`}>
-                  <Photo photo={w.photo} w={i % 8 === 0 || i % 8 === 3 ? 1000 : 560} sizes={i % 8 === 0 || i % 8 === 3 ? '(min-width: 900px) 60vw, 100vw' : '(min-width: 900px) 34vw, 80vw'} alt={w.title} loading={i < 2 ? 'eager' : 'lazy'} />
-                </button>
-                <figcaption>
-                  <span>
-                    <b>{w.title}</b>
-                    {(s || m) && <small>{[s?.title, m?.name].filter(Boolean).join(' · ')}</small>}
-                  </span>
-                  {s && (
-                    <button className="text-link" onClick={() => bookService(s.id, m?.id)}>
-                      Хочу так же <Arrow size={14} />
-                    </button>
-                  )}
-                </figcaption>
-              </figure>
-            )
-          })}
-          {!list.length && <p className="gallery-empty">Здесь пока нет работ.</p>}
+          {list.length > shown.length && (
+            <div className="gallery-more">
+              <button className="text-link" onClick={() => setAll(true)}>
+                Показать ещё {list.length - shown.length}
+              </button>
+            </div>
+          )}
         </div>
-        {list.length > shown.length && (
-          <div className="gallery-more">
-            <button className="text-link" onClick={() => setAll(true)}>
-              Показать ещё {list.length - shown.length}
-            </button>
-          </div>
-        )}
       </div>
       {open !== null && list[open] && (
         <Lightbox
