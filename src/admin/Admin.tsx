@@ -929,7 +929,7 @@ function StudioTab({ data }: { data: Data }) {
 
       <section className="adm-card">
         <h2 className="adm-h2">Демо-данные</h2>
-        <p className="muted adm-small">Вернуть шаблон к исходному виду: студия LUMI, два мастера, без ваших записей.</p>
+        <p className="muted adm-small">Вернуть сайт к исходному виду: убрать ваши правки и записи.</p>
         <div className="adm-actions">
           <button className="adm-x" onClick={() => confirm('Сбросить все изменения и записи?') && resetDemo()}>
             Сбросить к демо

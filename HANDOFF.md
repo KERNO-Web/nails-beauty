@@ -41,7 +41,8 @@
 1. Персональные демо точек на zapisvonline.ru/<slug> по PLAYBOOK (JSON в `outreach/<slug>.json`, картинки в
    `public/t/<slug>/`, `deploy/deploy.sh`, `make-demo.ts` в контейнере, проверка `curl https://zapisvonline.ru/api/t/<slug>`,
    ответ — таблица: точка · демо · вход владельца · куда писать). Список точек пользователь ещё не дал.
-2. Решить, как nail-студии (этот шаблон) живут на zapisvonline.ru рядом с шиномонтажками.
+2. ~~Как nail-студии живут на zapisvonline.ru~~ — решено 12.10: `zapisvonline.ru/<slug>`, файлы салонов и команды —
+   `salons/README.md`, выкладка — `deploy/deploy.sh`. Пункт 1 для салонов делается по нему, а не по PLAYBOOK автосервисов.
 3. Не проверено на реальных iPhone/Android: установка, уведомления, напоминания.
 
 ## Правила

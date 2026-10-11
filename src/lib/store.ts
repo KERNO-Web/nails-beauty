@@ -1,12 +1,13 @@
 // Хранилище данных студии. Сейчас — в браузере (localStorage): сайт и кабинет на одном устройстве видят одно и то же.
 // Для боевой версии этот модуль заменяется запросами к серверу (тот же набор функций), вёрстка не меняется.
 import { useSyncExternalStore } from 'react'
-import { DATA_VERSION, demo } from '../data/demo'
+import { DATA_VERSION } from '../data/demo'
+import { initial, storageKey } from '../data/site'
 import type { Booking, Data } from '../data/types'
 import { reportBooking, reportCancel } from './push'
 import { daySlots } from './slots'
 
-const KEY = 'nail-studio:data'
+const KEY = storageKey
 
 /** Сервер уведомлений из сборки (выкладка на свой сервер подставляет ключ и адрес — deploy/) */
 const ENV_PUSH =
@@ -15,7 +16,7 @@ const ENV_PUSH =
     : undefined
 
 function load(): Data {
-  let d = structuredClone(demo)
+  let d = structuredClone(initial)
   try {
     const raw = localStorage.getItem(KEY)
     if (raw) {
@@ -73,7 +74,7 @@ export function update(fn: (d: Data) => Data) {
 }
 
 export function resetDemo() {
-  data = structuredClone(demo)
+  data = structuredClone(initial)
   save()
   emit()
 }

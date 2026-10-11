@@ -6,9 +6,13 @@ import react from '@vitejs/plugin-react'
 const PRELOAD_FONTS = /^((jost|lora|comfortaa|onest)-(cyrillic|latin)|(jost|onest)-latin-ext)-wght-normal-.*\.woff2$/
 
 function preloadFonts(): Plugin {
+  let base = './'
   return {
     name: 'preload-fonts',
     apply: 'build',
+    configResolved(c) {
+      base = c.base
+    },
     transformIndexHtml: {
       order: 'post',
       handler(_html, ctx) {
@@ -17,7 +21,7 @@ function preloadFonts(): Plugin {
           .filter((f) => PRELOAD_FONTS.test(f.split('/').pop() ?? ''))
           .map((f) => ({
             tag: 'link',
-            attrs: { rel: 'preload', as: 'font', type: 'font/woff2', href: `./${f}`, crossorigin: '' },
+            attrs: { rel: 'preload', as: 'font', type: 'font/woff2', href: `${base}${f}`, crossorigin: '' },
             injectTo: 'head-prepend' as const,
           }))
       },
