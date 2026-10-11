@@ -8,9 +8,9 @@ export type FontId = 'a' | 'b' | 'c'
 export type CopyId = '1' | '2' | '3'
 
 export const FONTS: { id: FontId; letter: string; label: string; note: string }[] = [
-  { id: 'a', letter: 'A', label: 'Roboto Flex', note: 'узкий гротеск, ось ширины' },
-  { id: 'b', letter: 'B', label: 'Unbounded', note: 'широкая геометрия' },
-  { id: 'c', letter: 'C', label: 'Golos Text', note: 'плотный гротеск, контраст весов' },
+  { id: 'a', letter: 'A', label: 'Ysabeau', note: 'тонкий гуманистический гротеск с каллиграфической пластикой' },
+  { id: 'b', letter: 'B', label: 'Unbounded Light', note: 'лёгкая округлая геометрия, строчные — в рифму с каплей' },
+  { id: 'c', letter: 'C', label: 'Commissioner', note: 'гротеск с расширяющимися концами штрихов — «текучий»' },
 ]
 
 /** Строки заголовка заданы вручную — переносы осмысленные, короткие слова не отрываются */

@@ -140,7 +140,7 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
         ...[...h1.children].map((el) => {
           const r = document.createRange()
           r.selectNodeContents(el)
-          return r.getBoundingClientRect().width
+          return r.getBoundingClientRect().width + parseFloat(getComputedStyle(el).paddingLeft || '0')
         }),
       )
     // Несколько проходов: у переменных шрифтов с оптическим размером ширина букв меняется вместе с кеглем
@@ -156,7 +156,13 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
     }
     fit()
     document.fonts?.ready.then(fit)
-    const ro = new ResizeObserver(fit)
+    // Пересчёт только при смене ширины: подгонка меняет высоту блока, и без проверки наблюдатель зацикливается
+    let lastW = box.clientWidth
+    const ro = new ResizeObserver(() => {
+      if (box.clientWidth === lastW) return
+      lastW = box.clientWidth
+      fit()
+    })
     ro.observe(box)
     return () => ro.disconnect()
   }, [lab.font, lab.copy])

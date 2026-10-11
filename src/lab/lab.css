@@ -1,7 +1,8 @@
 @import '@fontsource/oranienbaum/cyrillic-400.css';
 @import '@fontsource/oranienbaum/latin-400.css';
-@import '@fontsource-variable/roboto-flex/full.css';
-@import '@fontsource-variable/golos-text';
+@import '@fontsource-variable/roboto-flex/wdth.css';
+@import '@fontsource-variable/ysabeau';
+@import '@fontsource-variable/commissioner/flar.css';
 
 /* ============================================================
    Лаборатория первого экрана: три концепции, переключатель для просмотра.
@@ -270,43 +271,43 @@ html.has-lab {
   display: block;
   white-space: nowrap;
 }
-/* A — узкий гротеск: высокий плотный силуэт за счёт настоящей оси ширины Roboto Flex, капслок */
+/* A — Ysabeau: тонкий гуманистический гротеск с каллиграфической пластикой; вторая строка со сдвигом */
 .hf-a {
-  --hf: 'Roboto Flex Variable', 'Arial Narrow', sans-serif;
+  --hf: 'Ysabeau Variable', system-ui, sans-serif;
 }
 .hf-a h1 {
-  text-transform: uppercase;
-  font-stretch: 30%;
-  font-weight: 760;
-  letter-spacing: 0.005em;
-  /* пробел у узкого начертания остаётся широким — подтягиваем, чтобы «В ДЕТАЛЯХ» читалось одним словом-блоком */
-  word-spacing: -0.12em;
-  line-height: 0.84;
-  font-size: clamp(5rem, 2rem + 8vw, 10rem);
+  font-weight: 230;
+  letter-spacing: -0.02em;
+  line-height: 0.96;
+  font-size: clamp(4rem, 1.6rem + 6.6vw, 8.6rem);
 }
-/* B — широкая геометрия Unbounded: средний вес, плотная разрядка, кегль сдержаннее, чтобы не давить каплю */
+.hf-a h1 span + span {
+  padding-left: 0.9em;
+}
+/* B — Unbounded Light: округлая лёгкая геометрия, всё строчными — силуэт мягкий, как капля */
 .hf-b {
   --hf: 'Unbounded Variable', system-ui, sans-serif;
 }
 .hf-b h1 {
-  font-weight: 450;
-  letter-spacing: -0.055em;
-  line-height: 1.02;
-  font-size: clamp(3rem, 1rem + 4.6vw, 5.4rem);
+  font-weight: 220;
+  text-transform: lowercase;
+  letter-spacing: -0.06em;
+  line-height: 1;
+  font-size: clamp(3.2rem, 1rem + 5vw, 6.2rem);
 }
-/* C — плотный гротеск Golos: тяжёлая первая строка, лёгкая вторая — ритм за счёт контраста весов */
+/* C — Commissioner с осью FLAR: концы штрихов расширяются, как у растёкшейся капли лака */
 .hf-c {
-  --hf: 'Golos Text Variable', system-ui, sans-serif;
+  --hf: 'Commissioner Variable', system-ui, sans-serif;
 }
 .hf-c h1 {
-  font-weight: 800;
-  letter-spacing: -0.052em;
-  line-height: 0.92;
-  font-size: clamp(4rem, 1.4rem + 6.4vw, 7.4rem);
+  font-weight: 320;
+  font-variation-settings: 'FLAR' 100;
+  letter-spacing: -0.035em;
+  line-height: 0.96;
+  font-size: clamp(3.8rem, 1.4rem + 6.2vw, 8rem);
 }
 .hf-c h1 span + span {
-  font-weight: 430;
-  letter-spacing: -0.045em;
+  font-weight: 220;
 }
 .m-copy .h-btn:hover {
   background: #fff;
@@ -406,14 +407,19 @@ html[data-concept='material'] .master-body h3 {
   letter-spacing: -0.005em;
   line-height: 0.92;
 }
-/* Прайс: названия — Oranienbaum (у шрифта есть только вес 400; искусственный жирный запрещён),
-   цены и длительность — Onest с настоящими весами 700 и 500 */
+/* Прайс: названия — тот же Oranienbaum, но плотнее. У шрифта один вес (400), поэтому штрих утолщён контуром
+   своего же цвета (~0.035em) — равномерно и предсказуемо, без браузерного «жирного»; цены — Onest 700 */
 html[data-concept='material'] .svc-title {
   font-weight: 400;
   font-synthesis: none;
   font-size: clamp(23px, 2.1vw, 31px);
-  letter-spacing: 0;
+  letter-spacing: 0.005em;
   color: var(--ink);
+  -webkit-text-stroke: 0.035em currentColor;
+  paint-order: stroke fill;
+}
+html[data-concept='material'] .svc-swatch figcaption span {
+  font-weight: 700;
 }
 html[data-concept='material'] .svc-meta b {
   font-family: var(--font-ui);
