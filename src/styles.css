@@ -1,5 +1,6 @@
 @import '@fontsource-variable/jost';
 @import '@fontsource-variable/onest';
+@import '@fontsource-variable/geologica';
 
 /* ============ Токены ============
    Три цвета темы (--accent, --paper, --ink) и форма ногтя (--nail) приходят из данных студии — lib/theme.ts.
@@ -38,6 +39,8 @@
   --font-display: 'Lora Variable', Georgia, serif;
   /* Все остальные заголовки: разделы, имена мастеров, запись, контакты */
   --font-heading: 'Jost Variable', system-ui, sans-serif;
+  /* Главный заголовок первого экрана — современный мягкий гротеск; логотип остаётся с засечками */
+  --font-hero: 'Geologica Variable', 'Onest Variable', system-ui, sans-serif;
   --font-ui: 'Onest Variable', 'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --gutter: 16px;
