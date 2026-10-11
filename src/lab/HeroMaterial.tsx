@@ -6,7 +6,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { Data } from '../data/types'
 import { photoUrl, typo } from '../lib/ui'
 import type { Concept } from './concepts'
-import { HeroCta, HeroFacts } from './HeroParts'
+import { HeroCta, HeroFacts, HeroPlace } from './HeroParts'
 
 /** Заголовок первого экрана — строки заданы вручную, чтобы перенос был осмысленным */
 const TITLE = ['Красота', 'в\u00a0деталях']
@@ -128,6 +128,7 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
   const photo = s.heroPhoto || data.works.find((w) => w.featured)?.photo || data.works[0]?.photo || ''
   const section = useRef<HTMLElement>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
+  const foot = useRef<HTMLDivElement>(null)
   const [gl, setGl] = useState<'pending' | 'on' | 'off'>('pending')
   const title = useRef<HTMLDivElement>(null)
 
@@ -203,7 +204,7 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
     let visible = true
     let ready = false
     const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 760 ? 1.5 : 1.6)
-    const state = { w: 0, h: 0, mx: 0, my: 0, tx: 0, ty: 0, grow: 0, t0: performance.now() }
+    const state = { w: 0, h: 0, mx: 0, my: 0, tx: 0, ty: 0, grow: 0, t0: performance.now(), copyBottom: 0, footTop: 0 }
 
     const layout = () => {
       const r = cv.getBoundingClientRect()
@@ -212,13 +213,19 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
       cv.width = state.w
       cv.height = state.h
       ctx.viewport(0, 0, state.w, state.h)
+      // Свободное место между кнопкой записи и блоком адреса — на телефоне капля встаёт ровно туда
+      const cta = sec.querySelector('.m-copy .h-cta')?.getBoundingClientRect()
+      const f = foot.current?.getBoundingClientRect()
+      state.copyBottom = cta ? (cta.bottom - r.top) * dpr : state.h * 0.55
+      state.footTop = f ? (f.top - r.top) * dpr : state.h * 0.85
     }
     const geometry = () => {
       const wide = state.w / dpr >= 900
-      // На телефоне капля ниже текста и меньше — заголовок и кнопка не уходят под неё
+      // На компьютере капля справа от текста; на телефоне — между кнопкой и адресом, не заходя ни на то, ни на другое
+      const gap = state.footTop - state.copyBottom
       const cx = wide ? state.w * 0.68 : state.w * 0.56
-      const cy = wide ? state.h * 0.52 : state.h * 0.72
-      const base = wide ? Math.min(state.w * 0.2, state.h * 0.33) : Math.min(state.w * 0.3, state.h * 0.16)
+      const cy = wide ? state.h * 0.52 : state.copyBottom + gap / 2
+      const base = wide ? Math.min(state.w * 0.2, state.h * 0.33) : Math.max(40 * dpr, Math.min(state.w * 0.34, gap / 2 - 18 * dpr))
       const far = Math.hypot(state.w, state.h) * 0.62
       const g = state.grow
       const ease = g * g * (3 - 2 * g)
@@ -271,6 +278,8 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
     }
     const onLeave = () => (rest(), kick())
     const onResize = () => (layout(), kick())
+    const ro = new ResizeObserver(onResize)
+    if (foot.current) ro.observe(foot.current)
 
     const img = new Image()
     img.crossOrigin = 'anonymous'
@@ -317,6 +326,7 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
       alive = false
       cancelAnimationFrame(raf)
       io.disconnect()
+      ro.disconnect()
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onResize)
       sec.removeEventListener('pointermove', onMove)
@@ -349,8 +359,9 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
           <p className="h-lead">{typo(LEAD)}</p>
           <HeroCta />
         </div>
-        <div className="wrap-wide m-foot">
-          <HeroFacts data={data} />
+        <div className="wrap-wide m-foot" ref={foot}>
+          <HeroPlace data={data} />
+          <HeroFacts data={data} address={false} className="m-facts" />
           <span className="m-hint" aria-hidden />
         </div>
       </div>

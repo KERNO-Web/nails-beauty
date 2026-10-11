@@ -667,49 +667,185 @@ textarea.input {
 }
 
 /* ============ Отзывы ============ */
+/* ============ Отзывы ============
+   Отступ сверху небольшой: над отзывами уже есть нижний отступ блока записи (оба на одном фоне) */
 .reviews-sec {
-  padding: clamp(88px, 10vw, 150px) 0;
+  padding: clamp(8px, 2vw, 24px) 0 clamp(72px, 9vw, 128px);
 }
-.rev-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--ink);
+.rv-head h2 {
+  font-size: clamp(2.2rem, 1.4rem + 2.6vw, 3.8rem);
 }
-.reviews {
+.rv-summary {
   display: grid;
+  gap: 10px;
+  justify-items: start;
 }
-.review {
-  margin: 0;
-  padding: 32px 0;
-  border-bottom: 1px solid var(--line-2);
+.rv-summary p {
+  color: var(--ink-2);
 }
-.review blockquote {
-  margin: 0;
-  font-family: var(--font-ui);
+.rv-score {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: inherit;
+}
+.rv-score > b {
+  font-family: var(--font-heading);
+  font-size: 46px;
   font-weight: 500;
-  font-size: clamp(19px, 1.6vw, 23px);
-  line-height: 1.4;
-  max-width: 34ch;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.rv-score > span {
+  display: grid;
+  gap: 4px;
+}
+.rv-score small {
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.stars {
+  display: inline-flex;
+  gap: 2px;
+  color: #c8962e;
+}
+.rv-grid {
+  display: grid;
+  gap: 14px;
+}
+.rv-side {
+  display: grid;
+  gap: 14px;
+}
+.rv-card {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 26px 24px 22px;
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+/* Главный отзыв — тёмный, с мягким перламутровым бликом, как у капли на первом экране */
+.rv-lead {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  padding: 34px 28px 26px;
+  background: #171315;
+  color: #eee8e2;
+  box-shadow: none;
+}
+.rv-lead::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  right: -18%;
+  top: -40%;
+  width: 70%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, rgba(236, 214, 230, 0.22), rgba(190, 200, 240, 0.08) 45%, transparent 70%);
+  filter: blur(8px);
+}
+.rv-quote {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.55;
   text-wrap: pretty;
 }
-.review figcaption {
-  margin-top: 16px;
+.rv-quote.is-big {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 1.6rem + 0.6vw, 32px);
+  line-height: 1.32;
+  letter-spacing: -0.01em;
+  max-width: 30ch;
+}
+.rv-more {
+  margin-top: -8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: inherit;
+  min-height: 32px;
+}
+.rv-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+}
+.rv-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-2);
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 17px;
+}
+.rv-lead .rv-avatar {
+  background: rgba(238, 232, 226, 0.12);
+}
+.rv-who {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  line-height: 1.3;
+}
+.rv-who b {
+  font-weight: 600;
+  font-size: 15px;
+}
+.rv-who small {
   font-size: 13px;
   color: var(--ink-2);
 }
-.review figcaption b {
-  color: var(--ink);
-  font-weight: 600;
+.rv-lead .rv-who small {
+  color: rgba(238, 232, 226, 0.62);
+}
+.rv-who a {
+  color: inherit;
+}
+.rv-rest {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+.rv-foot {
+  display: flex;
+  justify-content: center;
+  margin-top: 22px;
 }
 @media (min-width: 900px) {
-  .reviews {
-    grid-template-columns: 1fr 1fr;
-    column-gap: 24px;
+  .rv-grid {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 18px;
   }
-  .review {
-    padding: 44px 48px 44px 0;
+  .rv-grid.is-solo {
+    grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+  }
+  .rv-lead {
+    padding: 48px 48px 36px;
+    gap: 28px;
+  }
+  .rv-side {
+    gap: 18px;
+  }
+  .rv-card {
+    padding: 30px 30px 26px;
+  }
+  .rv-rest {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 18px;
   }
 }
 
@@ -847,7 +983,8 @@ textarea.input {
 
 /* ============ Запись: спокойный продуктовый режим ============ */
 .booking {
-  padding: clamp(72px, 8vw, 120px) 0;
+  /* Снизу меньше, чем сверху: следующий блок (отзывы) на том же фоне и добавляет свой отступ */
+  padding: clamp(72px, 8vw, 120px) 0 clamp(40px, 5vw, 72px);
 }
 .bk-head {
   display: grid;

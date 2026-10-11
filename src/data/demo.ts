@@ -2,7 +2,7 @@
 // Фото: id снимков Unsplash (photo-…) или любые ссылки/пути (/photos/1.jpg).
 import type { Data } from './types'
 
-export const DATA_VERSION = 7
+export const DATA_VERSION = 8
 
 export const demo: Data = {
   version: DATA_VERSION,
@@ -17,7 +17,6 @@ export const demo: Data = {
     telegram: 'lumi_nails',
     whatsapp: '79135552418',
     vk: 'lumi_nails',
-    reviewsUrl: '',
     heroTitle: 'Маникюр, который хочется разглядывать',
     heroLead: 'Чистая работа с\u00a0кутикулой, ровное покрытие и\u00a0дизайн от\u00a0тонкого френча до\u00a0росписи.',
     heroPhoto: 'photo-1643648854897-7b5845b4c04c',

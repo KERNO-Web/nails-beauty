@@ -1,33 +1,147 @@
 import { useEffect, useState } from 'react'
-import type { Data } from '../data/types'
-import { Arrow } from '../lib/icons'
-import { dateOf, dayHuman, fmtTime, hoursSummary, monthPrep, nearestSlot } from '../lib/slots'
-import { scrollToId, typo } from '../lib/ui'
+import type { Data, Review } from '../data/types'
+import { Arrow, Star } from '../lib/icons'
+import { fmtRating, reviewsCount, reviewsSource, routeUrl } from '../lib/place'
+import { dateOf, dayHuman, fmtTime, hoursSummary, MONTHS_NOM, nearestSlot, plural } from '../lib/slots'
+import { initialOf, scrollToId, typo } from '../lib/ui'
+
+/** Дата отзыва: «сентябрь 2026» */
+function reviewDate(iso: string) {
+  const d = dateOf(iso)
+  return `${MONTHS_NOM[d.getMonth()].toLowerCase()} ${d.getFullYear()}`
+}
+
+/** Звёзды — только для настоящей оценки отзыва */
+function Stars({ value, size = 16 }: { value: number; size?: number }) {
+  const n = Math.max(0, Math.min(5, Math.round(value)))
+  return (
+    <span className="stars" role="img" aria-label={`Оценка ${n} из 5`}>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <Star key={i} size={size} filled={i < n} />
+      ))}
+    </span>
+  )
+}
+
+/** Главный отзыв: отмеченный featured, иначе самый свежий из содержательных (от 80 знаков) */
+function orderReviews(list: Review[]) {
+  const byDate = [...list].sort((a, b) => b.date.localeCompare(a.date))
+  const lead = byDate.find((r) => r.featured) ?? byDate.find((r) => r.text.length >= 80) ?? byDate[0]
+  return [lead, ...byDate.filter((r) => r !== lead)]
+}
+
+const PREVIEW = 240
+
+function ReviewText({ text, big }: { text: string; big?: boolean }) {
+  const [open, setOpen] = useState(false)
+  const long = text.length > PREVIEW + 40
+  // Обрезаем по слову; полный текст — по кнопке (и для скринридеров он доступен целиком после раскрытия)
+  const short = long && !open ? text.slice(0, text.lastIndexOf(' ', PREVIEW)) + '…' : text
+  return (
+    <>
+      <blockquote className={big ? 'rv-quote is-big' : 'rv-quote'}>{typo(short)}</blockquote>
+      {long && (
+        <button className="rv-more" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+          {open ? 'Свернуть' : 'Читать полностью'}
+        </button>
+      )}
+    </>
+  )
+}
+
+function ReviewMeta({ r }: { r: Review }) {
+  const source = r.source && (r.url ? (
+    <a href={r.url} target="_blank" rel="noreferrer">
+      {r.source}
+    </a>
+  ) : (
+    r.source
+  ))
+  return (
+    <figcaption className="rv-meta">
+      <span className="rv-avatar" aria-hidden>
+        {initialOf(r.name)}
+      </span>
+      <span className="rv-who">
+        <b>{r.name}</b>
+        <small>
+          {[r.service, reviewDate(r.date)].filter(Boolean).join(' · ')}
+          {source && <> · {source}</>}
+        </small>
+      </span>
+    </figcaption>
+  )
+}
 
 export function Reviews({ data }: { data: Data }) {
+  const [all, setAll] = useState(false)
   if (!data.reviews.length) return null
+  const src = reviewsSource(data.studio)
+  const [lead, ...rest] = orderReviews(data.reviews)
+  const side = rest.slice(0, 2)
+  const more = rest.slice(2)
   return (
     <section className="reviews-sec" id="reviews">
       <div className="wrap-wide">
-        <header className="rev-head">
-          <p className="label reveal">Отзывы</p>
-          {data.studio.reviewsUrl && (
-            <a className="text-link reveal" href={data.studio.reviewsUrl} target="_blank" rel="noreferrer">
-              Все отзывы на картах <Arrow size={14} />
-            </a>
-          )}
+        <header className="sec-head rv-head">
+          <h2>Отзывы</h2>
+          <div className="rv-summary">
+            {src?.rating && src.count ? (
+              <a className="rv-score" href={src.url} target="_blank" rel="noreferrer">
+                <b>{fmtRating(src.rating)}</b>
+                <span>
+                  <Stars value={src.rating} size={15} />
+                  <small>
+                    {reviewsCount(src.count)} в&nbsp;{src.name}
+                  </small>
+                </span>
+              </a>
+            ) : (
+              <p>Что говорят клиентки после визита.</p>
+            )}
+            {src && (
+              <a className="text-link" href={src.url} target="_blank" rel="noreferrer">
+                Все отзывы{src.name ? ` в\u00a0${src.name}` : ''} <Arrow size={14} />
+              </a>
+            )}
+          </div>
         </header>
-        <div className="reviews">
-          {data.reviews.map((r) => (
-            <figure key={r.id} className="review reveal">
-              <blockquote>{typo(r.text)}</blockquote>
-              <figcaption>
-                <b>{r.name}</b> · {r.service}, в&nbsp;{monthPrep(r.date)}
-                {dateOf(r.date).getFullYear() !== new Date().getFullYear() ? ` ${dateOf(r.date).getFullYear()}` : ''}
-              </figcaption>
-            </figure>
-          ))}
+        <div className={`rv-grid ${side.length ? '' : 'is-solo'}`}>
+          <figure className="rv-card rv-lead reveal">
+            {lead.rating ? <Stars value={lead.rating} size={18} /> : null}
+            <ReviewText text={lead.text} big />
+            <ReviewMeta r={lead} />
+          </figure>
+          {side.length > 0 && (
+            <div className="rv-side">
+              {side.map((r, i) => (
+                <figure key={r.id} className={`rv-card reveal d${i + 1}`}>
+                  {r.rating ? <Stars value={r.rating} /> : null}
+                  <ReviewText text={r.text} />
+                  <ReviewMeta r={r} />
+                </figure>
+              ))}
+            </div>
+          )}
         </div>
+        {more.length > 0 &&
+          (all ? (
+            <div className="rv-rest">
+              {more.map((r) => (
+                <figure key={r.id} className="rv-card">
+                  {r.rating ? <Stars value={r.rating} /> : null}
+                  <ReviewText text={r.text} />
+                  <ReviewMeta r={r} />
+                </figure>
+              ))}
+            </div>
+          ) : (
+            <div className="rv-foot">
+              <button className="btn btn-line" onClick={() => setAll(true)}>
+                Ещё {more.length} {plural(more.length, 'отзыв', 'отзыва', 'отзывов')}
+              </button>
+            </div>
+          ))}
       </div>
     </section>
   )
@@ -37,10 +151,10 @@ export function Reviews({ data }: { data: Data }) {
 export function Closing({ data }: { data: Data }) {
   const s = data.studio
   const [lon, lat] = s.map
+  const route = routeUrl(s)
   const hours = hoursSummary(data)
   const near = nearestSlot(data)
   const mapSrc = `https://yandex.ru/map-widget/v1/?ll=${lon}%2C${lat}&z=16&pt=${lon}%2C${lat}%2Cpm2rdm`
-  const routeUrl = `https://yandex.ru/maps/?rtext=~${lat}%2C${lon}&rtt=auto`
   const links = [
     s.phone && { href: `tel:${s.phone.replace(/[^\d+]/g, '')}`, label: s.phone },
     s.telegram && { href: `https://t.me/${s.telegram}`, label: 'Telegram', ext: true },
@@ -57,7 +171,7 @@ export function Closing({ data }: { data: Data }) {
             <p className="muted">
               {s.city}. {typo(s.addressNote)}
             </p>
-            <a className="text-link" href={routeUrl} target="_blank" rel="noreferrer">
+            <a className="text-link" href={route} target="_blank" rel="noreferrer">
               Построить маршрут <Arrow size={14} />
             </a>
           </div>

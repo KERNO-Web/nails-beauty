@@ -590,6 +590,22 @@ function Reviews({ data }: { data: Data }) {
             <Field label="Дата">
               <input className="input" type="date" value={r.date} onChange={(e) => setReview(r.id, { date: e.target.value })} />
             </Field>
+            <Field label="Оценка (если клиент её ставил)">
+              <select className="input" value={r.rating ?? ''} onChange={(e) => setReview(r.id, { rating: Number(e.target.value) || undefined })}>
+                <option value="">— нет —</option>
+                {[5, 4, 3, 2, 1].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Где оставлен (2ГИС, Яндекс…)">
+              <input className="input" value={r.source ?? ''} onChange={(e) => setReview(r.id, { source: e.target.value || undefined })} />
+            </Field>
+            <Field label="Ссылка на отзыв (необязательно)" wide>
+              <input className="input" value={r.url ?? ''} onChange={(e) => setReview(r.id, { url: e.target.value.trim() || undefined })} />
+            </Field>
             <Field label="Текст" wide>
               <textarea className="input" rows={3} value={r.text} onChange={(e) => setReview(r.id, { text: e.target.value })} />
             </Field>
@@ -623,6 +639,10 @@ const SHAPES: { id: NailShape; label: string }[] = [
 function StudioTab({ data }: { data: Data }) {
   const s = data.studio
   const set = (patch: Partial<Data['studio']>) => update((d) => ({ ...d, studio: { ...d.studio, ...patch } }))
+  const setSource = (patch: Partial<NonNullable<Data['studio']['reviewsSource']>>) => {
+    const next = { name: '', url: '', ...s.reviewsSource, ...patch }
+    set({ reviewsSource: next.name || next.url || next.rating || next.count ? next : undefined })
+  }
   const t = data.theme
   const setTheme = (patch: Partial<Theme>) => update((d) => ({ ...d, theme: { ...d.theme, ...patch } }))
   return (
@@ -718,8 +738,29 @@ function StudioTab({ data }: { data: Data }) {
           <Field label="ВКонтакте (адрес страницы)">
             <input className="input" value={s.vk} onChange={(e) => set({ vk: e.target.value })} />
           </Field>
-          <Field label="Отзывы на картах (ссылка)">
-            <input className="input" value={s.reviewsUrl ?? ''} onChange={(e) => set({ reviewsUrl: e.target.value })} />
+          <Field label="Своя ссылка «Маршрут» (необязательно; по умолчанию — по координатам)" wide>
+            <input className="input" value={s.routeUrl ?? ''} placeholder="https://2gis.ru/…" onChange={(e) => set({ routeUrl: e.target.value.trim() || undefined })} />
+          </Field>
+        </div>
+      </section>
+
+      <section className="adm-card">
+        <h2 className="adm-h2">Отзывы на картах</h2>
+        <p className="muted adm-small" style={{ marginBottom: 12 }}>
+          Только настоящие цифры с публичной страницы. Без ссылки блок не показывается; без оценки и количества — показывается просто ссылка.
+        </p>
+        <div className="adm-grid">
+          <Field label="Сервис">
+            <input className="input" value={s.reviewsSource?.name ?? ''} placeholder="2ГИС" onChange={(e) => setSource({ name: e.target.value })} />
+          </Field>
+          <Field label="Ссылка на страницу с отзывами">
+            <input className="input" value={s.reviewsSource?.url ?? ''} placeholder="https://2gis.ru/…" onChange={(e) => setSource({ url: e.target.value.trim() })} />
+          </Field>
+          <Field label="Средняя оценка">
+            <input className="input" inputMode="decimal" value={s.reviewsSource?.rating ?? ''} placeholder="4.9" onChange={(e) => setSource({ rating: Number(e.target.value.replace(',', '.')) || undefined })} />
+          </Field>
+          <Field label="Количество отзывов">
+            <input className="input" inputMode="numeric" value={s.reviewsSource?.count ?? ''} onChange={(e) => setSource({ count: Number(e.target.value.replace(/\D/g, '')) || undefined })} />
           </Field>
         </div>
       </section>
