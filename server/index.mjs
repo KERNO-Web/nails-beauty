@@ -5,12 +5,12 @@ import { createServer } from 'node:http'
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import webpush from 'web-push'
-import { createCore } from './core.mjs'
+import { createCore, originMatcher } from './core.mjs'
 
 const env = process.env
 const PORT = Number(env.PORT || 8787)
 const DATA_FILE = env.DATA_FILE || './data/db.json'
-const ORIGINS = (env.ALLOWED_ORIGINS || '').split(',').map((s) => s.trim()).filter(Boolean)
+const ORIGINS = originMatcher(env.ALLOWED_ORIGINS)
 const TICK_MS = 60_000
 
 if (!env.VAPID_PUBLIC_KEY || !env.VAPID_PRIVATE_KEY) {
@@ -74,7 +74,7 @@ function readBody(req) {
 
 const server = createServer(async (req, res) => {
   const origin = req.headers.origin
-  const allowed = !origin || !ORIGINS.length || ORIGINS.includes(origin)
+  const allowed = !origin || ORIGINS(origin)
   if (origin && allowed) {
     res.setHeader('Access-Control-Allow-Origin', origin)
     res.setHeader('Vary', 'Origin')

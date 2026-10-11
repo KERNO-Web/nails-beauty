@@ -1,20 +1,21 @@
 #!/usr/bin/env bash
-# Первичная настройка и обновление сервера (Ubuntu 22.04/24.04, в том числе с ISPmanager).
-# Запускается из GitHub Actions по SSH от root; можно и руками: DOMAIN=… bash setup.sh
+# Настройка и обновление сервера zapisvonline.ru (Ubuntu 24.04, веб-сервер Caddy — на нём уже живёт «Север Авто»).
+# Каждая студия — свой поддомен: lumi.zapisvonline.ru → /var/www/zapisvonline/lumi. Сервер уведомлений общий, /api/ на каждом поддомене.
+# Существующие сайты не трогает: добавляет в Caddyfile одну строку import и свои файлы в /etc/caddy/sites/.
+# Запуск: из GitHub Actions по SSH от root или руками: DOMAIN=lumi.zapisvonline.ru bash setup.sh
 # Повторный запуск безопасен: ставит недостающее, ключи и данные не трогает.
 set -euo pipefail
 
-APP=${APP:-okoshko}
+APP=${APP:-zapisvonline}
+STUDIO=${STUDIO:-lumi}
 DOMAIN=${DOMAIN:?укажите DOMAIN}
 HOME_DIR=/opt/$APP
-WEB=/var/www/$APP
+WEB=/srv/$APP-studios
 PORT=${PORT:-8787}
 
 export DEBIAN_FRONTEND=noninteractive
 need=()
 command -v node >/dev/null || need+=(nodejs npm)
-command -v nginx >/dev/null || need+=(nginx)
-command -v certbot >/dev/null || need+=(certbot)
 command -v rsync >/dev/null || need+=(rsync)
 if ((${#need[@]})); then
   apt-get update -q
@@ -44,7 +45,7 @@ VAPID_PUBLIC_KEY=$PUB
 VAPID_PRIVATE_KEY=$PRIV
 VAPID_SUBJECT=https://$DOMAIN
 PORT=$PORT
-ALLOWED_ORIGINS=https://$DOMAIN
+ALLOWED_ORIGINS=https://*.${DOMAIN#*.}
 DATA_FILE=$HOME_DIR/data/db.json
 ENV
   chown root:"$APP" "$ENV_FILE"
@@ -76,35 +77,39 @@ systemctl daemon-reload
 systemctl enable "$APP-push" >/dev/null
 systemctl restart "$APP-push"
 
-# nginx: сайты студий — /<студия>/, сервер уведомлений — /api/
-NGINX_CONF=/etc/nginx/conf.d/$APP.conf
-CERT=/etc/letsencrypt/live/$DOMAIN/fullchain.pem
-write_nginx() {
-  {
-    echo "server {"
-    echo "  listen 80;"
-    echo "  server_name $DOMAIN;"
-    echo "  location /.well-known/acme-challenge/ { root $WEB; }"
-    if [ -f "$CERT" ]; then echo "  location / { return 301 https://\$host\$request_uri; }"; echo "}"; echo "server {"
-      echo "  listen 443 ssl;"
-      echo "  http2 on;"
-      echo "  server_name $DOMAIN;"
-      echo "  ssl_certificate $CERT;"
-      echo "  ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;"
-    fi
-    echo "  root $WEB;"
-    echo "  location /api/ { proxy_pass http://127.0.0.1:$PORT; proxy_set_header X-Forwarded-For \$remote_addr; client_max_body_size 64k; }"
-    echo "  location ~* /assets/ { expires 1y; add_header Cache-Control \"public, immutable\"; }"
-    echo "  location ~* (sw\\.js|\\.webmanifest|index\\.html)\$ { add_header Cache-Control \"no-cache\"; }"
-    echo "  location / { try_files \$uri \$uri/ =404; }"
-    echo "}"
-  } > "$NGINX_CONF"
-  nginx -t && systemctl reload nginx
+# Caddy: только системный (/etc/caddy/Caddyfile). Если он в Docker — ничего не меняем, печатаем, что нашли
+CADDYFILE=/etc/caddy/Caddyfile
+if ! systemctl is-active --quiet caddy || [ ! -f "$CADDYFILE" ]; then
+  echo "Caddy не найден как системная служба — сайт не подключён. Что слушает 80/443:"
+  ss -ltnp '( sport = :80 or sport = :443 )' || true
+  command -v docker >/dev/null && docker ps --format '{{.Names}}  {{.Image}}  {{.Ports}}' || true
+  exit 3
+fi
+mkdir -p /etc/caddy/sites "$WEB/$STUDIO"
+cat > "/etc/caddy/sites/$APP-$STUDIO.caddy" <<SITE
+$DOMAIN {
+	encode zstd gzip
+	handle /api/* {
+		reverse_proxy 127.0.0.1:$PORT
+	}
+	handle {
+		root * $WEB/$STUDIO
+		@nocache path /sw.js /*.webmanifest / /index.html
+		header @nocache Cache-Control "no-cache"
+		header /assets/* Cache-Control "public, max-age=31536000, immutable"
+		file_server
+	}
 }
-write_nginx
-if [ ! -f "$CERT" ]; then
-  certbot certonly --webroot -w "$WEB" -d "$DOMAIN" --non-interactive --agree-tos --register-unsafely-without-email
-  write_nginx
+SITE
+cp "$CADDYFILE" "$CADDYFILE.bak-$APP"
+grep -q '^import /etc/caddy/sites/\*.caddy' "$CADDYFILE" || printf '\nimport /etc/caddy/sites/*.caddy\n' >> "$CADDYFILE"
+if caddy validate --config "$CADDYFILE" --adapter caddyfile >/dev/null; then
+  systemctl reload caddy
+else
+  echo "Конфиг Caddy не прошёл проверку — возвращаю как было"
+  cp "$CADDYFILE.bak-$APP" "$CADDYFILE"
+  rm -f "/etc/caddy/sites/$APP-$STUDIO.caddy"
+  exit 4
 fi
 
 systemctl is-active "$APP-push"

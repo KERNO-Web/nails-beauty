@@ -2,6 +2,16 @@
 import { reminderText, zonedToUtc } from './time.mjs'
 
 const HOUR = 3_600_000
+
+/** ALLOWED_ORIGINS через запятую; «https://*.zapisvonline.ru» — любой поддомен (у каждой студии свой). Пусто — все */
+export function originMatcher(list = '') {
+  const res = list
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((s) => new RegExp(`^${s.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace('*', '[a-z0-9-]+')}$`))
+  return (origin) => !res.length || res.some((re) => re.test(origin))
+}
 const fmtTime = (min) => `${Math.floor(min / 60)}:${String(min % 60).padStart(2, '0')}`
 const validSub = (s) => s && typeof s.endpoint === 'string' && s.endpoint.startsWith('https://') && s.keys?.p256dh && s.keys?.auth
 const str = (v, max = 200) => (typeof v === 'string' ? v.slice(0, max) : undefined)

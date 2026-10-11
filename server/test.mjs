@@ -64,3 +64,15 @@ test('отменённой записи не напоминаем; мастер�
   for (let t = at - 30 * H; t <= at; t += 60_000) await core.tick(t)
   assert.equal(sent.length, 1)
 })
+
+import { originMatcher } from './core.mjs'
+
+test('адреса сайтов, которым можно к серверу', () => {
+  const ok = originMatcher('https://*.zapisvonline.ru, http://localhost:5190')
+  assert.equal(ok('https://lumi.zapisvonline.ru'), true)
+  assert.equal(ok('http://localhost:5190'), true)
+  assert.equal(ok('https://zapisvonline.ru.evil.com'), false)
+  assert.equal(ok('https://a.b.zapisvonline.ru'), false)
+  assert.equal(ok('http://lumi.zapisvonline.ru'), false)
+  assert.equal(originMatcher('')('https://any.example'), true)
+})
