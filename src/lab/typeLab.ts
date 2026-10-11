@@ -7,10 +7,11 @@ import { flushSync } from 'react-dom'
 export type FontId = 'a' | 'b' | 'c'
 export type CopyId = '1' | '2' | '3'
 
-export const FONTS: { id: FontId; letter: string; label: string; note: string }[] = [
-  { id: 'a', letter: 'A', label: 'Ysabeau', note: 'тонкий гуманистический гротеск с каллиграфической пластикой' },
-  { id: 'b', letter: 'B', label: 'Unbounded Light', note: 'лёгкая округлая геометрия, строчные — в рифму с каплей' },
-  { id: 'c', letter: 'C', label: 'Commissioner', note: 'гротеск с расширяющимися концами штрихов — «текучий»' },
+/** Шрифт выбирается один на весь сайт: заголовок первого экрана, заголовки разделов, названия услуг, имена мастеров */
+export const FONTS: { id: FontId; letter: string; label: string; note: string; family: string }[] = [
+  { id: 'a', letter: 'A', label: 'Wix Madefor', note: 'чёткий современный гротеск', family: "'Wix Madefor Display Variable', system-ui, sans-serif" },
+  { id: 'b', letter: 'B', label: 'Geologica', note: 'мягкая округлая геометрия', family: "'Geologica Variable', system-ui, sans-serif" },
+  { id: 'c', letter: 'C', label: 'Unbounded', note: 'широкий, с характером', family: "'Unbounded Variable', system-ui, sans-serif" },
 ]
 
 /** Строки заголовка заданы вручную — переносы осмысленные, короткие слова не отрываются */

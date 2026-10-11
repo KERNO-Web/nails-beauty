@@ -156,6 +156,8 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
     }
     fit()
     document.fonts?.ready.then(fit)
+    // Шрифт мог догрузиться позже (медленная сеть, смена варианта) — пересчитать
+    document.fonts?.addEventListener('loadingdone', fit)
     // Пересчёт только при смене ширины: подгонка меняет высоту блока, и без проверки наблюдатель зацикливается
     let lastW = box.clientWidth
     const ro = new ResizeObserver(() => {
@@ -164,7 +166,7 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
       fit()
     })
     ro.observe(box)
-    return () => ro.disconnect()
+    return () => (ro.disconnect(), document.fonts?.removeEventListener('loadingdone', fit))
   }, [lab.font, lab.copy])
 
   useEffect(() => {

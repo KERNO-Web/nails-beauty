@@ -4,6 +4,7 @@ import { Closing, Reviews, StickyCta } from './sections/Bottom'
 import { Masters, Services, Works } from './sections/Showcase'
 import { Header } from './sections/Top'
 import { useConcept } from './lab/concepts'
+import { FONTS, useTypeLab } from './lab/typeLab'
 import { HeroColor } from './lab/HeroColor'
 import { LabSwitch } from './lab/HeroParts'
 import { HeroMaterial } from './lab/HeroMaterial'
@@ -29,6 +30,7 @@ export default function App() {
   const route = useRoute()
 
   const concept = useConcept()
+  const lab = useTypeLab()
   // Тема — на <html>, чтобы её видели все слои (и окна поверх страницы). На сайте сейчас тема концепции из лаборатории
   useEffect(() => {
     const site = route === 'site'
@@ -36,12 +38,16 @@ export default function App() {
     const root = document.documentElement
     if (site) {
       root.dataset.concept = concept.id
-      root.style.setProperty('--font-display', concept.display)
+      // У «Живого материала» шрифт заголовков — выбранный в полосе просмотра, один на весь сайт
+      const hf = FONTS.find((f) => f.id === lab.font) ?? FONTS[0]
+      root.dataset.hf = concept.id === 'material' ? hf.id : ''
+      root.style.setProperty('--font-display', concept.id === 'material' ? hf.family : concept.display)
     } else {
       delete root.dataset.concept
+      delete root.dataset.hf
       root.style.removeProperty('--font-display')
     }
-  }, [data.theme, concept, route])
+  }, [data.theme, concept, route, lab.font])
   useEffect(() => {
     document.title = route === 'admin' ? `Кабинет — ${data.studio.name}` : `${data.studio.name} — маникюр и педикюр, онлайн-запись`
   }, [data.studio.name, route])

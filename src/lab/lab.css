@@ -1,8 +1,6 @@
-@import '@fontsource/oranienbaum/cyrillic-400.css';
-@import '@fontsource/oranienbaum/latin-400.css';
 @import '@fontsource-variable/roboto-flex/wdth.css';
-@import '@fontsource-variable/ysabeau';
-@import '@fontsource-variable/commissioner/flar.css';
+@import '@fontsource-variable/wix-madefor-display';
+@import '@fontsource-variable/geologica';
 
 /* ============================================================
    Лаборатория первого экрана: три концепции, переключатель для просмотра.
@@ -271,43 +269,25 @@ html.has-lab {
   display: block;
   white-space: nowrap;
 }
-/* A — Ysabeau: тонкий гуманистический гротеск с каллиграфической пластикой; вторая строка со сдвигом */
-.hf-a {
-  --hf: 'Ysabeau Variable', system-ui, sans-serif;
+/* Средний вес, плотная разрядка, обычный регистр: уверенно, без «модной» тонкости и без капслока */
+.m-title h1 {
+  font-family: var(--font-display);
+  line-height: 1;
+  font-size: clamp(3.2rem, 1.2rem + 4.8vw, 6.4rem);
 }
 .hf-a h1 {
-  font-weight: 230;
-  letter-spacing: -0.02em;
-  line-height: 0.96;
-  font-size: clamp(4rem, 1.6rem + 6.6vw, 8.6rem);
-}
-.hf-a h1 span + span {
-  padding-left: 0.9em;
-}
-/* B — Unbounded Light: округлая лёгкая геометрия, всё строчными — силуэт мягкий, как капля */
-.hf-b {
-  --hf: 'Unbounded Variable', system-ui, sans-serif;
+  font-weight: 520;
+  letter-spacing: -0.045em;
 }
 .hf-b h1 {
-  font-weight: 220;
-  text-transform: lowercase;
-  letter-spacing: -0.06em;
-  line-height: 1;
-  font-size: clamp(3.2rem, 1rem + 5vw, 6.2rem);
-}
-/* C — Commissioner с осью FLAR: концы штрихов расширяются, как у растёкшейся капли лака */
-.hf-c {
-  --hf: 'Commissioner Variable', system-ui, sans-serif;
+  font-weight: 420;
+  letter-spacing: -0.045em;
 }
 .hf-c h1 {
-  font-weight: 320;
-  font-variation-settings: 'FLAR' 100;
-  letter-spacing: -0.035em;
-  line-height: 0.96;
-  font-size: clamp(3.8rem, 1.4rem + 6.2vw, 8rem);
-}
-.hf-c h1 span + span {
-  font-weight: 220;
+  font-weight: 340;
+  letter-spacing: -0.055em;
+  line-height: 1.04;
+  font-size: clamp(2.9rem, 1rem + 4.2vw, 5.6rem);
 }
 .m-copy .h-btn:hover {
   background: #fff;
@@ -402,24 +382,28 @@ html.has-lab {
 /* Продолжение страницы в характере концепции */
 html[data-concept='material'] .sec-head h2,
 html[data-concept='material'] .master-body h3 {
-  font-weight: 400;
-  font-size: clamp(2.6rem, 1.6rem + 3.6vw, 5.2rem);
-  letter-spacing: -0.005em;
-  line-height: 0.92;
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 1;
 }
-/* Прайс: названия — тот же Oranienbaum, но плотнее. У шрифта один вес (400), поэтому штрих утолщён контуром
-   своего же цвета (~0.035em) — равномерно и предсказуемо, без браузерного «жирного»; цены — Onest 700 */
+html[data-hf='c'] .sec-head h2,
+html[data-hf='c'] .master-body h3 {
+  font-weight: 380;
+  letter-spacing: -0.055em;
+}
+/* Прайс: названия услуг — тем же шрифтом, что и заголовок, настоящим весом 600 (у Unbounded — 500) */
 html[data-concept='material'] .svc-title {
-  font-weight: 400;
-  font-synthesis: none;
-  font-size: clamp(23px, 2.1vw, 31px);
-  letter-spacing: 0.005em;
+  font-weight: 600;
+  font-size: clamp(20px, 1.8vw, 26px);
+  letter-spacing: -0.03em;
   color: var(--ink);
-  -webkit-text-stroke: 0.035em currentColor;
-  paint-order: stroke fill;
 }
-html[data-concept='material'] .svc-swatch figcaption span {
-  font-weight: 700;
+html[data-hf='c'] .svc-title {
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+html[data-hf='b'] .svc-title {
+  font-weight: 550;
 }
 html[data-concept='material'] .svc-meta b {
   font-family: var(--font-ui);
