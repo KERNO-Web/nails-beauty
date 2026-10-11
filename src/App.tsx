@@ -8,6 +8,7 @@ import { HeroColor } from './lab/HeroColor'
 import { HeroMaterial } from './lab/HeroMaterial'
 import { HeroType } from './lab/HeroType'
 import { useData } from './lib/store'
+import { useMediaVersion } from './lib/media'
 import { applyTheme } from './lib/theme'
 import { useReveal } from './lib/ui'
 
@@ -25,6 +26,8 @@ function useRoute() {
 
 export default function App() {
   const data = useData()
+  // Фото, загруженные с устройства, читаются из базы после старта — перерисовываем страницу, когда готовы
+  useMediaVersion()
   const route = useRoute()
 
   const concept = useConcept()

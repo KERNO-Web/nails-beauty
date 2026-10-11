@@ -65,9 +65,10 @@
   max-width: 60ch;
 }
 .adm-h1 {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-size: 34px;
-  font-weight: 400;
+  font-weight: 500;
+  letter-spacing: -0.03em;
   line-height: 1;
   margin: 0 0 6px;
 }
@@ -374,4 +375,69 @@
 }
 .adm-form {
   border: 1.5px solid var(--accent-mid);
+}
+
+/* Кабинет — только шрифты без засечек: заголовки Jost, интерфейс Onest */
+.adm .brand-name,
+.adm .avatar {
+  font-family: var(--font-heading);
+  font-weight: 500;
+}
+
+/* Фото: превью + загрузка с устройства, ссылка — запасной вариант */
+.adm-photo-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.adm-photo-prev {
+  flex: none;
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-2);
+}
+.adm-photo-prev img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.adm-photo-ctl {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  min-width: 0;
+  flex: 1;
+}
+.adm-upload {
+  cursor: pointer;
+}
+.adm-upload.is-busy {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.adm-photo-url {
+  flex-basis: 100%;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.adm-photo-url summary {
+  cursor: pointer;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+}
+.adm-photo-url .input {
+  margin-top: 6px;
+}
+.adm-err {
+  flex-basis: 100%;
+  font-size: 13px;
+  color: #a2443f;
+}
+.adm-add-works {
+  flex-wrap: wrap;
+  align-items: center;
 }

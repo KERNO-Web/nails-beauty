@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
+import { initMedia } from './lib/media'
 import './styles.css'
 import './site.css'
 import './booking.css'
@@ -13,6 +14,8 @@ Promise.all(
     document.fonts?.load(f, sample).catch(() => null),
   ),
 ).finally(() => document.documentElement.classList.remove('fonts-wait'))
+
+initMedia()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

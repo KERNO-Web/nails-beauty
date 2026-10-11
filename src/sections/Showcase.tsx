@@ -194,24 +194,30 @@ export function Works({ data }: { data: Data }) {
             {!curMaster && data.masters.length > 1 ? ' наших мастеров' : ''}. Нажмите на&nbsp;снимок, чтобы рассмотреть, или на&nbsp;стрелку, чтобы записаться на&nbsp;эту услугу.
           </p>
           {masters.length > 1 && (
-            <div className="filters filters-masters" role="group" aria-label="Мастер">
-              <button className="filter" aria-pressed={!masterId} onClick={() => setWorksMaster(null)}>
-                Все мастера
-              </button>
-              {masters.map((m) => (
-                <button key={m.id} className="filter" aria-pressed={masterId === m.id} onClick={() => setWorksMaster(m.id)}>
-                  {m.name}
+            <div className="filter-row">
+              <span className="filter-label">Мастер</span>
+              <div className="seg" role="group" aria-label="Мастер">
+                <button className="seg-btn" aria-pressed={!masterId} onClick={() => setWorksMaster(null)}>
+                  Все
                 </button>
-              ))}
+                {masters.map((m) => (
+                  <button key={m.id} className="seg-btn" aria-pressed={masterId === m.id} onClick={() => setWorksMaster(m.id)}>
+                    {m.name}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
           {tags.length > 1 && (
-            <div className="filters" role="group" aria-label="Стиль">
-              {(['all', ...tags] as const).map((t) => (
-                <button key={t} className="filter" aria-pressed={tag === t} onClick={() => (setTag(t), setAll(false))}>
-                  {t === 'all' ? 'Все' : TAG_LABEL[t]}
-                </button>
-              ))}
+            <div className="filter-row">
+              <span className="filter-label">Стиль</span>
+              <div className="filters" role="group" aria-label="Стиль">
+                {(['all', ...tags] as const).map((t) => (
+                  <button key={t} className="filter" aria-pressed={tag === t} onClick={() => (setTag(t), setAll(false))}>
+                    {t === 'all' ? 'Все' : TAG_LABEL[t]}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </header>

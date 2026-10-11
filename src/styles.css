@@ -349,7 +349,7 @@ p {
   overflow: hidden;
   background: var(--accent-soft);
   color: var(--accent-ink);
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-weight: 500;
 }
 .avatar img {

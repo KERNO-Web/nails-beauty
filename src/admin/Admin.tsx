@@ -6,6 +6,7 @@ import { formatPhone, phoneDigits } from '../lib/contact'
 import { addDays, busyOf, canDo, dateOf, dayFull, dayHuman, daySlots, fmtDuration, fmtTime, todayIso, toMin, WD_SHORT, weekdayOf } from '../lib/slots'
 import { cancelBooking, createBooking, resetDemo, uid, update, useData } from '../lib/store'
 import { Avatar, photoUrl } from '../lib/ui'
+import { saveImage } from '../lib/media'
 import './admin.css'
 
 type Tab = 'bookings' | 'schedule' | 'services' | 'works' | 'reviews' | 'studio'
@@ -69,6 +70,49 @@ function Field({ label, children, wide, group }: { label: string; children: Reac
       <span>{label}</span>
       {children}
     </label>
+  )
+}
+
+/** Фото: загрузка с устройства (телефон — камера или галерея) или ссылка. С превью */
+function PhotoField({ label, value, onChange, wide, optional }: { label: string; value: string; onChange: (v: string | undefined) => void; wide?: boolean; optional?: boolean }) {
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const pick = async (file?: File) => {
+    if (!file) return
+    setBusy(true)
+    setErr('')
+    try {
+      onChange(await saveImage(file))
+    } catch {
+      setErr('Не получилось прочитать фото. Попробуйте JPG или PNG.')
+    } finally {
+      setBusy(false)
+    }
+  }
+  const src = value ? photoUrl(value, 240) : ''
+  return (
+    <div className={`adm-field adm-photo ${wide ? 'wide' : ''}`} role="group" aria-label={label}>
+      <span>{label}</span>
+      <div className="adm-photo-row">
+        <span className="adm-photo-prev">{src ? <img src={src} alt="" /> : null}</span>
+        <div className="adm-photo-ctl">
+          <label className={`btn btn-sm btn-primary adm-upload ${busy ? 'is-busy' : ''}`}>
+            {busy ? 'Загружаю…' : value ? 'Заменить фото' : 'Загрузить с устройства'}
+            <input type="file" accept="image/*" hidden onChange={(e) => (pick(e.target.files?.[0]), (e.target.value = ''))} />
+          </label>
+          {optional && value && (
+            <button className="adm-x" onClick={() => onChange(undefined)}>
+              Убрать
+            </button>
+          )}
+          <details className="adm-photo-url">
+            <summary>или ссылка</summary>
+            <input className="input" value={value.startsWith('idb:') ? '' : value} placeholder="https://… или id Unsplash (photo-…)" onChange={(e) => onChange(e.target.value.trim() || undefined)} />
+          </details>
+          {err && <span className="adm-err">{err}</span>}
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -430,9 +474,7 @@ function Services({ data }: { data: Data }) {
             <Field label="Длительность, мин">
               <input className="input" type="number" min={15} step={15} value={s.minutes} onChange={(e) => setService(s.id, { minutes: Math.max(15, Number(e.target.value)) })} />
             </Field>
-            <Field label="Фото (ссылка или id Unsplash)" wide>
-              <input className="input" value={s.photo} onChange={(e) => setService(s.id, { photo: e.target.value })} />
-            </Field>
+            <PhotoField label="Фото" wide value={s.photo} onChange={(v) => setService(s.id, { photo: v ?? '' })} />
           </div>
           <div className="adm-svc-side">
             <label className="adm-check">
@@ -478,6 +520,24 @@ const TAGS: { id: WorkTag; label: string }[] = [
 
 function Works({ data }: { data: Data }) {
   const [url, setUrl] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const addFiles = async (files: FileList | null) => {
+    if (!files?.length) return
+    setBusy(true)
+    setErr('')
+    const added: string[] = []
+    for (const f of Array.from(files)) {
+      try {
+        added.push(await saveImage(f))
+      } catch {
+        setErr('Часть фото не получилось прочитать — попробуйте JPG или PNG.')
+      }
+    }
+    if (added.length)
+      update((d) => ({ ...d, works: [...added.map((photo) => ({ id: uid(), photo, tag: 'nude' as WorkTag, title: 'Новая работа', serviceId: d.services[0]?.id })), ...d.works] }))
+    setBusy(false)
+  }
   return (
     <div className="adm-stack">
       <div className="adm-head">
@@ -487,8 +547,16 @@ function Works({ data }: { data: Data }) {
         </div>
       </div>
       <section className="adm-card">
-        <div className="adm-inline">
-          <input className="input" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Ссылка на фото или id Unsplash (photo-…)" />
+        <div className="adm-inline adm-add-works">
+          <label className={`btn btn-primary adm-upload ${busy ? 'is-busy' : ''}`}>
+            {busy ? 'Загружаю…' : '+ Фото работ с устройства'}
+            <input type="file" accept="image/*" multiple hidden onChange={(e) => (addFiles(e.target.files), (e.target.value = ''))} />
+          </label>
+          <span className="muted adm-small">можно выбрать сразу несколько</span>
+        </div>
+        {err && <p className="adm-err">{err}</p>}
+        <div className="adm-inline" style={{ marginTop: 12 }}>
+          <input className="input" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="или ссылка на фото / id Unsplash (photo-…)" />
           <button
             className="btn btn-primary btn-sm"
             disabled={!url.trim()}
@@ -695,9 +763,7 @@ function StudioTab({ data }: { data: Data }) {
           <Field label="Подзаголовок (необязательно)" wide>
             <input className="input" value={s.heroLead} onChange={(e) => set({ heroLead: e.target.value })} />
           </Field>
-          <Field label="Главное фото (средний ноготь)" wide>
-            <input className="input" value={s.heroPhoto} onChange={(e) => set({ heroPhoto: e.target.value })} />
-          </Field>
+          <PhotoField label="Главное фото (в капле на первом экране)" wide value={s.heroPhoto} onChange={(v) => set({ heroPhoto: v ?? '' })} />
           <Field label="Пометка для демо (в подвале, необязательно)" wide>
             <input className="input" value={s.demoNote ?? ''} onChange={(e) => set({ demoNote: e.target.value || undefined })} />
           </Field>
@@ -821,9 +887,7 @@ function StudioTab({ data }: { data: Data }) {
               <Field label="Специализация">
                 <input className="input" value={m.role} onChange={(e) => setMaster(m.id, { role: e.target.value })} />
               </Field>
-              <Field label="Фото (ссылка)">
-                <input className="input" value={m.photo ?? ''} onChange={(e) => setMaster(m.id, { photo: e.target.value || undefined })} />
-              </Field>
+              <PhotoField label="Портрет (необязательно)" wide optional value={m.photo ?? ''} onChange={(v) => setMaster(m.id, { photo: v })} />
               <Field label="Стаж, лет (только если это правда)">
                 <input className="input" inputMode="numeric" value={m.years ?? ''} onChange={(e) => setMaster(m.id, { years: Number(e.target.value.replace(/\D/g, '')) || undefined })} />
               </Field>

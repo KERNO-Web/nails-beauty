@@ -126,6 +126,8 @@ function compile(gl: WebGLRenderingContext, type: number, src: string) {
 export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
   const s = data.studio
   const photo = s.heroPhoto || data.works.find((w) => w.featured)?.photo || data.works[0]?.photo || ''
+  // Ссылка на фото (у загруженных с устройства появляется, когда прочитана база)
+  const src = photo ? photoUrl(photo, 1600) : ''
   const section = useRef<HTMLElement>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
   const foot = useRef<HTMLDivElement>(null)
@@ -174,7 +176,7 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
   useEffect(() => {
     const cv = canvas.current
     const sec = section.current
-    if (!cv || !sec || !photo) return setGl('off')
+    if (!cv || !sec || !src) return setGl(photo ? 'pending' : 'off')
     const ctx = cv.getContext('webgl', { premultipliedAlpha: true, alpha: true, antialias: false })
     if (!ctx) return setGl('off')
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -311,7 +313,7 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
       kick()
     }
     img.onerror = () => alive && setGl('off')
-    img.src = photoUrl(photo, 1600)
+    img.src = src
 
     const io = new IntersectionObserver(([en]) => {
       visible = en.isIntersecting
@@ -333,7 +335,7 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
       sec.removeEventListener('pointerleave', onLeave)
       // Контекст не теряем принудительно: в StrictMode эффект запускается дважды на том же canvas
     }
-  }, [photo])
+  }, [src])
 
   return (
     <section className={`hero-m gl-${gl}`} id="top" data-hero="dark" ref={section}>

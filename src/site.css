@@ -816,9 +816,6 @@
 }
 
 /* ============ Работы мастера: из карточки — в галерею с фильтром ============ */
-.filters-masters {
-  margin-bottom: -6px;
-}
 .master-visual.is-link {
   cursor: pointer;
 }
@@ -853,4 +850,76 @@
 }
 .master-works:hover {
   color: var(--accent);
+}
+
+/* ============ Фильтры работ: «Мастер» — сплошной переключатель, «Стиль» — контурные чипы ============ */
+.filter-row {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.filter-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--on-dark-2);
+}
+.seg {
+  display: inline-flex;
+  justify-self: start;
+  max-width: 100%;
+  padding: 4px;
+  gap: 2px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--paper) 10%, var(--ink));
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.seg::-webkit-scrollbar {
+  display: none;
+}
+.seg-btn {
+  flex: none;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--on-dark-2);
+  transition:
+    background-color 0.2s var(--ease),
+    color 0.2s var(--ease);
+}
+.seg-btn:hover {
+  color: var(--on-dark);
+}
+.seg-btn[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+@media (max-width: 899px) {
+  /* На телефоне стили — одной прокручиваемой строкой, чтобы не путались с мастерами */
+  .filter-row .filters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin: 0 calc(var(--pad) * -1);
+    padding: 0 var(--pad);
+    scrollbar-width: none;
+  }
+  .filter-row .filters::-webkit-scrollbar {
+    display: none;
+  }
+  .filter-row .filter {
+    flex: none;
+  }
+}
+@media (min-width: 900px) {
+  .filter-row {
+    grid-column: 1 / -1;
+    grid-template-columns: 72px auto;
+    align-items: center;
+    justify-content: start;
+    gap: 16px;
+  }
 }

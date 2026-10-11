@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState, type ImgHTMLAttributes } from 'react'
+import { mediaUrl } from './media'
 
 /** Фото: id Unsplash (photo-…) → ссылка нужного размера; иначе путь как есть */
 export function photoUrl(photo: string, w: number) {
   if (photo.startsWith('photo-')) return `https://images.unsplash.com/${photo}?w=${w}&q=72&auto=format&fit=crop`
+  // Загружено с устройства в кабинете — хранится в браузере
+  if (photo.startsWith('idb:')) return mediaUrl(photo.slice(4))
   return photo
 }
 
