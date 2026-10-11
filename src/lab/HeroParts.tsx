@@ -1,10 +1,7 @@
-import { useEffect } from 'react'
 import type { Data } from '../data/types'
 import { Arrow } from '../lib/icons'
 import { dayHuman, fmtPrice, fmtTime, nearestSlot } from '../lib/slots'
 import { scrollToId } from '../lib/ui'
-import { labVisible } from './concepts'
-import { COPIES, FONTS, setTypeLab, useTypeLab } from './typeLab'
 
 export const go = (id: string) => (e: React.MouseEvent) => (e.preventDefault(), scrollToId(id))
 
@@ -46,53 +43,6 @@ export function HeroCta({ label = 'Выбрать время', onClick, classNam
       <a className="text-link" href="#services" onClick={go('services')}>
         Цены
       </a>
-    </div>
-  )
-}
-
-/** Внутренний переключатель: шрифт главного заголовка, названий услуг и вариант текста */
-export function LabSwitch() {
-  const lab = useTypeLab()
-  const on = labVisible()
-  // Полоса под шапкой; первые экраны сдвигаются на её высоту (--lab)
-  useEffect(() => {
-    document.documentElement.classList.toggle('has-lab', on)
-    return () => document.documentElement.classList.remove('has-lab')
-  }, [on])
-  if (!on) return null
-  return (
-    <div className="lab" role="group" aria-label="Внутренний просмотр: шрифты и текст">
-      <span className="lab-tag">Внутренний просмотр</span>
-      <label className="lab-pick">
-        <span>Главный заголовок</span>
-        <select value={lab.hero} onChange={(e) => setTypeLab({ hero: e.target.value })}>
-          {FONTS.map((f, i) => (
-            <option key={f.id} value={f.id}>
-              {i + 1}. {f.label} — {f.note}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="lab-pick">
-        <span>Услуги</span>
-        <select value={lab.names} onChange={(e) => setTypeLab({ names: e.target.value })}>
-          {FONTS.map((f, i) => (
-            <option key={f.id} value={f.id}>
-              {i + 1}. {f.label} — {f.note}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="lab-pick">
-        <span>Текст</span>
-        <select value={lab.copy} onChange={(e) => setTypeLab({ copy: e.target.value as (typeof COPIES)[number]['id'] })}>
-          {COPIES.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.text}
-            </option>
-          ))}
-        </select>
-      </label>
     </div>
   )
 }

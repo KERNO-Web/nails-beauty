@@ -7,7 +7,10 @@ import type { Data } from '../data/types'
 import { photoUrl, typo } from '../lib/ui'
 import type { Concept } from './concepts'
 import { HeroCta, HeroFacts } from './HeroParts'
-import { COPIES, LEAD, useTypeLab } from './typeLab'
+
+/** Заголовок первого экрана — строки заданы вручную, чтобы перенос был осмысленным */
+const TITLE = ['Красота', 'в\u00a0деталях']
+const LEAD = 'Маникюр, педикюр и\u00a0дизайн\u00a0— с\u00a0ценами на\u00a0сайте и\u00a0записью онлайн на\u00a0свободное время.'
 
 const VERT = `attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }`
 
@@ -126,8 +129,6 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
   const section = useRef<HTMLElement>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
   const [gl, setGl] = useState<'pending' | 'on' | 'off'>('pending')
-  const lab = useTypeLab()
-  const copy = COPIES.find((c) => c.id === lab.copy) ?? COPIES[0]
   const title = useRef<HTMLDivElement>(null)
 
   // Заголовок не шире своей колонки: меряем реальные строки после загрузки шрифта и при необходимости уменьшаем кегль
@@ -167,7 +168,7 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
     })
     ro.observe(box)
     return () => (ro.disconnect(), document.fonts?.removeEventListener('loadingdone', fit))
-  }, [lab.hero, lab.copy])
+  }, [])
 
   useEffect(() => {
     const cv = canvas.current
@@ -339,8 +340,8 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
             {s.name} · {s.kind} · {s.city}
           </p>
           <div className="m-title" ref={title}>
-            <h1 aria-label={copy.text}>
-              {copy.lines.map((l) => (
+            <h1 aria-label={TITLE.join(' ')}>
+              {TITLE.map((l) => (
                 <span key={l}>{l}</span>
               ))}
             </h1>

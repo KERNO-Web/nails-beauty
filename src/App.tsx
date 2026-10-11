@@ -4,9 +4,7 @@ import { Closing, Reviews, StickyCta } from './sections/Bottom'
 import { Masters, Services, Works } from './sections/Showcase'
 import { Header } from './sections/Top'
 import { useConcept } from './lab/concepts'
-import { fontById, useTypeLab } from './lab/typeLab'
 import { HeroColor } from './lab/HeroColor'
-import { LabSwitch } from './lab/HeroParts'
 import { HeroMaterial } from './lab/HeroMaterial'
 import { HeroType } from './lab/HeroType'
 import { useData } from './lib/store'
@@ -30,7 +28,6 @@ export default function App() {
   const route = useRoute()
 
   const concept = useConcept()
-  const lab = useTypeLab()
   // Тема — на <html>, чтобы её видели все слои (и окна поверх страницы). На сайте сейчас тема концепции из лаборатории
   useEffect(() => {
     const site = route === 'site'
@@ -38,22 +35,12 @@ export default function App() {
     const root = document.documentElement
     if (site) {
       root.dataset.concept = concept.id
-      // У «Живого материала» шрифты — выбранные в полосе просмотра: заголовков (на весь сайт) и названий услуг
-      const material = concept.id === 'material'
-      const hf = fontById(lab.hero)
-      const nf = fontById(lab.names)
-      root.style.setProperty('--font-display', material ? hf.family : concept.display)
-      root.style.setProperty('--hero-w', String(hf.hero.w))
-      root.style.setProperty('--hero-ls', hf.hero.ls)
-      root.style.setProperty('--hero-scale', String(hf.hero.scale))
-      root.style.setProperty('--font-names', nf.family)
-      root.style.setProperty('--names-w', String(nf.name.w))
-      root.style.setProperty('--names-ls', nf.name.ls)
+      root.style.setProperty('--font-display', concept.display)
     } else {
       delete root.dataset.concept
       root.style.removeProperty('--font-display')
     }
-  }, [data.theme, concept, route, lab.hero, lab.names])
+  }, [data.theme, concept, route])
   useEffect(() => {
     document.title = route === 'admin' ? `Кабинет — ${data.studio.name}` : `${data.studio.name} — маникюр и педикюр, онлайн-запись`
   }, [data.studio.name, route])
@@ -89,7 +76,6 @@ function Site() {
       </main>
       <Closing data={data} />
       <StickyCta data={data} />
-      <LabSwitch />
     </>
   )
 }

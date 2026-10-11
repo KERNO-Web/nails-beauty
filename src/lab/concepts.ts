@@ -27,7 +27,7 @@ export const CONCEPTS: Concept[] = [
     label: 'Живой материал',
     note: 'жидкий глянец',
     theme: { accent: '#5E4A55', paper: '#E9E6E2', ink: '#141113', nailShape: 'oval' },
-    display: "'Jost Variable', system-ui, sans-serif",
+    display: "'Lora Variable', Georgia, serif",
     title: 'Ровный глянец, чистая кутикула',
     lead: 'Маникюр и педикюр с покрытием, которое держится три–четыре недели. Окна на ближайшие дни видно сразу.',
   },
@@ -91,5 +91,3 @@ export function setConcept(id: ConceptId) {
   else apply()
 }
 
-/** Лаборатория включена по умолчанию в этой сборке; ?lab=0 — посмотреть страницу без переключателя */
-export const labVisible = () => new URLSearchParams(location.search).get('lab') !== '0'
