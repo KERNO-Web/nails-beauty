@@ -1,5 +1,5 @@
 // Подбор шрифтов на утверждённом первом экране «Живой материал». Внутренний режим просмотра.
-// Независимые выборы: шрифт заголовков (первый экран, разделы, логотип), названий услуг и блока «Мастера».
+// Независимые выборы: шрифт заголовка первого экрана и шрифт названий услуг. Остальные заголовки — Jost (зафиксирован).
 // Выбор заказчика: заголовок — Lora, услуги — Comfortaa, текст «Красота в деталях» (стоят по умолчанию).
 // Перед запуском: перенести выбранные значения в CSS-переменные темы и удалить LabSwitch и этот файл.
 import { useSyncExternalStore } from 'react'
@@ -49,14 +49,13 @@ export const COPIES: { id: CopyId; lines: string[]; text: string }[] = [
 
 export const LEAD = 'Маникюр, педикюр и дизайн — с ценами на сайте и записью онлайн на свободное время.'
 
-type State = { hero: string; names: string; masters: string; copy: CopyId }
+type State = { hero: string; names: string; copy: CopyId }
 const q = new URLSearchParams(location.search)
 const isFont = (x: string | null) => !!x && FONTS.some((v) => v.id === x)
 const isCopy = (x: unknown): x is CopyId => COPIES.some((c) => c.id === x)
 let state: State = {
   hero: isFont(q.get('hero')) ? q.get('hero')! : 'lora',
   names: isFont(q.get('names')) ? q.get('names')! : 'comfortaa',
-  masters: isFont(q.get('masters')) ? q.get('masters')! : 'comfortaa',
   copy: isCopy(q.get('copy')) ? (q.get('copy') as CopyId) : '1',
 }
 const listeners = new Set<() => void>()
@@ -76,7 +75,7 @@ export function setTypeLab(patch: Partial<State>) {
   url.searchParams.delete('font')
   url.searchParams.set('hero', state.hero)
   url.searchParams.set('names', state.names)
-  url.searchParams.set('masters', state.masters)
+  url.searchParams.delete('masters')
   url.searchParams.set('copy', state.copy)
   history.replaceState(null, '', url)
   flushSync(() => {

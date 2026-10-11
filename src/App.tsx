@@ -49,15 +49,11 @@ export default function App() {
       root.style.setProperty('--font-names', nf.family)
       root.style.setProperty('--names-w', String(nf.name.w))
       root.style.setProperty('--names-ls', nf.name.ls)
-      const mf = fontById(lab.masters)
-      root.style.setProperty('--font-masters', mf.family)
-      root.style.setProperty('--masters-w', String(mf.hero.w))
-      root.style.setProperty('--masters-ls', mf.hero.ls)
     } else {
       delete root.dataset.concept
       root.style.removeProperty('--font-display')
     }
-  }, [data.theme, concept, route, lab.hero, lab.names, lab.masters])
+  }, [data.theme, concept, route, lab.hero, lab.names])
   useEffect(() => {
     document.title = route === 'admin' ? `Кабинет — ${data.studio.name}` : `${data.studio.name} — маникюр и педикюр, онлайн-запись`
   }, [data.studio.name, route])

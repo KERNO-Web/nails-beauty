@@ -142,7 +142,8 @@
   font-weight: 400;
   font-size: 16px;
   white-space: nowrap;
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
+  font-weight: 600;
 }
 .collapsed-pick {
   display: flex;
@@ -480,7 +481,7 @@ textarea.input {
   }
 }
 .summary-title {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-size: 22px;
   font-weight: 400;
   line-height: 1;
@@ -512,8 +513,8 @@ textarea.input {
 }
 .summary .total dd {
   font-size: 20px;
-  font-weight: 400;
-  font-family: var(--font-display);
+  font-weight: 700;
+  font-family: var(--font-ui);
 }
 .fineprint {
   font-size: 12px;
@@ -625,7 +626,7 @@ textarea.input {
   }
 }
 .done h3 {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-size: clamp(1.9rem, 1.6rem + 1.4vw, 2.6rem);
   font-weight: 400;
   line-height: 1.08;
@@ -729,7 +730,7 @@ textarea.input {
   justify-items: start;
 }
 .closing-addr {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-size: 26px;
   line-height: 1.15;
 }
@@ -794,7 +795,7 @@ textarea.input {
   margin: var(--s-6) 0 0;
   padding-top: var(--s-4);
   border-top: 1px solid var(--line-2);
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-size: clamp(48px, 9vw, 140px);
   font-weight: 600;
   line-height: 1;

@@ -8,6 +8,15 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://images.unsplash.com" />
     <title>Студия маникюра — онлайн-запись</title>
+    <!-- Пока шрифты не загрузились, страница не показывается (не дольше 2,5 с) — текст не перескакивает -->
+    <style>
+      html.fonts-wait #root { opacity: 0; }
+      #root { transition: opacity 0.35s ease; }
+    </style>
+    <script>
+      document.documentElement.classList.add('fonts-wait')
+      setTimeout(function () { document.documentElement.classList.remove('fonts-wait') }, 2500)
+    </script>
   </head>
   <body>
     <div id="root"></div>

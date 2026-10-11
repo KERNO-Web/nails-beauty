@@ -50,7 +50,7 @@ export function HeroCta({ label = 'Выбрать время', onClick, classNam
   )
 }
 
-/** Внутренний переключатель: шрифты заголовков, названий услуг, блока «Мастера» и вариант текста */
+/** Внутренний переключатель: шрифт главного заголовка, названий услуг и вариант текста */
 export function LabSwitch() {
   const lab = useTypeLab()
   const on = labVisible()
@@ -64,7 +64,7 @@ export function LabSwitch() {
     <div className="lab" role="group" aria-label="Внутренний просмотр: шрифты и текст">
       <span className="lab-tag">Внутренний просмотр</span>
       <label className="lab-pick">
-        <span>Заголовок</span>
+        <span>Главный заголовок</span>
         <select value={lab.hero} onChange={(e) => setTypeLab({ hero: e.target.value })}>
           {FONTS.map((f, i) => (
             <option key={f.id} value={f.id}>
@@ -76,16 +76,6 @@ export function LabSwitch() {
       <label className="lab-pick">
         <span>Услуги</span>
         <select value={lab.names} onChange={(e) => setTypeLab({ names: e.target.value })}>
-          {FONTS.map((f, i) => (
-            <option key={f.id} value={f.id}>
-              {i + 1}. {f.label} — {f.note}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="lab-pick">
-        <span>Мастера</span>
-        <select value={lab.masters} onChange={(e) => setTypeLab({ masters: e.target.value })}>
           {FONTS.map((f, i) => (
             <option key={f.id} value={f.id}>
               {i + 1}. {f.label} — {f.note}

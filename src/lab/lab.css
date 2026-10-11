@@ -1,5 +1,4 @@
 @import '@fontsource-variable/roboto-flex/wdth.css';
-@import '@fontsource-variable/jost';
 @import '@fontsource-variable/montserrat';
 @import '@fontsource-variable/manrope';
 @import '@fontsource-variable/raleway';
@@ -401,19 +400,14 @@ html.has-lab {
   }
 }
 
-/* Продолжение страницы в характере концепции */
+/* Заголовки разделов, имена мастеров — Jost (зафиксирован) */
 html[data-concept='material'] .sec-head h2,
-html[data-concept='material'] .master-body h3 {
-  font-weight: var(--hero-w, 500);
-  letter-spacing: var(--hero-ls, -0.04em);
+html[data-concept='material'] .master-body h3,
+html[data-concept='material'] .bk-head h2 {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  letter-spacing: -0.035em;
   line-height: 1.02;
-}
-/* «Мастера»: заголовок блока и имена — своим выбранным шрифтом */
-html[data-concept='material'] .masters .sec-head h2,
-html[data-concept='material'] .master-body h3 {
-  font-family: var(--font-masters);
-  font-weight: var(--masters-w, 500);
-  letter-spacing: var(--masters-ls, -0.03em);
 }
 /* Прайс: названия услуг — отдельным выбранным шрифтом, настоящим весом */
 html[data-concept='material'] .svc-title {

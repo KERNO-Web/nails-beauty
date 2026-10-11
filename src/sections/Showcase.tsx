@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import type { Data, Master, ServiceCategory, Work, WorkTag } from '../data/types'
 import { galleryRows } from '../lib/gallery'
 import { Arrow, ChevronLeft, ChevronRight, Close } from '../lib/icons'
@@ -109,6 +109,25 @@ export function Services({ data }: { data: Data }) {
 /* ---------- Работы ---------- */
 
 /** Подписи стилей. Фильтр показывает только те стили, что реально есть у работ */
+/** Чьи работы показывает галерея: id мастера или null — все. Общее для галереи и карточек мастеров */
+let worksMaster: string | null = null
+const worksListeners = new Set<() => void>()
+function useWorksMaster() {
+  return useSyncExternalStore(
+    (l) => (worksListeners.add(l), () => worksListeners.delete(l)),
+    () => worksMaster,
+  )
+}
+function setWorksMaster(id: string | null) {
+  worksMaster = id
+  for (const l of worksListeners) l()
+}
+/** Карточка мастера → галерея только с её работами */
+function showMasterWorks(id: string) {
+  setWorksMaster(id)
+  scrollToId('works')
+}
+
 const TAG_LABEL: Record<WorkTag, string> = { nude: 'Нюд', minimal: 'Минимализм', french: 'Френч', bright: 'Яркие', design: 'Дизайн' }
 const FIRST_SHOWN = { wide: 9, narrow: 7 }
 
@@ -117,12 +136,22 @@ export function Works({ data }: { data: Data }) {
   const [tag, setTag] = useState<WorkTag | 'all'>('all')
   const [open, setOpen] = useState<number | null>(null)
   const [all, setAll] = useState(false)
-  const tags = useMemo(() => (Object.keys(TAG_LABEL) as WorkTag[]).filter((t) => data.works.some((w) => w.tag === t)), [data.works])
+  const masterId = useWorksMaster()
+  // Мастера с работами — для фильтра; один мастер — фильтр не нужен
+  const masters = data.masters.length > 1 ? data.masters.filter((m) => data.works.some((w) => w.masterId === m.id)) : []
+  const byMaster = useMemo(() => data.works.filter((w) => !masterId || w.masterId === masterId), [data.works, masterId])
+  const tags = useMemo(() => (Object.keys(TAG_LABEL) as WorkTag[]).filter((t) => byMaster.some((w) => w.tag === t)), [byMaster])
+  // Сменили мастера, а выбранного стиля у неё нет — сбрасываем на «Все»
+  useEffect(() => {
+    if (tag !== 'all' && !tags.includes(tag)) setTag('all')
+    setAll(false)
+  }, [masterId])
   const list = useMemo(() => {
-    const items = data.works.filter((w) => tag === 'all' || w.tag === tag)
+    const items = byMaster.filter((w) => tag === 'all' || w.tag === tag)
     const fi = Math.max(0, items.findIndex((w) => w.featured))
     return items.length ? [items[fi], ...items.filter((_, i) => i !== fi)] : []
-  }, [data.works, tag])
+  }, [byMaster, tag])
+  const curMaster = data.masters.find((m) => m.id === masterId)
   const limit = wide ? FIRST_SHOWN.wide : FIRST_SHOWN.narrow
   const shown = all ? list : list.slice(0, limit)
   const rows = galleryRows(shown.length, wide)
@@ -160,9 +189,22 @@ export function Works({ data }: { data: Data }) {
         <header className="sec-head works-head">
           <h2>Работы</h2>
           <p>
-            {data.works.length} {plural(data.works.length, 'работа', 'работы', 'работ')}
-            {data.masters.length > 1 ? ' наших мастеров' : ''}. Нажмите на&nbsp;снимок, чтобы рассмотреть, или на&nbsp;стрелку, чтобы записаться на&nbsp;эту услугу.
+            {curMaster ? `${curMaster.name}: ` : ''}
+            {byMaster.length} {plural(byMaster.length, 'работа', 'работы', 'работ')}
+            {!curMaster && data.masters.length > 1 ? ' наших мастеров' : ''}. Нажмите на&nbsp;снимок, чтобы рассмотреть, или на&nbsp;стрелку, чтобы записаться на&nbsp;эту услугу.
           </p>
+          {masters.length > 1 && (
+            <div className="filters filters-masters" role="group" aria-label="Мастер">
+              <button className="filter" aria-pressed={!masterId} onClick={() => setWorksMaster(null)}>
+                Все мастера
+              </button>
+              {masters.map((m) => (
+                <button key={m.id} className="filter" aria-pressed={masterId === m.id} onClick={() => setWorksMaster(m.id)}>
+                  {m.name}
+                </button>
+              ))}
+            </div>
+          )}
           {tags.length > 1 && (
             <div className="filters" role="group" aria-label="Стиль">
               {(['all', ...tags] as const).map((t) => (
@@ -173,7 +215,7 @@ export function Works({ data }: { data: Data }) {
             </div>
           )}
         </header>
-        <div className="gallery" key={`${tag}-${wide}`}>
+        <div className="gallery" key={`${masterId}-${tag}-${wide}`}>
           {rows.map((r, ri) => (
             <GalleryRowView key={ri} kind={r.kind} count={r.items.length} cols={'cols' in r ? r.cols : undefined}>
               {r.kind === 'lead' ? (
@@ -342,7 +384,10 @@ function MasterCard({ data, m, single }: { data: Data; m: Master; single: boolea
   const fallback = (works.length ? works : data.works).slice(0, 3)
   return (
     <article className={`master ${single ? 'is-single' : ''}`}>
-      <div className={`master-visual ${m.photo ? 'has-portrait' : 'has-works'}`}>
+      <div
+        className={`master-visual ${m.photo ? 'has-portrait' : 'has-works'} ${works.length && !single ? 'is-link' : ''}`}
+        {...(works.length && !single ? { role: 'button', tabIndex: 0, 'aria-label': `Работы мастера: ${m.name}`, onClick: () => showMasterWorks(m.id), onKeyDown: (e: React.KeyboardEvent) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), showMasterWorks(m.id)) } : {})}
+      >
         {m.photo ? (
           <Photo photo={m.photo} w={700} sizes="(min-width: 860px) 30vw, 90vw" alt={m.name} loading="lazy" />
         ) : (
@@ -354,7 +399,15 @@ function MasterCard({ data, m, single }: { data: Data; m: Master; single: boolea
         )}
       </div>
       <div className="master-body">
-        <h3>{m.name}</h3>
+        {works.length && !single ? (
+          <h3>
+            <button className="master-name" onClick={() => showMasterWorks(m.id)}>
+              {m.name}
+            </button>
+          </h3>
+        ) : (
+          <h3>{m.name}</h3>
+        )}
         <p className="master-role">{m.role}</p>
         {m.about && <p className="master-about">{typo(m.about)}</p>}
         <ul className="master-facts">
@@ -362,7 +415,15 @@ function MasterCard({ data, m, single }: { data: Data; m: Master; single: boolea
           <li>{services.length ? services.map((s) => s.title).join(', ') : 'Все услуги студии'}</li>
           {works.length > 0 && (
             <li>
-              {works.length} {plural(works.length, 'работа', 'работы', 'работ')} в&nbsp;галерее
+              {single ? (
+                <>
+                  {works.length} {plural(works.length, 'работа', 'работы', 'работ')} в&nbsp;галерее
+                </>
+              ) : (
+                <button className="master-works" onClick={() => showMasterWorks(m.id)}>
+                  Смотреть {works.length} {plural(works.length, 'работу', 'работы', 'работ')} <Arrow size={14} />
+                </button>
+              )}
             </li>
           )}
         </ul>
