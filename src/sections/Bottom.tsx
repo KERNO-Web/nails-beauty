@@ -2,36 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Data } from '../data/types'
 import { Arrow } from '../lib/icons'
 import { dateOf, dayHuman, fmtTime, hoursSummary, monthPrep, nearestSlot } from '../lib/slots'
-import { scrollToId } from '../lib/ui'
-
-export function Benefits() {
-  const items = [
-    { t: 'Свободное время видно сразу', d: 'Не нужно спрашивать «а когда есть окошко?» — все окна уже в расписании.' },
-    { t: 'Цены перед глазами', d: 'У каждой услуги — стоимость и длительность. Без сюрпризов на кассе.' },
-    { t: 'Мастера выбираете сами', d: 'Или записываетесь к любому, у кого раньше окно.' },
-    { t: 'Запись в полночь — тоже запись', d: 'Выбираете время, когда удобно вам, а не когда мастер может ответить.' },
-  ]
-  return (
-    <section className="benefits">
-      <div className="wrap-wide ben-grid">
-        <h2 className="reveal">
-          Записаться проще,
-          <br />
-          чем написать.
-        </h2>
-        <ol className="ben-list">
-          {items.map((it, i) => (
-            <li key={i} className="reveal">
-              <span className="n">{String(i + 1).padStart(2, '0')}</span>
-              <b>{it.t}</b>
-              <span>{it.d}</span>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
-  )
-}
+import { scrollToId, typo } from '../lib/ui'
 
 export function Reviews({ data }: { data: Data }) {
   if (!data.reviews.length) return null
@@ -49,7 +20,7 @@ export function Reviews({ data }: { data: Data }) {
         <div className="reviews">
           {data.reviews.map((r) => (
             <figure key={r.id} className="review reveal">
-              <blockquote>{r.text}</blockquote>
+              <blockquote>{typo(r.text)}</blockquote>
               <figcaption>
                 <b>{r.name}</b> · {r.service}, в&nbsp;{monthPrep(r.date)}
                 {dateOf(r.date).getFullYear() !== new Date().getFullYear() ? ` ${dateOf(r.date).getFullYear()}` : ''}
@@ -84,7 +55,7 @@ export function Closing({ data }: { data: Data }) {
             <p className="label">Адрес</p>
             <p className="closing-addr">{s.address}</p>
             <p className="muted">
-              {s.city}. {s.addressNote}
+              {s.city}. {typo(s.addressNote)}
             </p>
             <a className="text-link" href={routeUrl} target="_blank" rel="noreferrer">
               Построить маршрут <Arrow size={14} />
@@ -133,6 +104,7 @@ export function Closing({ data }: { data: Data }) {
         <div className="closing-legal">
           <span>
             © {new Date().getFullYear()} {s.name} {s.kind}, {s.city}
+            {s.demoNote && <span className="demo-note">{s.demoNote}</span>}
           </span>
           <a href="#/admin">Кабинет мастера</a>
         </div>

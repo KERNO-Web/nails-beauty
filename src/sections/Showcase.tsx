@@ -1,19 +1,41 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Data, Master, ServiceCategory, Work, WorkTag } from '../data/types'
+import { galleryRows } from '../lib/gallery'
 import { Arrow, ChevronLeft, ChevronRight, Close } from '../lib/icons'
 import { select } from '../lib/selection'
-import { daySlots, daysAhead, dayHuman, canDo, fmtDuration, fmtTime, plural, priceLabel } from '../lib/slots'
-import { Photo, photoUrl, scrollToId, Spine } from '../lib/ui'
+import { canDo, daySlots, daysAhead, dayHuman, fmtDuration, fmtTime, plural, priceLabel } from '../lib/slots'
+import { Photo, photoUrl, scrollToId, typo, useMedia } from '../lib/ui'
 
-const CATEGORY: Record<ServiceCategory, string> = { hands: 'Руки', feet: 'Ноги', extra: 'Дополнительно' }
-const nn = (i: number) => String(i + 1).padStart(2, '0')
+const CATEGORY: Record<ServiceCategory, string> = { hands: 'Руки', feet: 'Ноги', extra: 'К любой услуге' }
 
 function bookService(serviceId: string, masterId?: string) {
   select({ serviceId, ...(masterId ? { masterId } : {}) })
   scrollToId('booking')
 }
 
-/* ---------- Услуги: список — главный объект, фото — поддержка ---------- */
+/** Появление блока, когда он доезжает до экрана: класс .is-in */
+function useEnter<T extends HTMLElement>(margin = '0px 0px -12% 0px') {
+  const ref = useRef<T>(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    if (!('IntersectionObserver' in window)) return el.classList.add('is-in')
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          el.classList.add('is-in')
+          io.disconnect()
+        }
+      },
+      { rootMargin: margin },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [margin])
+  return ref
+}
+
+/* ---------- Услуги и цены: список главный, рядом — «ноготь» с фото услуги ---------- */
 
 export function Services({ data }: { data: Data }) {
   const groups = (Object.keys(CATEGORY) as ServiceCategory[])
@@ -21,156 +43,176 @@ export function Services({ data }: { data: Data }) {
     .filter((g) => g.items.length)
   const [active, setActive] = useState(data.services[0]?.id)
   const cur = data.services.find((s) => s.id === active) ?? data.services[0]
-  let n = 0
+  const hasFrom = data.services.some((s) => s.priceFrom)
   return (
     <section className="services" id="services">
-      <div className="wrap-wide sec-grid">
-        <Spine n={2} title="Услуги и цены" note={`${data.services.length} ${plural(data.services.length, 'услуга', 'услуги', 'услуг')}`} />
-        <div className="sec-body svc-layout">
-          <header className="sec-intro">
-            <h2>Цена и&nbsp;время&nbsp;— сразу</h2>
-            <p>«От» стоит только там, где итог зависит от&nbsp;длины и&nbsp;дизайна. Нажмите на&nbsp;услугу, чтобы выбрать время.</p>
-          </header>
-          <div className="svc-index">
-            {groups.map((g) => (
-              <div key={g.c} className="svc-group">
-                {groups.length > 1 && <p className="svc-group-title">{CATEGORY[g.c]}</p>}
-                <ul>
-                  {g.items.map((s) => {
-                    const i = n++
-                    return (
-                      <li key={s.id}>
-                        <button
-                          className={`svc-row ${s.id === cur?.id ? 'is-active' : ''}`}
-                          onClick={() => bookService(s.id)}
-                          onMouseEnter={() => setActive(s.id)}
-                          onFocus={() => setActive(s.id)}
-                          aria-label={`${s.title}, ${fmtDuration(s.minutes)}, ${priceLabel(s)}. Выбрать время`}
-                        >
-                          <span className="svc-n">{nn(i)}</span>
-                          <span className="svc-main">
-                            <span className="svc-title">{s.title}</span>
-                            <span className="svc-note">{s.note}</span>
-                          </span>
-                          <span className="svc-meta">
-                            <b className="num">{priceLabel(s)}</b>
-                            <span>{fmtDuration(s.minutes)}</span>
-                          </span>
-                          <span className="svc-go" aria-hidden>
-                            <Arrow size={18} />
-                          </span>
-                        </button>
-                      </li>
-                    )
-                  })}
-                </ul>
-              </div>
-            ))}
-          </div>
-          <figure className="svc-visual" aria-hidden>
-            <div className="frame">
+      <div className="wrap-wide">
+        <header className="sec-head">
+          <h2>Услуги и&nbsp;цены</h2>
+          {hasFrom && <p>«От»&nbsp;— там, где итог зависит от&nbsp;длины и&nbsp;дизайна. Точную цену мастер назовёт до&nbsp;начала работы.</p>}
+        </header>
+        <div className="svc-layout">
+          <figure className="svc-swatch" aria-hidden>
+            <div className="svc-swatch-nail">
               {data.services.map((s) => (
-                <Photo key={s.id} photo={s.photo} w={560} sizes="28vw" loading="lazy" className={s.id === cur?.id ? 'is-on' : ''} />
+                <Photo key={s.id} photo={s.photo} w={520} sizes="22vw" loading="lazy" className={s.id === cur?.id ? 'is-on' : ''} />
               ))}
             </div>
             {cur && (
-              <figcaption className="tag">
+              <figcaption>
                 <span>{cur.title}</span>
                 <b className="num">{priceLabel(cur)}</b>
               </figcaption>
             )}
           </figure>
+          <div className="svc-list">
+            {groups.map((g) => (
+              <div key={g.c} className="svc-group">
+                {groups.length > 1 && <p className="svc-group-title">{CATEGORY[g.c]}</p>}
+                <ul>
+                  {g.items.map((s) => (
+                    <li key={s.id}>
+                      <button
+                        className={`svc-row ${s.id === cur?.id ? 'is-active' : ''}`}
+                        onClick={() => bookService(s.id)}
+                        onMouseEnter={() => setActive(s.id)}
+                        onFocus={() => setActive(s.id)}
+                        aria-label={`${s.title}, ${fmtDuration(s.minutes)}, ${priceLabel(s)}. Выбрать время`}
+                      >
+                        <span className="svc-thumb" aria-hidden>
+                          <Photo photo={s.photo} w={120} sizes="56px" loading="lazy" />
+                        </span>
+                        <span className="svc-main">
+                          <span className="svc-title">{s.title}</span>
+                          <span className="svc-note">{typo(s.note)}</span>
+                        </span>
+                        <span className="svc-meta">
+                          <b className="num">{priceLabel(s)}</b>
+                          <span>{fmtDuration(s.minutes)}</span>
+                        </span>
+                        <span className="svc-go" aria-hidden>
+                          <Arrow size={18} />
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
   )
 }
 
-/* ---------- Работы: одна главная работа + ритм ---------- */
+/* ---------- Работы ---------- */
 
-const TAGS: { id: WorkTag | 'all'; label: string }[] = [
-  { id: 'all', label: 'Все' },
-  { id: 'nude', label: 'Нюд' },
-  { id: 'minimal', label: 'Минимализм' },
-  { id: 'french', label: 'Френч' },
-  { id: 'bright', label: 'Яркие' },
-  { id: 'design', label: 'Дизайн' },
-]
+/** Подписи стилей. Фильтр показывает только те стили, что реально есть у работ */
+const TAG_LABEL: Record<WorkTag, string> = { nude: 'Нюд', minimal: 'Минимализм', french: 'Френч', bright: 'Яркие', design: 'Дизайн' }
+const FIRST_SHOWN = { wide: 9, narrow: 7 }
 
 export function Works({ data }: { data: Data }) {
+  const wide = useMedia('(min-width: 860px)')
   const [tag, setTag] = useState<WorkTag | 'all'>('all')
   const [open, setOpen] = useState<number | null>(null)
   const [all, setAll] = useState(false)
-  // Снимок с первого экрана в галерее не повторяем
-  const pool = data.works.filter((w) => w.photo !== data.studio.heroPhoto)
-  const tags = TAGS.filter((t) => t.id === 'all' || pool.some((w) => w.tag === t.id))
+  const tags = useMemo(() => (Object.keys(TAG_LABEL) as WorkTag[]).filter((t) => data.works.some((w) => w.tag === t)), [data.works])
   const list = useMemo(() => {
-    const items = pool.filter((w) => tag === 'all' || w.tag === tag)
+    const items = data.works.filter((w) => tag === 'all' || w.tag === tag)
     const fi = Math.max(0, items.findIndex((w) => w.featured))
     return items.length ? [items[fi], ...items.filter((_, i) => i !== fi)] : []
-  }, [data.works, data.studio.heroPhoto, tag])
-  const shown = all ? list : list.slice(0, 6)
+  }, [data.works, tag])
+  const limit = wide ? FIRST_SHOWN.wide : FIRST_SHOWN.narrow
+  const shown = all ? list : list.slice(0, limit)
+  const rows = galleryRows(shown.length, wide)
   const serviceOf = (w: Work) => data.services.find((s) => s.id === w.serviceId)
   const masterOf = (w: Work) => (data.masters.length > 1 ? data.masters.find((m) => m.id === w.masterId) : undefined)
+  const meta = (w: Work) => [serviceOf(w)?.title, masterOf(w)?.name].filter(Boolean).join(' · ')
+
+  const tile = (idx: number, big = false) => {
+    const w = shown[idx]
+    if (!w) return null
+    const s = serviceOf(w)
+    return (
+      <figure key={w.id} className={`work ${big ? 'is-lead' : ''}`} style={{ '--k': idx } as React.CSSProperties}>
+        <button className="work-img" onClick={() => setOpen(idx)} aria-label={`Открыть: ${w.title}`}>
+          <Photo photo={w.photo} w={big ? 1000 : 640} sizes={big ? '(min-width: 860px) 56vw, 100vw' : '(min-width: 860px) 30vw, 50vw'} alt={w.title} loading={idx < 3 ? 'eager' : 'lazy'} style={{ objectPosition: w.focus }} />
+        </button>
+        <figcaption>
+          <span>
+            <b>{w.title}</b>
+            {meta(w) && <small>{meta(w)}</small>}
+          </span>
+          {s && (
+            <button className="work-book" onClick={() => bookService(s.id, masterOf(w)?.id)} aria-label={`Записаться: ${s.title}`}>
+              <Arrow size={16} />
+            </button>
+          )}
+        </figcaption>
+      </figure>
+    )
+  }
 
   return (
     <section className="works" id="works">
-      <div className="wrap-wide sec-grid">
-        <Spine n={3} title="Работы" note={`${pool.length} ${plural(pool.length, 'работа', 'работы', 'работ')} мастеров`} />
-        <div className="sec-body">
-          <header className="sec-intro works-intro">
-            <h2>Выберите дизайн по&nbsp;фото</h2>
-            <p>Нажмите на&nbsp;снимок, чтобы рассмотреть, и&nbsp;запишитесь на&nbsp;такой&nbsp;же.</p>
-            <div className="tabs" role="group" aria-label="Стиль">
-              {tags.map((t) => (
-                <button key={t.id} className="tab" aria-pressed={tag === t.id} onClick={() => (setTag(t.id), setAll(false))}>
-                  {t.label}
+      <div className="wrap-wide">
+        <header className="sec-head works-head">
+          <h2>Работы</h2>
+          <p>
+            {data.works.length} {plural(data.works.length, 'работа', 'работы', 'работ')}
+            {data.masters.length > 1 ? ' наших мастеров' : ''}. Нажмите на&nbsp;снимок, чтобы рассмотреть, или на&nbsp;стрелку, чтобы записаться на&nbsp;эту услугу.
+          </p>
+          {tags.length > 1 && (
+            <div className="filters" role="group" aria-label="Стиль">
+              {(['all', ...tags] as const).map((t) => (
+                <button key={t} className="filter" aria-pressed={tag === t} onClick={() => (setTag(t), setAll(false))}>
+                  {t === 'all' ? 'Все' : TAG_LABEL[t]}
                 </button>
               ))}
             </div>
-          </header>
-          <div className="gallery" key={tag}>
-            {shown.map((w, i) => {
-              const s = serviceOf(w)
-              const m = masterOf(w)
-              const lead = i === 0
-              return (
-                <figure key={w.id} className={`work ${lead ? 'is-lead' : ''}`} style={{ animationDelay: `${Math.min(i, 8) * 0.04}s` }}>
-                  <button className="frame work-img" onClick={() => setOpen(i)} aria-label={`Открыть: ${w.title}`}>
-                    <Photo photo={w.photo} w={lead ? 900 : 520} sizes={lead ? '(min-width: 900px) 50vw, 100vw' : '(min-width: 900px) 26vw, 100vw'} alt={w.title} loading={i < 3 ? 'eager' : 'lazy'} />
-                  </button>
-                  <figcaption className={lead ? 'tag' : ''}>
-                    <span>
-                      <b>{w.title}</b>
-                      {(s || m) && <small>{[s?.title, m?.name].filter(Boolean).join(' · ')}</small>}
-                    </span>
-                    {s && (
-                      <button className="text-link" onClick={() => bookService(s.id, m?.id)}>
-                        Хочу так же <Arrow size={14} />
-                      </button>
-                    )}
-                  </figcaption>
-                </figure>
-              )
-            })}
-            {!list.length && <p className="gallery-empty">Здесь пока нет работ.</p>}
-          </div>
-          {list.length > shown.length && (
-            <div className="gallery-more">
-              <button className="text-link" onClick={() => setAll(true)}>
-                Показать ещё {list.length - shown.length}
-              </button>
-            </div>
           )}
+        </header>
+        <div className="gallery" key={`${tag}-${wide}`}>
+          {rows.map((r, ri) => (
+            <GalleryRowView key={ri} kind={r.kind} count={r.items.length} cols={'cols' in r ? r.cols : undefined}>
+              {r.kind === 'lead' ? (
+                <>
+                  {tile(r.items[0], true)}
+                  <div className="gallery-stack">{r.items.slice(1).map((i) => tile(i))}</div>
+                </>
+              ) : r.kind === 'solo' ? (
+                <>
+                  {tile(r.items[0], true)}
+                  <div className="gallery-cta">
+                    <p>Понравилась работа? Покажите её мастеру на&nbsp;записи&nbsp;— сделаем так&nbsp;же или подберём похожее.</p>
+                    <button className="btn btn-accent" onClick={() => scrollToId('booking')}>
+                      Выбрать время <Arrow size={16} />
+                    </button>
+                  </div>
+                </>
+              ) : (
+                r.items.map((i) => tile(i, !wide && r.items.length === 1 && i === 0))
+              )}
+            </GalleryRowView>
+          ))}
+          {!list.length && <p className="gallery-empty">Здесь появятся работы мастеров.</p>}
         </div>
+        {list.length > shown.length && (
+          <div className="gallery-more">
+            <button className="btn btn-line-dark" onClick={() => setAll(true)}>
+              Показать ещё {list.length - shown.length}
+            </button>
+          </div>
+        )}
       </div>
-      {open !== null && list[open] && (
+      {open !== null && shown[open] && (
         <Lightbox
-          works={list}
+          works={shown}
           index={open}
           onIndex={setOpen}
           onClose={() => setOpen(null)}
-          caption={(w) => [serviceOf(w)?.title, masterOf(w)?.name].filter(Boolean).join(' · ')}
+          caption={meta}
           onBook={(w) => {
             setOpen(null)
             const s = serviceOf(w)
@@ -180,6 +222,15 @@ export function Works({ data }: { data: Data }) {
         />
       )}
     </section>
+  )
+}
+
+function GalleryRowView({ kind, count, cols, children }: { kind: string; count: number; cols?: string; children: React.ReactNode }) {
+  const ref = useEnter<HTMLDivElement>()
+  return (
+    <div ref={ref} className={`g-row g-${kind} g-n${count}`} style={cols ? ({ '--cols': cols } as React.CSSProperties) : undefined}>
+      {children}
+    </div>
   )
 }
 
@@ -203,10 +254,17 @@ function Lightbox({ works, index, onIndex, onClose, onBook, caption }: { works: 
   // Свайп на телефоне
   let x0 = 0
   return (
-    <div className="lightbox" role="dialog" aria-modal="true" aria-label={w.title} onTouchStart={(e) => (x0 = e.touches[0].clientX)} onTouchEnd={(e) => {
-      const dx = e.changedTouches[0].clientX - x0
-      if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1)
-    }}>
+    <div
+      className="lightbox"
+      role="dialog"
+      aria-modal="true"
+      aria-label={w.title}
+      onTouchStart={(e) => (x0 = e.touches[0].clientX)}
+      onTouchEnd={(e) => {
+        const dx = e.changedTouches[0].clientX - x0
+        if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1)
+      }}
+    >
       <div className="lightbox-top">
         <span className="num">
           {index + 1} / {works.length}
@@ -216,7 +274,7 @@ function Lightbox({ works, index, onIndex, onClose, onBook, caption }: { works: 
         </button>
       </div>
       <div className="lightbox-img" onClick={(e) => e.target === e.currentTarget && onClose()}>
-        <img key={w.id} src={photoUrl(w.photo, 1200)} alt={w.title} />
+        <img key={w.id} src={photoUrl(w.photo, 1400)} alt={w.title} />
         {works.length > 1 && (
           <>
             <button className="icon-btn lightbox-nav prev" onClick={() => go(-1)} aria-label="Предыдущая">
@@ -233,33 +291,18 @@ function Lightbox({ works, index, onIndex, onClose, onBook, caption }: { works: 
           <b>{w.title}</b>
           <small>{caption(w)}</small>
         </div>
-        <button className="btn btn-primary" onClick={() => onBook(w)}>
-          Записаться на такой <Arrow />
+        <button className="btn btn-accent" onClick={() => onBook(w)}>
+          Записаться на&nbsp;такой <Arrow />
         </button>
       </div>
     </div>
   )
 }
 
-/* ---------- Пауза: спокойная фраза ---------- */
-
-export function Interlude() {
-  return (
-    <section className="interlude">
-      <div className="wrap-wide interlude-grid">
-        <p className="interlude-big reveal">
-          Цену и&nbsp;свободное время видно до&nbsp;того, как вы&nbsp;оставите контакты.
-        </p>
-        <p className="interlude-small reveal d1">Без переписки, уточнений и&nbsp;ожидания ответа. Запись сразу попадает в&nbsp;расписание мастера.</p>
-      </div>
-    </section>
-  )
-}
-
-/* ---------- Мастера: один мастер на развороте ---------- */
+/* ---------- Мастера ---------- */
 
 function nextSlotOf(data: Data, m: Master) {
-  const svc = data.services.find((s) => s.category !== 'extra' && canDo(m, s.id))
+  const svc = data.services.find((s) => s.popular && canDo(m, s.id)) ?? data.services.find((s) => s.category !== 'extra' && canDo(m, s.id))
   if (!svc) return null
   const day = daysAhead(data, svc.id, m.id).find((d) => d.free > 0)
   if (!day) return null
@@ -267,71 +310,78 @@ function nextSlotOf(data: Data, m: Master) {
   return slot ? { iso: day.iso, time: slot.time } : null
 }
 
+const yearsLabel = (n: number) => `${n} ${plural(n, 'год', 'года', 'лет')} в профессии`
+
 export function Masters({ data }: { data: Data }) {
-  const [idx, setIdx] = useState(0)
-  if (data.masters.length < 2) return null
-  const m = data.masters[Math.min(idx, data.masters.length - 1)]
-  const pool = data.works.filter((w) => w.photo !== data.studio.heroPhoto)
-  // Портрета нет — берём работу мастера, которая не стоит в начале галереи
-  const photoOf = (x: Master) => x.photo || pool.filter((w) => w.masterId === x.id && !w.featured).pop()?.photo
-  const next = nextSlotOf(data, m)
+  const ms = data.masters
+  const ref = useEnter<HTMLDivElement>()
+  if (!ms.length) return null
+  const single = ms.length === 1
   return (
     <section className="masters" id="masters">
-      <div className="wrap-wide masters-grid">
-        <div className="master-visual">
-          {data.masters.map((x) => {
-            const ph = photoOf(x)
-            return ph ? <img key={x.id} src={photoUrl(ph, 900)} alt={x.photo ? x.name : `Работа мастера: ${x.name}`} loading="lazy" className={x.id === m.id ? 'is-on' : ''} /> : null
-          })}
-        </div>
-        <div className="master-profile">
-          <p className="label">
-            Мастер {nn(idx)} / {nn(data.masters.length - 1)}
-          </p>
-          <div className="master-copy" key={m.id}>
-            <h2>{m.name}</h2>
-            <p className="master-role">{m.role}</p>
-            <p className="master-about">{m.about}</p>
-            {next && (
-              <p className="master-next">
-                Ближайшее окно — {dayHuman(next.iso, false)}, {fmtTime(next.time)}
-              </p>
-            )}
-            <button className="btn btn-primary" onClick={() => (select({ masterId: m.id }), scrollToId('booking'))}>
-              Выбрать мастера <Arrow size={16} className="arrow" />
-            </button>
-          </div>
-          <div className="master-switch" role="tablist" aria-label="Мастера">
-            {data.masters.map((x, i) => (
-              <button key={x.id} role="tab" aria-selected={i === idx} onClick={() => setIdx(i)}>
-                <span className="n">{nn(i)}</span>
-                {x.name}
-              </button>
-            ))}
-          </div>
+      <div className="wrap-wide">
+        <header className="sec-head">
+          <h2>{single ? 'Мастер' : 'Мастера'}</h2>
+          {!single && <p>Можно выбрать мастера при записи или записаться к&nbsp;тому, у&nbsp;кого раньше свободное окно.</p>}
+        </header>
+        <div ref={ref} className={`master-list count-${Math.min(ms.length, 3)}`}>
+          {ms.map((m) => (
+            <MasterCard key={m.id} data={data} m={m} single={single} />
+          ))}
         </div>
       </div>
     </section>
   )
 }
 
-/* ---------- Переход к записи ---------- */
-
-export function BookingIntro({ data }: { data: Data }) {
-  const steps = data.masters.length > 1 ? 'Услуга, мастер, время и контакты' : 'Услуга, время и контакты'
+function MasterCard({ data, m, single }: { data: Data; m: Master; single: boolean }) {
+  const works = data.works.filter((w) => w.masterId === m.id)
+  const services = m.serviceIds.length ? data.services.filter((s) => m.serviceIds.includes(s.id)) : []
+  const next = nextSlotOf(data, m)
+  // Портрета нет — вместо него три работы мастера тем же силуэтом, что и на первом экране
+  const fallback = (works.length ? works : data.works).slice(0, 3)
   return (
-    <section className="bk-intro">
-      <div className="wrap-wide">
-        <p className="bk-intro-big reveal">
-          Выбрали образ&nbsp;—
-          <br />
-          теперь выберите время.
-        </p>
-        <p className="bk-intro-small reveal d1">{steps}&nbsp;— пара минут. Показываем только свободные окна.</p>
-        <a className="bk-intro-cue reveal d2" href="#booking" onClick={(e) => (e.preventDefault(), scrollToId('booking'))} aria-label="К записи">
-          ↓
-        </a>
+    <article className={`master ${single ? 'is-single' : ''}`}>
+      <div className={`master-visual ${m.photo ? 'has-portrait' : 'has-works'}`}>
+        {m.photo ? (
+          <Photo photo={m.photo} w={700} sizes="(min-width: 860px) 30vw, 90vw" alt={m.name} loading="lazy" />
+        ) : (
+          fallback.map((w, i) => (
+            <span key={w.id} className="mini-nail" style={{ '--i': i } as React.CSSProperties}>
+              <Photo photo={w.photo} w={320} sizes="14vw" alt={`Работа: ${w.title}`} style={{ objectPosition: w.focus }} />
+            </span>
+          ))
+        )}
       </div>
-    </section>
+      <div className="master-body">
+        <h3>{m.name}</h3>
+        <p className="master-role">{m.role}</p>
+        {m.about && <p className="master-about">{typo(m.about)}</p>}
+        <ul className="master-facts">
+          {m.years ? <li>{yearsLabel(m.years)}</li> : null}
+          <li>{services.length ? services.map((s) => s.title).join(', ') : 'Все услуги студии'}</li>
+          {works.length > 0 && (
+            <li>
+              {works.length} {plural(works.length, 'работа', 'работы', 'работ')} в&nbsp;галерее
+            </li>
+          )}
+        </ul>
+        <div className="master-actions">
+          <button className="btn btn-primary" onClick={() => (select({ masterId: m.id }), scrollToId('booking'))}>
+            {m.nameDat ? `Записаться к ${m.nameDat}` : 'Записаться'} <Arrow size={16} className="arrow" />
+          </button>
+          {next && (
+            <span className="master-next">
+              Ближайшее окно: {dayHuman(next.iso)}, {fmtTime(next.time)}
+            </span>
+          )}
+        </div>
+        {m.portfolio && (
+          <a className="text-link" href={m.portfolio} target="_blank" rel="noreferrer">
+            Портфолио мастера <Arrow size={14} />
+          </a>
+        )}
+      </div>
+    </article>
   )
 }

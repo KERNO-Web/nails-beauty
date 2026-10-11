@@ -2,7 +2,7 @@
 // Фото: id снимков Unsplash (photo-…) или любые ссылки/пути (/photos/1.jpg).
 import type { Data } from './types'
 
-export const DATA_VERSION = 5
+export const DATA_VERSION = 6
 
 export const demo: Data = {
   version: DATA_VERSION,
@@ -18,14 +18,21 @@ export const demo: Data = {
     whatsapp: '79135552418',
     vk: 'lumi_nails',
     reviewsUrl: '',
-    accent: '#7F363F',
+    heroTitle: 'Маникюр, который хочется разглядывать',
+    heroLead: 'Чистая работа с\u00a0кутикулой, ровное покрытие и\u00a0дизайн от\u00a0тонкого френча до\u00a0росписи.',
     heroPhoto: 'photo-1643648854897-7b5845b4c04c',
-    heroPhoto2: 'photo-1648844421727-cde6c4246b13',
     stepMin: 30,
     bufferMin: 0,
     horizonDays: 21,
     confirmNote: 'Мастер подтвердит запись в течение часа и напомнит о визите накануне.',
     demoBusy: true,
+    demoNote: 'Демонстрационный сайт: студия, мастера и отзывы вымышлены, фото — Unsplash.',
+  },
+  theme: {
+    accent: '#2433D6',
+    paper: '#F3F0EA',
+    ink: '#0E0F1A',
+    nailShape: 'almond',
   },
   masters: [
     {
@@ -33,7 +40,7 @@ export const demo: Data = {
       name: 'Анна',
       nameDat: 'Анне',
       role: 'Наращивание и сложный дизайн',
-      about: 'Восемь лет в профессии. Любит тонкую архитектуру ногтя и аккуратный френч.',
+      about: 'Строит архитектуру ногтя под форму пальцев, поэтому наращивание выглядит естественно. Любит тонкий френч и роспись.',
       schedule: [null, { open: '10:00', close: '20:00' }, { open: '10:00', close: '20:00' }, { open: '10:00', close: '20:00' }, { open: '10:00', close: '20:00' }, { open: '10:00', close: '18:00' }, null],
       daysOff: [],
       serviceIds: [],
@@ -43,7 +50,7 @@ export const demo: Data = {
       name: 'Вера',
       nameDat: 'Вере',
       role: 'Маникюр, педикюр, нюд',
-      about: 'Делает быстрый и чистый маникюр — удобно перед работой или в обед.',
+      about: 'Делает аккуратный маникюр без лишних часов в кресле — удобно перед работой или в обед. Хорошо подбирает нюдовые оттенки.',
       schedule: [{ open: '09:00', close: '19:00' }, null, { open: '09:00', close: '19:00' }, { open: '12:00', close: '21:00' }, { open: '12:00', close: '21:00' }, null, { open: '11:00', close: '19:00' }],
       daysOff: [],
       serviceIds: ['manicure', 'manicure-gel', 'design', 'removal', 'pedicure'],

@@ -99,13 +99,8 @@ export function useMedia(query: string) {
   return on
 }
 
-/** Корешок секции: номер, название и короткий контекст. Повторяется в каждой секции — это и есть «система» страницы */
-export function Spine({ n, title, note }: { n: number; title: string; note?: string }) {
-  return (
-    <div className="spine">
-      <span className="spine-n">{String(n).padStart(2, '0')}</span>
-      <span className="spine-t">{title}</span>
-      {note && <span className="spine-note">{note}</span>}
-    </div>
-  )
+/** Типографика для текстов из данных: короткие предлоги и союзы («в», «и», «на», «без») не висят в конце строки */
+const SHORT = /(?<=^|[\s(«—-])(а|и|в|во|к|ко|с|со|у|о|об|от|до|по|на|за|из|не|ни|но|же|для|без|под|над|при|про|или|что|как) +/giu
+export function typo(text: string) {
+  return text.replace(SHORT, '$1\u00a0')
 }
