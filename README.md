@@ -18,6 +18,8 @@ npm run build
 (первый экран, разделы, логотип), шрифт названий услуг и вариант текста. Ссылки: `?hero=…&names=…&copy=1|2|3`;
 без полосы — `?lab=0`. Набор шрифтов, веса и разрядка — `src/lab/typeLab.ts`.
 
+Сейчас по умолчанию: заголовок — Lora, услуги и «Мастера» — Comfortaa (`?masters=…` — шрифт блока «Мастера»).
+
 Пул (кириллица, настоящие веса, OFL): Jost, Montserrat, Manrope, Raleway, Rubik, Comfortaa, Geologica, Unbounded, Lora.
 Цены и обычный текст — Onest.
 

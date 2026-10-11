@@ -408,6 +408,13 @@ html[data-concept='material'] .master-body h3 {
   letter-spacing: var(--hero-ls, -0.04em);
   line-height: 1.02;
 }
+/* «Мастера»: заголовок блока и имена — своим выбранным шрифтом */
+html[data-concept='material'] .masters .sec-head h2,
+html[data-concept='material'] .master-body h3 {
+  font-family: var(--font-masters);
+  font-weight: var(--masters-w, 500);
+  letter-spacing: var(--masters-ls, -0.03em);
+}
 /* Прайс: названия услуг — отдельным выбранным шрифтом, настоящим весом */
 html[data-concept='material'] .svc-title {
   font-family: var(--font-names);
