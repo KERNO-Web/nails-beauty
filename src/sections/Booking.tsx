@@ -394,7 +394,7 @@ function DateStrip({ days, value, onChange }: { days: ReturnType<typeof daysAhea
               onClick={() => onChange(d.iso)}
               aria-label={`${dayFull(d.iso)}${!d.open ? ', выходной' : d.free === 0 ? ', всё занято' : ''}`}
             >
-              <small>{i === 0 ? 'Сег' : i === 1 ? 'Завт' : WD_SHORT[wd]}</small>
+              <small>{i === 0 ? 'Сегодня' : i === 1 ? 'Завтра' : WD_SHORT[wd]}</small>
               <b>{dateOf(d.iso).getDate()}</b>
               {!d.open ? <i>вых</i> : d.free === 0 ? <i>занято</i> : <span className="dot" aria-hidden />}
             </button>

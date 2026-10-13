@@ -274,7 +274,8 @@
     transform 0.25s var(--ease);
 }
 .date small {
-  font-size: 12px;
+  font-size: 11px;
+  letter-spacing: -0.01em;
   font-weight: 600;
   color: var(--ink-2);
 }

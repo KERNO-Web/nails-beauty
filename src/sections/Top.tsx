@@ -12,7 +12,8 @@ export function Header({ data }: { data: Data }) {
     const on = () => {
       // Над тёмным первым экраном шапка прозрачная до его конца, над светлым — плотная сразу после начала прокрутки
       const field = document.querySelector<HTMLElement>('[data-hero="dark"]')
-      setScrolled(field ? field.getBoundingClientRect().bottom < 56 : window.scrollY > 8)
+      // на телефоне в тёмный экран входит светлое фото рук — белая шапка над ним терялась, поэтому плотная сразу
+      setScrolled(field && window.innerWidth >= 760 ? field.getBoundingClientRect().bottom < 56 : window.scrollY > 8)
     }
     on()
     window.addEventListener('scroll', on, { passive: true })
