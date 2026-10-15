@@ -1,15 +1,13 @@
-@import '@fontsource-variable/jost';
-@import '@fontsource-variable/onest';
-@import '@fontsource-variable/geologica';
+/* Общее для кабинета и окон уведомлений. Публичный сайт — src/design/ и src/site/ */
 
 /* ============ Токены ============
    Три цвета темы (--accent, --paper, --ink) и форма ногтя (--nail) приходят из данных студии — lib/theme.ts.
    Всё остальное считается от них, поэтому новая студия = новые три цвета, без правки стилей. */
 :root {
-  --accent: #2433d6;
-  --on-accent: #f3f0ea;
-  --paper: #f3f0ea;
-  --ink: #0e0f1a;
+  --accent: #552a3a;
+  --on-accent: #fffcfb;
+  --paper: #f7f4f0;
+  --ink: #241c20;
   --nail: none;
 
   --bg: var(--paper);
@@ -28,19 +26,17 @@
   --accent-on-dark: color-mix(in oklab, var(--accent) 45%, white);
   --dark-line: color-mix(in oklab, var(--paper) 14%, transparent);
 
-  --r-xl: 18px;
-  --r-lg: 14px;
-  --r-md: 10px;
-  --r-sm: 8px;
+  --r-xl: 8px;
+  --r-lg: 6px;
+  --r-md: 4px;
+  --r-sm: 3px;
   --shadow-sm: 0 1px 2px rgba(14, 15, 26, 0.05), 0 6px 18px -8px rgba(14, 15, 26, 0.14);
   --shadow: 0 1px 2px rgba(14, 15, 26, 0.04), 0 24px 48px -20px rgba(14, 15, 26, 0.3);
 
-  /* Заголовок первого экрана (сейчас задаётся из lab: Lora) */
-  --font-display: 'Lora Variable', Georgia, serif;
-  /* Все остальные заголовки: разделы, имена мастеров, запись, контакты */
-  --font-heading: 'Jost Variable', system-ui, sans-serif;
-  /* Главный заголовок первого экрана — современный мягкий гротеск; логотип остаётся с засечками */
-  --font-hero: 'Geologica Variable', 'Onest Variable', system-ui, sans-serif;
+  /* Два шрифта на всё: Tenor Sans — название студии, Onest — интерфейс кабинета (заголовки тоже) */
+  --font-display: 'Tenor Sans', 'Onest Variable', Arial, sans-serif;
+  --font-heading: 'Onest Variable', system-ui, sans-serif;
+  --font-hero: var(--font-display);
   --font-ui: 'Onest Variable', 'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --gutter: 16px;

@@ -11,14 +11,8 @@
     "sites": "node scripts/build-sites.mjs"
   },
   "dependencies": {
-    "@fontsource-variable/comfortaa": "^5.3.0",
-    "@fontsource-variable/cormorant-garamond": "^5.3.0",
-    "@fontsource-variable/geologica": "^5.3.0",
-    "@fontsource-variable/jost": "^5.3.0",
-    "@fontsource-variable/lora": "^5.3.0",
     "@fontsource-variable/onest": "^5.3.1",
-    "@fontsource-variable/roboto-flex": "^5.3.0",
-    "@fontsource-variable/unbounded": "^5.3.0",
+    "@fontsource/tenor-sans": "^5.3.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },
@@ -26,6 +20,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "playwright": "^1.64.1",
     "typescript": "^7.0.2",
     "vite": "^8.3.4"
   }

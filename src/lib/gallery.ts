@@ -1,18 +1,30 @@
-// Раскладка галереи без ручной настройки: из числа снимков получается ряд строк по 3 и 2.
-// Первая работа (featured или просто первая) — крупная, с двумя снимками рядом.
-// Фото любых пропорций кадрируются по высоте строки (object-fit + необязательный focus у работы),
-// поэтому сетка ровная при 4, 6, 9 или 15 снимках — без дыр и мелочи.
+// Раскладка галереи без ручной настройки. Снимки идут «полосами» по 12-колоночной сетке:
+// у каждой полосы своя фиксированная схема (крупный снимок + стопка, тройка разной ширины, пара 7:5),
+// поэтому края ровные при любом числе работ — 2, 3, 4, 6, 9, 12, 15 — без дыр, повторов и одиноких хвостов.
+// Фото любых пропорций кадрируются по ячейке (object-fit + необязательный focus у работы).
 
-export type GalleryRow =
-  | { kind: 'lead'; items: number[] }
-  | { kind: 'row'; items: number[]; cols: string }
-  /** Единственная работа: снимок и рядом карточка записи */
-  | { kind: 'solo'; items: number[] }
+export type BandKind =
+  /** Крупный слева на две строки, высокий рядом, два друг над другом справа */
+  | 'lead4'
+  /** Крупный слева, два друг над другом справа */
+  | 'trioL'
+  /** Два друг над другом слева, крупный справа */
+  | 'trioR'
+  /** Три в ряд разной ширины */
+  | 'row3'
+  /** Пара 7:5 и зеркальная 5:7 */
+  | 'pair'
+  | 'pairR'
+  /** Единственная работа: снимок и рядом приглашение записаться */
+  | 'solo'
+  /** Телефон: во всю ширину */
+  | 'full'
+  /** Телефон: пара */
+  | 'duo'
 
-const COLS3 = ['1fr 1.35fr 1fr', '1.25fr 1fr 1.25fr']
-const COLS2 = ['1.5fr 1fr', '1fr 1.5fr']
+export type Band = { kind: BandKind; items: number[] }
 
-/** Разбить n на строки по 3 и 2, чередуя, без строки из одного снимка */
+/** Разбить n на полосы по 3 и 2 без полосы из одного снимка */
 function split(n: number) {
   const out: number[] = []
   let rest = n
@@ -33,37 +45,44 @@ function split(n: number) {
   return out
 }
 
-export function galleryRows(n: number, wide: boolean): GalleryRow[] {
+const take = (from: number, count: number) => Array.from({ length: count }, (_, k) => from + k)
+
+export function planGallery(n: number, wide: boolean): Band[] {
   if (n <= 0) return []
   if (n === 1) return [{ kind: 'solo', items: [0] }]
-  const rows: GalleryRow[] = []
-  let i = 0
-  if (wide) {
-    // Крупная первая — только если после неё не останется одинокого снимка (4 работы = 2 + 2)
-    if (n >= 3 && n !== 4) {
-      rows.push({ kind: 'lead', items: [0, 1, 2] })
-      i = 3
-    }
-    let r3 = 0
-    let r2 = 0
-    for (const size of split(n - i)) {
-      const items = Array.from({ length: size }, (_, k) => i + k)
-      i += size
-      rows.push({ kind: 'row', items, cols: size === 3 ? COLS3[r3++ % 2] : size === 2 ? COLS2[r2++ % 2] : '1fr' })
-    }
-    return rows
+  if (!wide) return planNarrow(n)
+  if (n === 2) return [{ kind: 'pair', items: [0, 1] }]
+  if (n === 3) return [{ kind: 'trioL', items: [0, 1, 2] }]
+  if (n === 5) return [{ kind: 'trioL', items: [0, 1, 2] }, { kind: 'pairR', items: [3, 4] }]
+  const bands: Band[] = [{ kind: 'lead4', items: [0, 1, 2, 3] }]
+  let i = 4
+  const threes: BandKind[] = ['trioR', 'row3', 'trioL']
+  const twos: BandKind[] = ['pair', 'pairR']
+  let t3 = 0
+  let t2 = 0
+  for (const size of split(n - 4)) {
+    bands.push({ kind: size === 3 ? threes[t3++ % threes.length] : twos[t2++ % twos.length], items: take(i, size) })
+    i += size
   }
-  // Телефон: крупная первая, дальше пары; нечётный хвост — снова во всю ширину
-  rows.push({ kind: 'row', items: [0], cols: '1fr' })
-  i = 1
-  let r2 = 0
+  return bands
+}
+
+/** Телефон: крупный первый, дальше две пары и снова крупный; без одиночного хвоста */
+function planNarrow(n: number): Band[] {
+  const bands: Band[] = [{ kind: 'full', items: [0] }]
+  let i = 1
+  let pairs = 0
   while (i < n) {
-    if (n - i === 1) {
-      rows.push({ kind: 'row', items: [i], cols: '1fr' })
-      break
+    const rest = n - i
+    if (rest === 1 || (pairs === 2 && rest !== 2 && rest !== 4)) {
+      bands.push({ kind: 'full', items: [i] })
+      i += 1
+      pairs = 0
+      continue
     }
-    rows.push({ kind: 'row', items: [i, i + 1], cols: r2++ % 2 ? '1fr 1.25fr' : '1.25fr 1fr' })
+    bands.push({ kind: 'duo', items: [i, i + 1] })
     i += 2
+    pairs++
   }
-  return rows
+  return bands
 }

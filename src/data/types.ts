@@ -108,19 +108,28 @@ export type Booking = {
   createdAt: string
 }
 
-/** Форма ногтя — силуэт окон с фото на первом экране и в акцентах */
+/** Форма ногтя — осталась от прежнего дизайна, на сайте больше не используется */
 export type NailShape = 'almond' | 'oval' | 'square' | 'coffin'
+
+/** Три готовые палитры одного дизайна (src/design/tokens.css) */
+export type ThemePreset = 'mulberry' | 'taupe' | 'rose'
 
 /** Внешний вид. Меняется под клиента вместе с фото — вёрстка общая */
 export type Theme = {
-  /** Цвет первого экрана и акцентов, #RRGGBB */
-  accent: string
-  /** Фон страницы */
-  paper: string
-  /** Основной текст и тёмные сцены */
-  ink: string
-  nailShape: NailShape
+  /** Палитра. Нет — «mulberry» */
+  preset?: ThemePreset
+  /** Свой тёмный акцент вместо цвета палитры, #RRGGBB (необязательно). Слишком светлый затемняется до читаемого */
+  accent?: string
+  /** Прежние поля темы — больше не используются: фон и текст задаёт палитра */
+  paper?: string
+  ink?: string
+  nailShape?: NailShape
 }
+
+/** Как клиент записывается. native — запись на сайте; external — кнопки ведут в DIKIDI/YCLIENTS и т.п. */
+export type BookingMode =
+  | { mode: 'native' }
+  | { mode: 'external'; url: string; /** «DIKIDI», «YCLIENTS» — подпись к кнопке */ name?: string }
 
 export type Studio = {
   name: string
@@ -153,8 +162,15 @@ export type Studio = {
   heroTitle: string
   /** Одна-две фразы под заголовком (необязательно) */
   heroLead: string
-  /** Главное фото первого экрана — средний, самый длинный «ноготь». Остальные берутся из работ */
+  /** Главное фото первого экрана: работа крупным планом, без надписей */
   heroPhoto: string
+  /** Точка кадра фото первого экрана (как object-position) на компьютере и на телефоне */
+  heroPositionDesktop?: string
+  heroPositionMobile?: string
+  /** Раскладка первого экрана: auto — по пропорциям фото; photographic — с фото; typographic — без фото */
+  heroLayout?: 'auto' | 'photographic' | 'typographic'
+  /** Запись: на сайте (по умолчанию) или во внешнем сервисе */
+  booking?: BookingMode
   /** Шаг сетки времени, минут */
   stepMin: number
   /** Запас между клиентами, минут */

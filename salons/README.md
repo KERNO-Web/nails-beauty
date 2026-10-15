@@ -12,9 +12,13 @@
   достаточно; до боевого запуска нужен сервер (см. README → «Что нужно до боевого запуска»).
 
 ## Файл салона
-Всё, чего нет в файле, берётся из демо LUMI (`src/data/demo.ts`): `studio` и `theme` — по полям,
-`masters`, `services`, `works`, `reviews` — списком целиком. Поэтому списки задавать **всегда**,
-иначе у салона окажутся мастера Анна и Вера и выдуманные отзывы.
+Чего нет в файле — пусто (мастеров, работ, отзывов нет; демо-занятость выключена; демо-отзывы `demo: true` отбрасываются).
+Вымышленное содержимое LUMI берётся только при `"base": "lumi-demo"` (так устроен `lumi.json`).
+Сборка не пропустит салон без `studio.name`, `studio.address`, услуг или с ценой 0.
+
+Оформление: `"theme": { "preset": "mulberry" | "taupe" | "rose" }`, по желанию `"accent": "#7F363F"` (тёмный).
+Если у салона уже есть DIKIDI/YCLIENTS: `"booking": { "mode": "external", "url": "https://…", "name": "DIKIDI" }` —
+кнопки ведут туда, своей сетки времени на сайте нет.
 
 ```json
 {
@@ -23,8 +27,9 @@
     "name": "Nail Room", "kind": "студия маникюра", "city": "Красноярск",
     "address": "ул. Ленина, 10", "addressNote": "", "map": [92.87, 56.01],
     "phone": "+7 (913) 000-00-00", "telegram": "", "whatsapp": "", "vk": "",
-    "accent": "#7F363F", "heroPhoto": "/nail-room/cover.jpg", "heroPhoto2": "/nail-room/2.jpg"
+    "heroTitle": "", "heroPhoto": "/nail-room/cover.jpg", "timezone": "Asia/Krasnoyarsk"
   },
+  "theme": { "preset": "taupe" },
   "masters": [{ "id": "m1", "name": "Мастер", "role": "Маникюр и педикюр", "about": "",
     "schedule": [{"open":"10:00","close":"20:00"}, …7 дней, null — выходной], "daysOff": [], "serviceIds": [] }],
   "services": [{ "id": "manicure-gel", "title": "Маникюр + покрытие", "note": "", "minutes": 105,

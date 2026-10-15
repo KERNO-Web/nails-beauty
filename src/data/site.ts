@@ -1,20 +1,25 @@
 // Данные конкретного салона. На zapisvonline.ru/<slug> сборка одна на всех, а данные салона
 // (salons/<slug>.json) скрипт сборки вшивает в его index.html как window.__STUDIO__.
-// Чего в файле салона нет — берётся из демо (studio и theme — по полям, списки — целиком).
 import { demo } from './demo'
-import type { Data, Master, Review, Service, Studio, Theme, Work } from './types'
+import { fromConfig, type SiteConfig } from './config'
+import type { Data } from './types'
 
-export type SiteConfig = {
-  slug: string
-  studio?: Partial<Studio>
-  theme?: Partial<Theme>
-  masters?: Master[]
-  services?: Service[]
-  works?: Work[]
-  reviews?: Review[]
-}
+export type { SiteConfig }
 
-const config = (globalThis as { __STUDIO__?: SiteConfig }).__STUDIO__
+// Только при разработке: ?fixture=<имя> — проверочные студии из fixtures/ (в сборку не попадают)
+const fixtures: Record<string, SiteConfig> = import.meta.env.DEV
+  ? Object.fromEntries(
+      Object.entries(import.meta.glob<SiteConfig>('../../fixtures/*.json', { eager: true, import: 'default' })).map(([k, v]) => [k.split('/').pop()!.replace('.json', ''), v]),
+    )
+  : {}
+const params = import.meta.env.DEV ? new URLSearchParams(location.search) : null
+const fixture = params?.get('fixture')
+// ?works=N — демо LUMI с N разными работами (2…15): проверка раскладки галереи
+const worksN = Number(params?.get('works'))
+const EXTRA_WORKS = ['photo-1772983166346-93afb9898264', 'photo-1707725238063-0c54fb6963d1', 'photo-1753285310651-6974a839c992'].map((photo, i) => ({ id: `x${i}`, photo, tag: 'minimal' as const, title: `Работа ${13 + i}`, serviceId: 'manicure-gel', masterId: 'vera' }))
+const galleryFixture: SiteConfig | undefined = worksN ? { slug: `fixture-works-${worksN}`, base: 'lumi-demo', works: [...demo.works, ...EXTRA_WORKS].slice(0, worksN) } : undefined
+
+const config = galleryFixture || (fixture && fixtures[fixture]) || (globalThis as { __STUDIO__?: SiteConfig }).__STUDIO__
 
 function hash(s: string) {
   let h = 0
@@ -23,18 +28,10 @@ function hash(s: string) {
 }
 
 /** Исходные данные этого сайта */
-export const initial: Data = config
-  ? {
-      ...demo,
-      studio: { ...demo.studio, ...config.studio },
-      theme: { ...demo.theme, ...config.theme },
-      masters: config.masters ?? demo.masters,
-      services: config.services ?? demo.services,
-      works: config.works ?? demo.works,
-      reviews: config.reviews ?? demo.reviews,
-      bookings: [],
-    }
-  : demo
+export const initial: Data = config ? fromConfig(config) : demo
+
+/** Демо-сайт: вымышленные данные допустимы и помечаются */
+export const isDemo = !config || config.base === 'lumi-demo'
 
 /**
  * Ключ хранилища в браузере: у каждого салона свой (все живут на одном домене),

@@ -1,0 +1,73 @@
+{
+ "slug": "fixture-long",
+ "studio": {
+  "name": "Маникюрная мастерская Анны Ивановой",
+  "kind": "маникюр и педикюр",
+  "city": "Красноярск",
+  "address": "ул. Тестовая, 3",
+  "addressNote": "",
+  "map": [
+   92.87,
+   56.01
+  ],
+  "phone": "+7 (900) 000-00-03",
+  "telegram": "",
+  "whatsapp": "",
+  "vk": "",
+  "heroTitle": "Маникюр и педикюр без спешки",
+  "heroLead": "",
+  "heroPhoto": "photo-1684609365994-a144ee021c88",
+  "timezone": "Asia/Krasnoyarsk",
+  "demoNote": "Проверочная студия."
+ },
+ "theme": {
+  "preset": "mulberry"
+ },
+ "masters": [
+  {
+   "id": "a",
+   "name": "Анна",
+   "role": "Маникюр",
+   "about": "",
+   "schedule": [
+    null,
+    {
+     "open": "10:00",
+     "close": "20:00"
+    },
+    {
+     "open": "10:00",
+     "close": "20:00"
+    },
+    {
+     "open": "10:00",
+     "close": "20:00"
+    },
+    {
+     "open": "10:00",
+     "close": "20:00"
+    },
+    {
+     "open": "10:00",
+     "close": "18:00"
+    },
+    null
+   ],
+   "daysOff": [],
+   "serviceIds": []
+  }
+ ],
+ "services": [
+  {
+   "id": "mg",
+   "title": "Маникюр + покрытие",
+   "note": "",
+   "minutes": 120,
+   "price": 1900,
+   "category": "hands",
+   "photo": ""
+  }
+ ],
+ "works": [],
+ "reviews": []
+}

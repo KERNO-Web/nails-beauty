@@ -1,0 +1,98 @@
+{
+ "slug": "fixture-sparse",
+ "studio": {
+  "name": "БЛИК",
+  "kind": "ногтевая студия",
+  "city": "Красноярск",
+  "address": "ул. Тестовая, 4",
+  "addressNote": "",
+  "map": [
+   0,
+   0
+  ],
+  "phone": "+7 (900) 000-00-04",
+  "telegram": "",
+  "whatsapp": "",
+  "vk": "",
+  "heroTitle": "",
+  "heroLead": "",
+  "heroPhoto": "",
+  "timezone": "Asia/Krasnoyarsk",
+  "demoNote": "Проверочная студия."
+ },
+ "masters": [
+  {
+   "id": "a",
+   "name": "Мастер",
+   "role": "Маникюр",
+   "about": "",
+   "schedule": [
+    null,
+    {
+     "open": "10:00",
+     "close": "20:00"
+    },
+    {
+     "open": "10:00",
+     "close": "20:00"
+    },
+    {
+     "open": "10:00",
+     "close": "20:00"
+    },
+    {
+     "open": "10:00",
+     "close": "20:00"
+    },
+    {
+     "open": "10:00",
+     "close": "18:00"
+    },
+    null
+   ],
+   "daysOff": [],
+   "serviceIds": []
+  }
+ ],
+ "services": [
+  {
+   "id": "m",
+   "title": "Маникюр",
+   "note": "",
+   "minutes": 60,
+   "price": 1000,
+   "category": "hands",
+   "photo": ""
+  },
+  {
+   "id": "mg",
+   "title": "Маникюр + покрытие",
+   "note": "",
+   "minutes": 120,
+   "price": 1800,
+   "category": "hands",
+   "photo": ""
+  }
+ ],
+ "works": [
+  {
+   "id": "a",
+   "photo": "photo-1643648854897-7b5845b4c04c",
+   "tag": "nude",
+   "title": "Работа мастера",
+   "serviceId": "mg",
+   "masterId": "a",
+   "focus": "60% 70%"
+  }
+ ],
+ "reviews": [
+  {
+   "id": "x",
+   "demo": true,
+   "name": "Не должно появиться",
+   "service": "",
+   "date": "2026-10-01",
+   "text": "Демо-отзыв в настоящей студии отфильтровывается."
+  }
+ ]
+}

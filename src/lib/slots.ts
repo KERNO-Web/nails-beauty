@@ -15,7 +15,38 @@ export const fmtTime = (m: number) => `${Math.floor(m / 60)}:${String(m % 60).pa
 export const isoOf = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 export const dateOf = (iso: string) => new Date(`${iso}T12:00:00`)
-export const todayIso = () => isoOf(new Date())
+
+/* Время студии. «Сегодня» и «уже прошло» считаются в часовом поясе студии, а не браузера:
+   клиентка из Москвы в 23:30 по Москве уже видит завтрашний день Красноярска */
+let studioTz = 'Europe/Moscow'
+export function setStudioTimezone(tz?: string) {
+  try {
+    if (tz) new Intl.DateTimeFormat('ru-RU', { timeZone: tz })
+    studioTz = tz || 'Europe/Moscow'
+  } catch {
+    studioTz = 'Europe/Moscow'
+  }
+}
+/** Дата и минуты от полуночи сейчас — по часам студии */
+export function studioNow(at = new Date()) {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-CA', { timeZone: studioTz, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+      .formatToParts(at)
+      .map((x) => [x.type, x.value]),
+  )
+  return { iso: `${parts.year}-${parts.month}-${parts.day}`, minutes: Number(parts.hour) * 60 + Number(parts.minute) }
+}
+/** Местное время студии → момент UTC (для календаря) */
+export function studioToUtc(iso: string, minutes: number) {
+  const [y, mo, d] = iso.split('-').map(Number)
+  const guess = Date.UTC(y, mo - 1, d, Math.floor(minutes / 60), minutes % 60)
+  // Смещение пояса в этот момент: сколько показывают часы студии, когда в UTC — guess
+  const shown = studioNow(new Date(guess))
+  const [sy, sm, sd] = shown.iso.split('-').map(Number)
+  const offset = Date.UTC(sy, sm - 1, sd, Math.floor(shown.minutes / 60), shown.minutes % 60) - guess
+  return new Date(guess - offset)
+}
+export const todayIso = () => studioNow().iso
 export const addDays = (iso: string, n: number) => {
   const d = dateOf(iso)
   d.setDate(d.getDate() + n)
@@ -114,9 +145,9 @@ export function busyOf(data: Data, m: Master, iso: string): Interval[] {
 
 /** Сегодня раньше этого времени окна не показываем (успеть доехать) */
 function notBefore(iso: string, step: number) {
-  if (iso !== todayIso()) return -1
-  const now = new Date()
-  const t = now.getHours() * 60 + now.getMinutes() + 45
+  const now = studioNow()
+  if (iso !== now.iso) return -1
+  const t = now.minutes + 45
   return Math.ceil(t / step) * step
 }
 

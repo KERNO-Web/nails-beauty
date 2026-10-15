@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#141113" />
+    <meta name="theme-color" content="#f7f4f0" />
     <meta name="description" content="Маникюр и педикюр с онлайн-записью: услуги, цены, работы и свободное время — на одной странице." />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <!-- Приложение на рабочем столе (Android, iPhone) и уведомления -->
@@ -15,15 +15,9 @@
     <meta name="apple-mobile-web-app-title" content="LUMI" />
     <link rel="preconnect" href="https://images.unsplash.com" />
     <title>Студия маникюра — онлайн-запись</title>
-    <!-- Пока шрифты не загрузились, страница не показывается (не дольше 2,5 с) — текст не перескакивает -->
     <style>
-      html.fonts-wait #root { opacity: 0; }
-      #root { transition: opacity 0.35s ease; }
+      html { background: #f7f4f0; }
     </style>
-    <script>
-      document.documentElement.classList.add('fonts-wait')
-      setTimeout(function () { document.documentElement.classList.remove('fonts-wait') }, 2500)
-    </script>
   </head>
   <body>
     <div id="root"></div>

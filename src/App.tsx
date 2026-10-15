@@ -1,18 +1,13 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
-import { Booking } from './sections/Booking'
-import { Closing, Reviews, StickyCta } from './sections/Bottom'
-import { Masters, Services, Works } from './sections/Showcase'
-import { Header } from './sections/Top'
+import { Booking } from './site/Booking'
+import { Contact, Reviews, StickyCta } from './site/Bottom'
+import { Masters, Services, Works } from './site/Showcase'
+import { Header, Hero } from './site/Top'
 import { RemindPrompt } from './notify/Remind'
-import { useConcept } from './lab/concepts'
-import { HeroColor } from './lab/HeroColor'
-import { HeroMaterial } from './lab/HeroMaterial'
-import { HeroType } from './lab/HeroType'
 import { useData } from './lib/store'
 import { useMediaVersion } from './lib/media'
 import { useAdminManifest } from './lib/push'
 import { applyTheme } from './lib/theme'
-import { useReveal } from './lib/ui'
 
 const Admin = lazy(() => import('./admin/Admin'))
 
@@ -34,21 +29,8 @@ export default function App() {
   // Ставим на рабочий стол сайт или кабинет — у каждого свой манифест (имя, иконка, стартовая страница)
   useAdminManifest(route === 'admin')
 
-  const concept = useConcept()
-  // Тема — на <html>, чтобы её видели все слои (и окна поверх страницы). На сайте сейчас тема концепции из лаборатории
-  useEffect(() => {
-    const site = route === 'site'
-    // Кабинет — в тех же цветах, что и сайт
-    applyTheme(concept.theme)
-    const root = document.documentElement
-    if (site) {
-      root.dataset.concept = concept.id
-      root.style.setProperty('--font-display', concept.display)
-    } else {
-      delete root.dataset.concept
-      root.style.removeProperty('--font-display')
-    }
-  }, [data.theme, concept, route])
+  // Тема — на <html>, чтобы её видели все слои (и окна поверх страницы); кабинет — в тех же цветах
+  useEffect(() => applyTheme(data.theme), [data.theme])
   useEffect(() => {
     document.title = route === 'admin' ? `Кабинет — ${data.studio.name}` : `${data.studio.name} — маникюр и педикюр, онлайн-запись`
   }, [data.studio.name, route])
@@ -68,23 +50,20 @@ export default function App() {
 
 function Site() {
   const data = useData()
-  const concept = useConcept()
-  useReveal()
-  const Hero = concept.id === 'material' ? HeroMaterial : concept.id === 'type' ? HeroType : HeroColor
   return (
-    <>
+    <div className="site">
       <Header data={data} />
       <main>
-        <Hero key={concept.id} data={data} concept={concept} />
+        <Hero data={data} />
         <Services data={data} />
         <Works data={data} />
         <Masters data={data} />
         <Booking data={data} />
         <Reviews data={data} />
       </main>
-      <Closing data={data} />
+      <Contact data={data} />
       <StickyCta data={data} />
       <RemindPrompt data={data} />
-    </>
+    </div>
   )
 }

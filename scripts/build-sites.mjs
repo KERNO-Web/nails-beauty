@@ -3,7 +3,7 @@
 // Запуск: npm run sites. Выкладка — deploy/deploy.sh.
 import { execSync } from 'node:child_process'
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
-import { demo } from '../src/data/demo.ts'
+import { fromConfig } from '../src/data/config.ts'
 
 const SITE = 'https://zapisvonline.ru'
 const SLUG = /^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/
@@ -23,7 +23,14 @@ for (const file of files) {
   const config = JSON.parse(readFileSync(`salons/${file}`, 'utf8'))
   const slug = config.slug
   if (!SLUG.test(slug) || file !== `${slug}.json`) throw new Error(`${file}: slug «${slug}» — латиница, цифры, дефис, 3–40, совпадает с именем файла`)
-  const studio = { ...demo.studio, ...config.studio }
+  const site = fromConfig(config)
+  const studio = site.studio
+  // Настоящий салон без своих данных не должен выйти с пустыми ценами или с фото-заглушкой
+  if (config.base !== 'lumi-demo') {
+    const miss = [!studio.name && 'studio.name', !studio.address && 'studio.address', !site.services.length && 'services'].filter(Boolean)
+    if (miss.length) throw new Error(`${file}: не заполнено ${miss.join(', ')}`)
+    if (site.services.some((s) => !(s.price > 0))) throw new Error(`${file}: у каждой услуги нужна цена больше 0`)
+  }
   const title = `${studio.name} — маникюр, онлайн-запись`
   const description = `${studio.address ? studio.address + '. ' : ''}Услуги, цены и свободное время мастеров — запись без звонков.`
   const head = [
@@ -34,7 +41,7 @@ for (const file of files) {
     `<meta property="og:title" content="${esc(title)}" />`,
     `<meta property="og:description" content="${esc(description)}" />`,
     `<meta property="og:url" content="${SITE}/${slug}" />`,
-    `<meta property="og:image" content="${esc(imageUrl(studio.heroPhoto))}" />`,
+    ...(studio.heroPhoto ? [`<meta property="og:image" content="${esc(imageUrl(studio.heroPhoto))}" />`] : []),
     `<meta property="og:locale" content="ru_RU" />`,
     `<meta name="twitter:card" content="summary_large_image" />`,
     // </script> внутри текстов не должен закрыть тег

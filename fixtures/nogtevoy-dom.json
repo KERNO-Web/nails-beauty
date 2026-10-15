@@ -1,0 +1,127 @@
+{
+ "slug": "fixture-nogtevoy-dom",
+ "studio": {
+  "name": "Ногтевой дом",
+  "kind": "студия маникюра",
+  "city": "Красноярск",
+  "address": "ул. Тестовая, 1 (проверочные данные)",
+  "addressNote": "",
+  "map": [
+   92.87,
+   56.01
+  ],
+  "phone": "+7 (900) 000-00-01",
+  "telegram": "",
+  "whatsapp": "",
+  "vk": "",
+  "heroTitle": "Аккуратный маникюр рядом с домом",
+  "heroLead": "",
+  "heroPhoto": "photo-1610992015732-2449b76344bc",
+  "timezone": "Asia/Krasnoyarsk",
+  "confirmNote": "Мастер подтвердит запись по телефону.",
+  "demoNote": "Проверочная студия для разработки, не настоящая."
+ },
+ "theme": {
+  "preset": "taupe"
+ },
+ "masters": [
+  {
+   "id": "m1",
+   "name": "Ольга",
+   "role": "Маникюр и педикюр",
+   "about": "",
+   "schedule": [
+    null,
+    {
+     "open": "10:00",
+     "close": "20:00"
+    },
+    {
+     "open": "10:00",
+     "close": "20:00"
+    },
+    {
+     "open": "10:00",
+     "close": "20:00"
+    },
+    {
+     "open": "10:00",
+     "close": "20:00"
+    },
+    {
+     "open": "10:00",
+     "close": "18:00"
+    },
+    null
+   ],
+   "daysOff": [],
+   "serviceIds": []
+  }
+ ],
+ "services": [
+  {
+   "id": "mg",
+   "title": "Маникюр с покрытием гель-лаком",
+   "note": "",
+   "minutes": 120,
+   "price": 1800,
+   "category": "hands",
+   "photo": ""
+  },
+  {
+   "id": "m",
+   "title": "Маникюр без покрытия",
+   "note": "",
+   "minutes": 60,
+   "price": 900,
+   "category": "hands",
+   "photo": ""
+  },
+  {
+   "id": "p",
+   "title": "Педикюр с покрытием",
+   "note": "",
+   "minutes": 120,
+   "price": 2100,
+   "priceFrom": true,
+   "category": "feet",
+   "photo": ""
+  },
+  {
+   "id": "r",
+   "title": "Снятие покрытия",
+   "note": "",
+   "minutes": 20,
+   "price": 200,
+   "category": "extra",
+   "photo": ""
+  }
+ ],
+ "works": [
+  {
+   "id": "a",
+   "photo": "photo-1610992015732-2449b76344bc",
+   "tag": "nude",
+   "title": "Молочный нюд",
+   "serviceId": "mg",
+   "masterId": "m1"
+  },
+  {
+   "id": "b",
+   "photo": "photo-1772322586634-9867476143b9",
+   "tag": "bright",
+   "title": "Синий миндаль",
+   "serviceId": "mg",
+   "masterId": "m1"
+  },
+  {
+   "id": "c",
+   "photo": "photo-1667207229737-0adf3c700d5e",
+   "tag": "french",
+   "title": "Френч",
+   "serviceId": "mg",
+   "masterId": "m1"
+  }
+ ],
+ "reviews": []
+}

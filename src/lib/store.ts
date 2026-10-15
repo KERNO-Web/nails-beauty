@@ -5,7 +5,7 @@ import { DATA_VERSION } from '../data/demo'
 import { initial, storageKey } from '../data/site'
 import type { Booking, Data } from '../data/types'
 import { reportBooking, reportCancel } from './push'
-import { daySlots } from './slots'
+import { daySlots, setStudioTimezone } from './slots'
 
 const KEY = storageKey
 
@@ -27,6 +27,7 @@ function load(): Data {
     /* пустое или битое хранилище — берём демо */
   }
   if (ENV_PUSH && !d.studio.push) d.studio.push = ENV_PUSH
+  setStudioTimezone(d.studio.timezone)
   return d
 }
 
@@ -69,6 +70,7 @@ export const getData = () => data
 
 export function update(fn: (d: Data) => Data) {
   data = fn(data)
+  setStudioTimezone(data.studio.timezone)
   save()
   emit()
 }

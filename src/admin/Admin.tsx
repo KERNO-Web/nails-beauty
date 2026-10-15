@@ -1,7 +1,8 @@
 // Кабинет мастера: записи, график, услуги, работы, отзывы, данные студии.
 // Демо-версия хранит всё в браузере; в боевой — те же формы пишут на сервер (см. lib/store.ts).
 import { useMemo, useState } from 'react'
-import type { Booking, Data, DayHours, Master, NailShape, Review, Service, ServiceCategory, Theme, Work, WorkTag } from '../data/types'
+import type { Booking, Data, DayHours, Master, Review, Service, ServiceCategory, Theme, ThemePreset, Work, WorkTag } from '../data/types'
+import { paletteOf, PRESETS } from '../lib/theme'
 import { formatPhone, phoneDigits } from '../lib/contact'
 import { addDays, busyOf, canDo, dateOf, dayFull, dayHuman, daySlots, fmtDuration, fmtTime, todayIso, toMin, WD_SHORT, weekdayOf } from '../lib/slots'
 import { cancelBooking, createBooking, resetDemo, uid, update, useData } from '../lib/store'
@@ -47,6 +48,9 @@ export default function Admin() {
         </nav>
       </header>
       <main className="adm-wrap adm-main">
+        <p className="adm-local">
+          Записи и правки хранятся только в этом браузере, а кабинет открыт без пароля. Для настоящей студии нужен сервер записей со входом — см. README.
+        </p>
         <NotifyBanner data={data} />
         {tab === 'bookings' && <Bookings data={data} />}
         {tab === 'schedule' && <Schedule data={data} />}
@@ -701,14 +705,6 @@ function Reviews({ data }: { data: Data }) {
 
 /* ---------- Студия ---------- */
 
-const ACCENTS = ['#2433D6', '#B3122E', '#1F5F4A', '#E0592A', '#6B3FA0', '#C9A27E']
-const SHAPES: { id: NailShape; label: string }[] = [
-  { id: 'almond', label: 'Миндаль' },
-  { id: 'oval', label: 'Овал' },
-  { id: 'square', label: 'Квадрат' },
-  { id: 'coffin', label: 'Балерина' },
-]
-
 function StudioTab({ data }: { data: Data }) {
   const s = data.studio
   const set = (patch: Partial<Data['studio']>) => update((d) => ({ ...d, studio: { ...d.studio, ...patch } }))
@@ -739,27 +735,23 @@ function StudioTab({ data }: { data: Data }) {
           <Field label="Логотип (ссылка, необязательно)" wide>
             <input className="input" value={s.logo ?? ''} onChange={(e) => set({ logo: e.target.value || undefined })} />
           </Field>
-          <Field label="Цвет акцента и первого экрана" wide group>
+          <Field label="Палитра" wide group>
             <span className="adm-inline">
-              {ACCENTS.map((c) => (
-                <button key={c} className={`adm-swatch ${t.accent.toLowerCase() === c.toLowerCase() ? 'on' : ''}`} style={{ background: c }} onClick={() => setTheme({ accent: c })} aria-label={c} />
-              ))}
-              <input type="color" value={t.accent} onChange={(e) => setTheme({ accent: e.target.value })} aria-label="Свой цвет" />
-            </span>
-          </Field>
-          <Field label="Фон страницы">
-            <input type="color" value={t.paper} onChange={(e) => setTheme({ paper: e.target.value })} aria-label="Фон страницы" />
-          </Field>
-          <Field label="Текст и тёмные блоки">
-            <input type="color" value={t.ink} onChange={(e) => setTheme({ ink: e.target.value })} aria-label="Цвет текста" />
-          </Field>
-          <Field label="Форма ногтя в окнах с фото" wide group>
-            <span className="adm-inline">
-              {SHAPES.map((x) => (
-                <button key={x.id} className={`btn btn-sm ${t.nailShape === x.id ? 'btn-primary' : 'btn-line'}`} onClick={() => setTheme({ nailShape: x.id })}>
-                  {x.label}
+              {(Object.keys(PRESETS) as ThemePreset[]).map((id) => (
+                <button key={id} className={`btn btn-sm ${(t.preset ?? 'mulberry') === id ? 'btn-primary' : 'btn-line'}`} onClick={() => setTheme({ preset: id, accent: undefined })}>
+                  <span className="adm-swatch" style={{ background: PRESETS[id].wine, width: 14, height: 14 }} aria-hidden /> {PRESETS[id].label}
                 </button>
               ))}
+            </span>
+          </Field>
+          <Field label="Свой тёмный акцент (необязательно; слишком светлый затемнится сам)" wide group>
+            <span className="adm-inline">
+              <input type="color" value={paletteOf(t).wine} onChange={(e) => setTheme({ accent: e.target.value })} aria-label="Свой цвет акцента" />
+              {t.accent && (
+                <button className="btn btn-sm btn-line" onClick={() => setTheme({ accent: undefined })}>
+                  Цвет палитры
+                </button>
+              )}
             </span>
           </Field>
           <Field label="Заголовок первого экрана" wide>
@@ -768,7 +760,19 @@ function StudioTab({ data }: { data: Data }) {
           <Field label="Подзаголовок (необязательно)" wide>
             <input className="input" value={s.heroLead} onChange={(e) => set({ heroLead: e.target.value })} />
           </Field>
-          <PhotoField label="Главное фото (в капле на первом экране)" wide value={s.heroPhoto} onChange={(v) => set({ heroPhoto: v ?? '' })} />
+          <PhotoField label="Главное фото первого экрана (работа крупным планом, без надписей)" wide value={s.heroPhoto} onChange={(v) => set({ heroPhoto: v ?? '' })} />
+          <Field label="Первый экран">
+            <select className="input" value={s.heroLayout ?? 'auto'} onChange={(e) => set({ heroLayout: e.target.value as Data['studio']['heroLayout'] })}>
+              <option value="auto">С фото (раскладка по пропорциям фото)</option>
+              <option value="typographic">Без фото — только текст</option>
+            </select>
+          </Field>
+          <Field label="Точка кадра фото: компьютер / телефон (например 50% 30%)">
+            <span className="adm-inline">
+              <input className="input" value={s.heroPositionDesktop ?? ''} placeholder="50% 50%" onChange={(e) => set({ heroPositionDesktop: e.target.value.trim() || undefined })} />
+              <input className="input" value={s.heroPositionMobile ?? ''} placeholder="как на компьютере" onChange={(e) => set({ heroPositionMobile: e.target.value.trim() || undefined })} />
+            </span>
+          </Field>
           <Field label="Пометка для демо (в подвале, необязательно)" wide>
             <input className="input" value={s.demoNote ?? ''} onChange={(e) => set({ demoNote: e.target.value || undefined })} />
           </Field>
@@ -839,6 +843,22 @@ function StudioTab({ data }: { data: Data }) {
       <section className="adm-card">
         <h2 className="adm-h2">Запись</h2>
         <div className="adm-grid">
+          <Field label="Где записываются клиенты" wide>
+            <select className="input" value={s.booking?.mode ?? 'native'} onChange={(e) => set({ booking: e.target.value === 'external' ? { mode: 'external', url: s.booking?.mode === 'external' ? s.booking.url : '', name: s.booking?.mode === 'external' ? s.booking.name : 'DIKIDI' } : { mode: 'native' } })}>
+              <option value="native">На этом сайте (выбор времени здесь)</option>
+              <option value="external">В своём сервисе записи (DIKIDI, YCLIENTS…)</option>
+            </select>
+          </Field>
+          {s.booking?.mode === 'external' && (
+            <>
+              <Field label="Ссылка на запись (https://…)">
+                <input className="input" value={s.booking.url} placeholder="https://dikidi.net/…" onChange={(e) => set({ booking: { ...(s.booking as { mode: 'external'; url: string; name?: string }), url: e.target.value.trim() } })} />
+              </Field>
+              <Field label="Название сервиса">
+                <input className="input" value={s.booking.name ?? ''} placeholder="DIKIDI" onChange={(e) => set({ booking: { ...(s.booking as { mode: 'external'; url: string; name?: string }), name: e.target.value || undefined } })} />
+              </Field>
+            </>
+          )}
           <Field label="Шаг времени">
             <select className="input" value={s.stepMin} onChange={(e) => set({ stepMin: Number(e.target.value) })}>
               {[15, 30, 60].map((n) => (

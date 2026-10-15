@@ -1,0 +1,82 @@
+/* ============ LUMI 2.0 — «Soft Precision» ============
+   Два шрифта: Tenor Sans — только крупные заголовки и логотип; Onest — всё остальное (меню, цены, текст, формы).
+   Цвета приходят из палитры студии (lib/theme.ts → --color-*); здесь — значения по умолчанию (Шелковица). */
+@import '@fontsource/tenor-sans/400.css';
+@import '@fontsource-variable/onest/wght.css';
+
+:root {
+  --color-paper: #f7f4f0;
+  --color-canvas: #eee8e4;
+  --color-ink: #241c20;
+  --color-wine: #552a3a;
+  --color-rose: #d8a1a6;
+  --color-line: #d4cbcb;
+  --color-white: #fffcfb;
+  --color-muted: #6d6266;
+
+  /* Производные — только смеси палитры, без новых оттенков */
+  --ink-soft: color-mix(in oklab, var(--color-ink) 82%, var(--color-paper));
+  --wine-deep: color-mix(in oklab, var(--color-wine) 86%, black);
+  --on-wine: var(--color-white);
+  --on-wine-muted: color-mix(in oklab, var(--color-white) 72%, var(--color-wine));
+  --wine-line: color-mix(in oklab, var(--color-white) 18%, var(--color-wine));
+  --rose-wash: color-mix(in oklab, var(--color-rose) 22%, var(--color-paper));
+  --line-strong: color-mix(in oklab, var(--color-ink) 28%, var(--color-paper));
+
+  /* Шрифты. Запасные — без засечек, близкие по метрикам: если шрифт не догрузился, Times не появится */
+  --font-display: 'Tenor Sans', 'Onest Variable', 'Helvetica Neue', Arial, sans-serif;
+  --font-text: 'Onest Variable', 'Onest', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* Сетка: 12 колонок, поля 56 / 40 / 24 / 20 */
+  --inset: 56px;
+  --gap: 22px;
+  --max: 1328px;
+  --header-h: 76px;
+
+  /* Ритм глав */
+  --chapter: clamp(120px, 11vw, 168px);
+  --chapter-tight: clamp(88px, 8vw, 120px);
+
+  --radius-ui: 3px;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --t-fast: 160ms;
+  --t-mid: 240ms;
+
+  color-scheme: light;
+}
+
+@media (max-width: 1360px) {
+  :root {
+    --inset: 40px;
+  }
+}
+@media (max-width: 1023px) {
+  :root {
+    --inset: 32px;
+    --gap: 18px;
+  }
+}
+@media (max-width: 768px) {
+  :root {
+    --inset: 24px;
+    --gap: 14px;
+    --header-h: 64px;
+    --chapter: 96px;
+    --chapter-tight: 72px;
+  }
+}
+@media (max-width: 430px) {
+  :root {
+    --inset: 20px;
+    --gap: 12px;
+    --header-h: 62px;
+    --chapter: 88px;
+    --chapter-tight: 64px;
+  }
+}
+@media (max-width: 370px) {
+  :root {
+    --inset: 18px;
+  }
+}

@@ -75,7 +75,8 @@ export function scrollToId(id: string) {
   const el = document.getElementById(id)
   if (!el) return
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  const top = el.getBoundingClientRect().top + window.scrollY - 72
+  const head = document.querySelector('.hdr')?.getBoundingClientRect().height ?? 72
+  const top = el.getBoundingClientRect().top + window.scrollY - head
   window.scrollTo({ top, behavior: reduce ? 'auto' : 'smooth' })
 }
 
@@ -105,5 +106,6 @@ export function useMedia(query: string) {
 /** Типографика для текстов из данных: короткие предлоги и союзы («в», «и», «на», «без») не висят в конце строки */
 const SHORT = /(?<=^|[\s(«—-])(а|и|в|во|к|ко|с|со|у|о|об|от|до|по|на|за|из|не|ни|но|же|для|без|под|над|при|про|или|что|как) +/giu
 export function typo(text: string) {
-  return text.replace(SHORT, '$1\u00a0')
+  // Тире не начинает строку, короткие слова не висят в конце
+  return text.replace(/ +— /g, '\u00a0— ').replace(SHORT, '$1\u00a0')
 }

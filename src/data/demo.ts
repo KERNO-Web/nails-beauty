@@ -2,7 +2,7 @@
 // Фото: id снимков Unsplash (photo-…) или любые ссылки/пути (/photos/1.jpg).
 import type { Data } from './types'
 
-export const DATA_VERSION = 9
+export const DATA_VERSION = 10
 
 export const demo: Data = {
   version: DATA_VERSION,
@@ -21,6 +21,7 @@ export const demo: Data = {
     heroTitle: 'Маникюр, который хочется разглядывать',
     heroLead: 'Чистая работа с\u00a0кутикулой, ровное покрытие и\u00a0дизайн от\u00a0тонкого френча до\u00a0росписи.',
     heroPhoto: 'photo-1643648854897-7b5845b4c04c',
+    booking: { mode: 'native' },
     stepMin: 30,
     bufferMin: 0,
     horizonDays: 21,
@@ -28,12 +29,7 @@ export const demo: Data = {
     demoBusy: true,
     demoNote: 'Демонстрационный сайт: студия, мастера и отзывы вымышлены, фото — Unsplash.',
   },
-  theme: {
-    accent: '#2433D6',
-    paper: '#F3F0EA',
-    ink: '#0E0F1A',
-    nailShape: 'almond',
-  },
+  theme: { preset: 'mulberry' },
   masters: [
     {
       id: 'anna',

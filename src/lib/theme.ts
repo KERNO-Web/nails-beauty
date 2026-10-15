@@ -1,18 +1,25 @@
-// Тема студии → CSS-переменные на <html>. Всё оформление считается от трёх цветов и формы ногтя.
-import type { NailShape, Theme } from '../data/types'
+// Тема студии → CSS-переменные на <html>. Палитра — одна из трёх готовых (у каждой выверен контраст);
+// свой акцент студии подменяет только тёмный цвет палитры и затемняется, пока текст на нём читается.
+import type { Theme, ThemePreset } from '../data/types'
 
-/** Контур ногтя: viewBox 100×1000, кончик сверху, дальше прямоугольник. Маска растягивается по ширине,
- * поэтому кончик всегда одной пропорции, а «ноготь» может быть любой высоты (до 1:10) */
-const NAIL_PATH: Record<NailShape, string> = {
-  almond: 'M0 1000V120C0 74 28 20 45 4Q50 0 55 4C72 20 100 74 100 120V1000Z',
-  oval: 'M0 1000V62C0 22 24 0 50 0C76 0 100 22 100 62V1000Z',
-  square: 'M0 1000V16Q0 0 16 0H84Q100 0 100 16V1000Z',
-  coffin: 'M0 1000V58Q0 52 3 47L20 4Q22 0 27 0H73Q78 0 80 4L97 47Q100 52 100 58V1000Z',
+export type Palette = {
+  label: string
+  paper: string
+  canvas: string
+  ink: string
+  /** Тёмный фирменный цвет: кнопки, тёмные поля */
+  wine: string
+  /** Мягкий акцент: мелкие детали */
+  rose: string
+  line: string
+  white: string
+  muted: string
 }
 
-export function nailMask(shape: NailShape) {
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 1000' preserveAspectRatio='none'><path d='${NAIL_PATH[shape] ?? NAIL_PATH.almond}'/></svg>`
-  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`
+export const PRESETS: Record<ThemePreset, Palette> = {
+  mulberry: { label: 'Шелковица', paper: '#F7F4F0', canvas: '#EEE8E4', ink: '#241C20', wine: '#552A3A', rose: '#D8A1A6', line: '#D4CBCB', white: '#FFFCFB', muted: '#6D6266' },
+  taupe: { label: 'Тёплый тауп', paper: '#F6F4F0', canvas: '#ECE7E0', ink: '#22201D', wine: '#3B332D', rose: '#C38E63', line: '#D7CFC5', white: '#FFFDFA', muted: '#6A635C' },
+  rose: { label: 'Пыльная роза', paper: '#F8F3F1', canvas: '#F0E5E2', ink: '#2A1D22', wine: '#7A2E4C', rose: '#E2A3B1', line: '#DDCCCC', white: '#FFFBFB', muted: '#725F66' },
 }
 
 function rgb(hex: string) {
@@ -20,37 +27,54 @@ function rgb(hex: string) {
   const n = parseInt(h.length === 3 ? h.replace(/./g, '$&$&') : h, 16)
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
 }
+const hex = (c: number[]) => '#' + c.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')
 
 /** Относительная яркость (WCAG) */
-export function luminance(hex: string) {
-  const [r, g, b] = rgb(hex).map((v) => {
+export function luminance(color: string) {
+  const [r, g, b] = rgb(color).map((v) => {
     const c = v / 255
     return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
   })
   return 0.2126 * r + 0.7152 * g + 0.0722 * b
 }
 
-const contrast = (a: string, b: string) => {
+export const contrast = (a: string, b: string) => {
   const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p)
   return (x + 0.05) / (y + 0.05)
 }
 
-export function applyTheme(t: Theme) {
-  const root = document.documentElement.style
-  // Текст на акценте: светлая бумага или тёмные чернила — что контрастнее
-  const onAccent = contrast(t.accent, t.paper) >= contrast(t.accent, t.ink) ? t.paper : t.ink
-  root.setProperty('--accent', t.accent)
-  root.setProperty('--on-accent', onAccent)
-  root.setProperty('--paper', t.paper)
-  root.setProperty('--ink', t.ink)
-  root.setProperty('--nail', nailMask(t.nailShape))
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', t.accent)
+const isHex = (s?: string): s is string => !!s && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(s)
+
+/** Свой цвет студии → тёмный акцент, на котором светлый текст читается (≥ 7:1) */
+function darkAccent(color: string, p: Palette) {
+  let c = rgb(color)
+  const ink = rgb(p.ink)
+  for (let i = 0; i < 12 && contrast(hex(c), p.white) < 7; i++) c = c.map((v, k) => v * 0.85 + ink[k] * 0.15)
+  return hex(c)
 }
 
-/** Временно сменить акцент (выбранный оттенок). Слишком светлый к фону оттенок не берём — кнопки потеряются */
-export function applyAccent(color: string, t: Theme) {
-  const use = contrast(color, t.paper) >= 2.4 ? color : t.accent
-  const root = document.documentElement.style
-  root.setProperty('--accent', use)
-  root.setProperty('--on-accent', contrast(use, t.paper) >= contrast(use, t.ink) ? t.paper : t.ink)
+export function paletteOf(t: Theme): Palette {
+  const p = PRESETS[t.preset ?? 'mulberry'] ?? PRESETS.mulberry
+  return isHex(t.accent) && t.accent.toLowerCase() !== p.wine.toLowerCase() ? { ...p, wine: darkAccent(t.accent, p) } : p
+}
+
+export function applyTheme(t: Theme) {
+  const p = paletteOf(t)
+  const root = document.documentElement
+  const st = root.style
+  root.dataset.palette = t.preset ?? 'mulberry'
+  st.setProperty('--color-paper', p.paper)
+  st.setProperty('--color-canvas', p.canvas)
+  st.setProperty('--color-ink', p.ink)
+  st.setProperty('--color-wine', p.wine)
+  st.setProperty('--color-rose', p.rose)
+  st.setProperty('--color-line', p.line)
+  st.setProperty('--color-white', p.white)
+  st.setProperty('--color-muted', p.muted)
+  // Кабинет и окна уведомлений считают цвета от этих трёх
+  st.setProperty('--accent', p.wine)
+  st.setProperty('--on-accent', p.white)
+  st.setProperty('--paper', p.paper)
+  st.setProperty('--ink', p.ink)
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', p.paper)
 }
