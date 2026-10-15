@@ -1,3 +1,5 @@
+@import '@fontsource-variable/unbounded';
+@import '@fontsource-variable/cormorant-garamond/wght-italic.css';
 @import '@fontsource-variable/roboto-flex/wdth.css';
 @import '@fontsource-variable/comfortaa';
 @import '@fontsource-variable/lora';
@@ -873,5 +875,110 @@ html[data-concept] .master-visual.has-works {
   }
   .m-copy {
     gap: 12px;
+  }
+}
+
+/* ===== Примерка первого экрана (?hero=a|b|c) — временно, после выбора остаётся один ===== */
+.hero-m[data-v] .h-kicker {
+  display: none;
+}
+/* A, C — «журнал»: тонкий гротеск + курсив с засечками, вторая строка со сдвигом */
+.hero-m:is([data-v='a'], [data-v='c']) .m-title h1 {
+  font-family: var(--font-hero);
+  font-weight: 280;
+  letter-spacing: -0.045em;
+  line-height: 0.92;
+}
+.hero-m:is([data-v='a'], [data-v='c']) .m-title h1 span + span {
+  font-family: 'Cormorant Garamond Variable', Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.12em;
+  letter-spacing: -0.02em;
+  padding-left: 0.9em;
+  margin-top: 0;
+}
+/* B — «широкий»: Unbounded капсом, меньше и плотнее */
+.hero-m[data-v='b'] .m-title h1 {
+  font-family: 'Unbounded Variable', var(--font-hero);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
+  font-size: clamp(2.2rem, 1rem + 3.2vw, 4.4rem);
+}
+.hero-m[data-v='b'] .m-title h1 span + span {
+  font-size: 1em;
+  font-weight: 250;
+  margin-top: 0;
+}
+/* C — подписи к деталям справа от капли (капля: центр 68 % / 52 %, радиус min(20 % ширины, 33 % высоты)).
+   Точка — у края капли, от неё короткая линия; на узких экранах подписям не хватает места — их нет */
+.m-notes {
+  display: none;
+}
+@media (min-width: 1180px) {
+  .m-notes {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    container-type: size;
+    pointer-events: none;
+    opacity: calc(1 - var(--grow, 0) * 3);
+  }
+  .m-note {
+    --r: min(20cqw, 33cqh);
+    position: absolute;
+    left: calc(68cqw + var(--r) * var(--x) + var(--r) * 0.14 + 22px);
+    top: calc(52cqh + var(--r) * var(--y));
+    translate: 0 -0.7em;
+    display: grid;
+    gap: 2px;
+    max-width: 15ch;
+    font-size: 13px;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.72);
+  }
+  .m-note b {
+    font-family: 'Cormorant Garamond Variable', Georgia, serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 19px;
+    line-height: 1;
+    color: #fff;
+  }
+  /* точка и линия к капле */
+  .m-note::before,
+  .m-note::after {
+    content: '';
+    position: absolute;
+    top: 0.55em;
+  }
+  .m-note::before {
+    left: -15px;
+    width: 6px;
+    height: 6px;
+    margin-top: -3px;
+    border-radius: 50%;
+    background: #fff;
+  }
+  .m-note::after {
+    right: calc(100% + 15px);
+    width: calc(var(--r) * 0.14);
+    height: 1px;
+    background: rgba(255, 255, 255, 0.4);
+  }
+  .n1 {
+    --x: 0.72;
+    --y: -0.72;
+  }
+  .n2 {
+    --x: 1.02;
+    --y: -0.02;
+  }
+  .n3 {
+    --x: 0.8;
+    --y: 0.66;
   }
 }

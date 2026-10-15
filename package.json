@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@fontsource-variable/comfortaa": "^5.3.0",
+    "@fontsource-variable/cormorant-garamond": "^5.3.0",
     "@fontsource-variable/geologica": "^5.3.0",
     "@fontsource-variable/jost": "^5.3.0",
     "@fontsource-variable/lora": "^5.3.0",

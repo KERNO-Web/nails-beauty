@@ -10,6 +10,9 @@ import { HeroCta, HeroFacts, HeroPlace } from './HeroParts'
 
 /** Заголовок первого экрана — строки заданы вручную, чтобы перенос был осмысленным */
 const TITLE = ['Красота', 'в\u00a0деталях']
+/** Примерка первого экрана: ?hero=a|b|c (временно, пока не выбран вариант) */
+const VARIANT = typeof location !== 'undefined' ? (new URLSearchParams(location.search).get('hero') ?? '') : ''
+
 const LEAD = 'Маникюр, педикюр и\u00a0дизайн\u00a0— с\u00a0ценами на\u00a0сайте и\u00a0записью онлайн на\u00a0свободное время.'
 
 const VERT = `attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }`
@@ -340,10 +343,17 @@ export function HeroMaterial({ data }: { data: Data; concept: Concept }) {
   }, [src])
 
   return (
-    <section className={`hero-m gl-${gl}`} id="top" data-hero="dark" ref={section}>
+    <section className={`hero-m gl-${gl}`} id="top" data-hero="dark" data-v={VARIANT || undefined} ref={section}>
       <div className="m-stage">
         <canvas ref={canvas} className="m-canvas" aria-hidden />
         {/* Запасной вариант без WebGL: то же фото в капле с бликом на CSS */}
+        {VARIANT === 'c' && (
+          <div className="m-notes" aria-hidden>
+            <span className="m-note n1"><b>Форма</b>мягкий миндаль</span>
+            <span className="m-note n2"><b>Кутикула</b>аппаратно, без порезов</span>
+            <span className="m-note n3"><b>Покрытие</b>держится 3–4 недели</span>
+          </div>
+        )}
         {gl === 'off' && photo && (
           <div className="m-fallback" aria-hidden>
             <img src={photoUrl(photo, 1000)} alt="" />
