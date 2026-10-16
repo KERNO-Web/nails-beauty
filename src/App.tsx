@@ -120,22 +120,18 @@ function Header() {
   )
 }
 
-/* ---------- Первый экран ---------- */
-// Одна работа в высокой арке. «на пять» заходит на арку поверх фото, рядом учительская «5» ручкой:
-// маникюр на пять — буквально оценка за работу. Оранжевый взят из бархатцев на фото.
-
-const HERO_PHOTO = { id: '1736434518489-0eb84070017f', alt: 'Бежевый миндаль на фоне бархатцев', pos: '58% 35%' }
+/* ---------- Первый экран ----------
+   Три слоя одного кадра: размытый фон из бархатцев → огромный заголовок → рука без фона поверх заголовка.
+   Слои готовит scripts/cutout.mjs из фото салона (public/hero/bg.webp и hand.webp). */
 
 function Hero() {
   const first = useMemo(() => nearest(main.id), [])
   const minPrice = Math.min(...services.filter((s) => s.category !== 'design').map((s) => s.price))
   const pick = first ? { serviceId: main.id, date: first.iso, time: first.time } : {}
+  const base = import.meta.env.BASE_URL
   return (
     <section className="hero" aria-labelledby="hero-h">
-      <div className="arch">
-        <Photo id={HERO_PHOTO.id} w={900} alt={HERO_PHOTO.alt} pos={HERO_PHOTO.pos} sizes="(min-width: 900px) 42vw, 100vw" eager />
-      </div>
-
+      <img className="hero-bg" src={`${base}hero/bg.webp`} alt="" aria-hidden />
       <h1 id="hero-h" className="hero-h">
         <span className="hl-1">Маникюр</span>
         <span className="hl-2">
@@ -148,12 +144,13 @@ function Hero() {
           </span>
         </span>
       </h1>
+      <img className="hero-hand" src={`${base}hero/hand.webp`} alt="Рука с маникюром: бежевый миндаль с перламутром" fetchPriority="high" />
 
       <div className="hero-side">
         <p className="hero-lead">{studio.lead}</p>
         <div className="hero-cta">
           <button className="btn is-orange is-big" onClick={() => book(pick)}>
-            {first ? `Записаться: ${dayPhrase(first.iso)} в\u00a0${fmtTime(first.time)}` : "Выбрать время"}
+            {first ? `Записаться: ${dayPhrase(first.iso)} в\u00a0${fmtTime(first.time)}` : 'Выбрать время'}
           </button>
           <a className="link" href="#prices" onClick={go('prices')}>
             Цены от&nbsp;{minPrice.toLocaleString('ru-RU')}&nbsp;₽
