@@ -467,7 +467,7 @@ function Reviews() {
 function Footer() {
   const ref = useEnter<HTMLDivElement>()
   return (
-    <footer className="ft" id="contacts" aria-labelledby="ft-h" style={{ ['--ph' as string]: `url(${import.meta.env.BASE_URL}hero/photo.webp)` }}>
+    <footer className="ft" id="contacts" aria-labelledby="ft-h" style={{ ['--ph' as string]: `url(${new URL(`${import.meta.env.BASE_URL}hero/photo.webp`, document.baseURI).href})` }}>
       <div className="wrap" ref={ref}>
         <h2 className="sr-only" id="ft-h">
           Контакты
