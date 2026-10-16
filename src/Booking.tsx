@@ -96,7 +96,7 @@ export function Booking() {
   }
 
   const when = pick.date && chosen ? `${dayLabel(pick.date)}, ${monthDay(pick.date)}, ${fmtTime(chosen.time)}` : ''
-  const n = (i: number, ok: boolean) => <span className={`bn ${ok ? 'is-ok' : ''}`}>{ok ? '✓' : i}</span>
+  const n = (i: number, ok: boolean) => <span className={`bn ${ok ? 'is-ok' : ''}`}>{i}</span>
 
   return (
     <section className="sec booking" id="booking" aria-labelledby="bk-h">
@@ -248,7 +248,7 @@ export function Booking() {
                 <b>{service ? priceLabel(service) : '0 ₽'}</b>
               </p>
               {err.form && <p className="sum-err" role="alert">{err.form}</p>}
-              <button className="btn is-light is-wide" onClick={submit} disabled={!service}>
+              <button className="btn is-orange is-wide" onClick={submit} disabled={!service}>
                 {!service ? 'Выберите услугу' : !ready ? 'Выберите время' : 'Записаться'}
               </button>
               <p className="sum-fine">Мастер подтвердит запись в&nbsp;течение часа. Время указано по&nbsp;Красноярску.</p>

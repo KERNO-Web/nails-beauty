@@ -1,10 +1,15 @@
-/* «На пять». Кобальт (первый экран и подвал), светлая бумага в середине, один акцент — кобальт.
-   Unbounded для заголовков, Golos Text для текста. Сквозная форма — «ноготь»: скруглённый верх (.frame). */
+/* «На пять». Палитра снята с фото первого экрана: тёмный мох, бархатцы, тёплый крем.
+   Unbounded для заголовков, Golos Text для текста. Сквозной приём — оранжевая «ручка учителя»:
+   оценка «5» на первом экране, пометки на полях у заголовков, подчёркнутое и обведённое выбранное. */
 :root {
+  --pen-line: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath d='M3 8c22-5 48-6 72-4s30 2 42-2' fill='none' stroke='%23f28c28' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E");
+  --pen-ring: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M62 10C30 8 9 32 10 62c1 31 26 50 55 47 28-3 47-26 45-53C108 30 86 12 58 14' fill='none' stroke='%23f28c28' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E");
+  --pen-oval: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60' preserveAspectRatio='none'%3E%3Cpath d='M66 5C30 3 4 15 4 31s24 26 58 25 54-11 54-26S96 6 54 8' fill='none' stroke='%23f28c28' stroke-width='2.6' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+  --hand: 'Caveat', cursive;
   --field: #2a3d1c;
   --field-2: #142010;
-  --paper: #f5f4f0;
-  --ink: #101014;
+  --paper: #f6efe4;
+  --ink: #17210f;
   --on-field: #ffffff;
   --on-field-2: rgb(255 255 255 / 0.72);
   --display: 'Unbounded Variable', 'Unbounded', system-ui, sans-serif;
@@ -353,21 +358,21 @@ button {
   white-space: nowrap;
 }
 .hd.is-solid {
-  background: rgb(245 244 240 / 0.92);
+  background: rgb(246 239 228 / 0.92);
   backdrop-filter: saturate(160%) blur(14px);
   -webkit-backdrop-filter: saturate(160%) blur(14px);
   color: var(--ink);
-  box-shadow: 0 1px 0 rgb(16 16 20 / 0.08);
+  box-shadow: 0 1px 0 rgb(23 33 15 / 0.08);
 }
 .hd.is-solid .nav a {
-  color: rgb(16 16 20 / 0.62);
+  color: rgb(23 33 15 / 0.62);
 }
 .hd.is-solid .nav a:hover {
   color: var(--ink);
 }
 .hd.is-solid .btn.is-light {
-  background: var(--field);
-  color: #fff;
+  background: var(--orange);
+  color: #1a1206;
 }
 .burger {
   display: none;
@@ -406,7 +411,7 @@ button {
   color: #fff;
 }
 .btn.is-ink {
-  background: var(--ink);
+  background: var(--field);
   color: var(--paper);
 }
 .btn.is-line {
@@ -416,7 +421,7 @@ button {
   box-shadow: inset 0 0 0 1.5px #fff;
 }
 .btn.is-line-ink {
-  box-shadow: inset 0 0 0 1.5px rgb(16 16 20 / 0.24);
+  box-shadow: inset 0 0 0 1.5px rgb(23 33 15 / 0.24);
 }
 .btn.is-wide {
   width: 100%;
@@ -427,11 +432,11 @@ button {
 }
 @media (hover: hover) {
   .btn.is-blue:hover,
-  .hd.is-solid .btn.is-light:hover {
+  .btn.is-ink:hover {
     background: var(--field-2);
   }
-  .btn.is-ink:hover {
-    background: var(--field);
+  .hd.is-solid .btn.is-light:hover {
+    background: #ffa04a;
   }
   .btn.is-line-ink:hover {
     box-shadow: inset 0 0 0 1.5px var(--ink);
@@ -449,7 +454,7 @@ button {
   border-radius: 999px;
   font-size: 15px;
   font-weight: 500;
-  box-shadow: inset 0 0 0 1.5px rgb(16 16 20 / 0.14);
+  box-shadow: inset 0 0 0 1.5px rgb(23 33 15 / 0.14);
   transition:
     background-color 0.2s,
     color 0.2s,
@@ -464,14 +469,56 @@ button {
   color: #fff;
   box-shadow: none;
 }
+/* Фильтр работ: выбранное подчёркнуто ручкой, как на полях тетради */
+.pills.is-pen {
+  gap: 4px 22px;
+}
+.is-pen .pill {
+  min-height: 44px;
+  padding: 0 2px 6px;
+  border-radius: 0;
+  box-shadow: none;
+  font-size: 16px;
+  color: var(--dim, rgb(23 33 15 / 0.55));
+  background: var(--pen-line) 0 100% / 0 9px no-repeat;
+  transition:
+    color 0.2s,
+    background-size 0.35s var(--ease);
+}
+.is-pen .pill:hover {
+  box-shadow: none;
+  color: inherit;
+}
+.is-pen .pill[aria-pressed='true'] {
+  background-color: transparent;
+  background-size: 100% 9px;
+  color: inherit;
+}
 
-/* Сквозная форма «ноготь»: скруглённый верх, ровный низ с маленьким радиусом */
+/* Пометка на полях: оранжевая ручка рядом с заголовком раздела, только факты из данных */
+.note {
+  display: inline-block;
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: clamp(24px, 2.2vw, 34px);
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--orange);
+  rotate: -5deg;
+  white-space: nowrap;
+}
+.h2 .note {
+  margin-left: 0.5em;
+  vertical-align: 0.9em;
+}
+
+/* Фото: ровный кадр с маленьким радиусом, как фото на первом экране */
 .frame {
   display: block;
   position: relative;
   overflow: hidden;
-  border-radius: 999px 999px 18px 18px / 46% 46% 18px 18px;
-  background: #e2e1dc;
+  border-radius: 6px;
+  background: #e6dac6;
 }
 .frame img {
   position: absolute;
@@ -512,7 +559,7 @@ button {
   margin: 0;
   font-size: clamp(17px, 1.3vw, 20px);
   line-height: 1.45;
-  color: rgb(16 16 20 / 0.68);
+  color: rgb(23 33 15 / 0.68);
   max-width: 46ch;
 }
 
@@ -546,26 +593,28 @@ button {
 }
 .tabs {
   display: flex;
-  gap: 6px;
-  padding: 5px;
-  border-radius: 999px;
-  background: #e8e7e2;
+  gap: 26px;
   justify-self: start;
 }
 .tab {
-  min-height: 44px;
-  padding: 0 22px;
-  border-radius: 999px;
+  min-height: 48px;
+  padding: 0 2px 8px;
+  font-family: var(--display);
   font-weight: 600;
-  font-size: 15px;
-  color: rgb(16 16 20 / 0.6);
+  font-size: clamp(18px, 1.5vw, 22px);
+  letter-spacing: -0.04em;
+  color: rgb(23 33 15 / 0.4);
+  background: var(--pen-line) 0 100% / 0 10px no-repeat;
   transition:
-    background-color 0.2s,
-    color 0.2s;
+    color 0.2s,
+    background-size 0.35s var(--ease);
+}
+.tab:hover {
+  color: var(--ink);
 }
 .tab[aria-selected='true'] {
-  background: var(--ink);
-  color: var(--paper);
+  color: var(--ink);
+  background-size: 100% 10px;
 }
 .prices-pic {
   aspect-ratio: 3 / 4;
@@ -584,7 +633,7 @@ button {
   margin: 0;
   padding: 0;
   list-style: none;
-  border-top: 1.5px solid rgb(16 16 20 / 0.12);
+  border-top: 1.5px solid rgb(23 33 15 / 0.12);
 }
 .prow {
   width: 100%;
@@ -594,7 +643,7 @@ button {
   gap: 6px 28px;
   align-items: baseline;
   padding: 26px 0;
-  border-bottom: 1.5px solid rgb(16 16 20 / 0.12);
+  border-bottom: 1.5px solid rgb(23 33 15 / 0.12);
 }
 .prow-main {
   grid-area: main;
@@ -609,13 +658,13 @@ button {
 }
 .prow-main small {
   font-size: 15px;
-  color: rgb(16 16 20 / 0.58);
+  color: rgb(23 33 15 / 0.58);
   max-width: 48ch;
 }
 .prow-time {
   grid-area: time;
   font-size: 15px;
-  color: rgb(16 16 20 / 0.58);
+  color: rgb(23 33 15 / 0.58);
   white-space: nowrap;
 }
 .prow-price {
@@ -626,6 +675,10 @@ button {
   letter-spacing: -0.04em;
   white-space: nowrap;
   text-align: right;
+  padding: 8px 16px;
+  margin: -8px -16px;
+  background: var(--pen-oval) center / 0% 0% no-repeat;
+  transition: background-size 0.35s var(--ease);
 }
 .prow-go {
   grid-area: go;
@@ -648,6 +701,10 @@ button {
   .prow:hover .prow-main b {
     color: var(--field);
   }
+  .prow:hover .prow-price,
+  .prow:focus-visible .prow-price {
+    background-size: 100% 100%;
+  }
 }
 @media (prefers-reduced-motion: no-preference) {
   .plist li {
@@ -657,8 +714,31 @@ button {
 }
 
 /* ---------- Работы ---------- */
+/* Работы на тёмном мхе, как фон фото на первом экране: маникюр светится на тёмном */
 .works {
-  background: #ebeae5;
+  --dim: rgb(246 239 228 / 0.55);
+  background: var(--field-2);
+  color: var(--cream);
+}
+.works .h2 .note {
+  color: var(--orange);
+}
+.works .frame {
+  background: #1f2d16;
+}
+.works .arrows button {
+  box-shadow: inset 0 0 0 1.5px rgb(246 239 228 / 0.25);
+}
+.works .arrows button:hover {
+  box-shadow: inset 0 0 0 1.5px var(--cream);
+}
+.works .work-cap small {
+  color: rgb(246 239 228 / 0.55);
+}
+@media (hover: hover) {
+  .works .work:hover .work-cap b {
+    color: var(--orange);
+  }
 }
 .works-head {
   display: grid;
@@ -683,7 +763,7 @@ button {
   height: 48px;
   border-radius: 50%;
   font-size: 20px;
-  box-shadow: inset 0 0 0 1.5px rgb(16 16 20 / 0.18);
+  box-shadow: inset 0 0 0 1.5px rgb(23 33 15 / 0.18);
   transition: box-shadow 0.2s;
 }
 .arrows button:hover {
@@ -736,7 +816,7 @@ button {
 }
 .work-cap small {
   font-size: 14px;
-  color: rgb(16 16 20 / 0.55);
+  color: rgb(23 33 15 / 0.55);
 }
 @media (prefers-reduced-motion: no-preference) {
   .strip li {
@@ -783,7 +863,7 @@ button {
   border-radius: 50%;
   font-size: 26px;
   line-height: 1;
-  box-shadow: inset 0 0 0 1.5px rgb(16 16 20 / 0.16);
+  box-shadow: inset 0 0 0 1.5px rgb(23 33 15 / 0.16);
 }
 .viewer dl {
   margin: 0;
@@ -808,7 +888,7 @@ button {
 .viewer-fine {
   margin: 0;
   font-size: 14px;
-  color: rgb(16 16 20 / 0.6);
+  color: rgb(23 33 15 / 0.6);
 }
 
 /* ---------- Мастера ---------- */
@@ -863,7 +943,7 @@ button {
 }
 .mabout {
   margin: 0;
-  color: rgb(16 16 20 / 0.66);
+  color: rgb(23 33 15 / 0.66);
   flex: 1 1 auto;
 }
 .mweek {
@@ -879,18 +959,30 @@ button {
   border-radius: 50%;
   font-size: 12px;
   font-weight: 600;
-  color: rgb(16 16 20 / 0.45);
-  box-shadow: inset 0 0 0 1.5px rgb(16 16 20 / 0.12);
+  color: rgb(23 33 15 / 0.45);
+  box-shadow: inset 0 0 0 1.5px rgb(23 33 15 / 0.12);
 }
 .mweek span.is-on {
   background: var(--field);
   color: #fff;
   box-shadow: none;
 }
+/* Сегодня обведено ручкой */
+.mweek span.is-today {
+  position: relative;
+}
+.mweek span.is-today::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  background: var(--pen-ring) center / contain no-repeat;
+  rotate: -10deg;
+  pointer-events: none;
+}
 
 /* ---------- Запись ---------- */
 .booking {
-  background: #ebeae5;
+  background: #efe4d1;
 }
 .bk-head {
   display: grid;
@@ -906,7 +998,7 @@ button {
 .bk-steps {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  background: #fbfbf9;
+  background: #fcf8f1;
   border-radius: 28px;
   padding: 6px clamp(18px, 2.4vw, 36px);
 }
@@ -915,7 +1007,7 @@ button {
   transition: opacity 0.25s;
 }
 .bk-step + .bk-step {
-  border-top: 1.5px solid rgb(16 16 20 / 0.08);
+  border-top: 1.5px solid rgb(23 33 15 / 0.08);
 }
 .bk-step.is-off {
   opacity: 0.4;
@@ -937,7 +1029,7 @@ button {
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0;
-  color: rgb(16 16 20 / 0.5);
+  color: rgb(23 33 15 / 0.5);
 }
 .bn {
   width: 30px;
@@ -949,12 +1041,16 @@ button {
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0;
-  box-shadow: inset 0 0 0 1.5px rgb(16 16 20 / 0.2);
+  box-shadow: inset 0 0 0 1.5px rgb(23 33 15 / 0.2);
 }
+/* Заполненный шаг: цифра обведена ручкой, как оценка «5» на первом экране */
 .bn.is-ok {
-  background: var(--field);
-  color: #fff;
+  font-family: var(--hand);
+  font-size: 22px;
+  color: var(--orange);
   box-shadow: none;
+  background: var(--pen-ring) center / 118% 118% no-repeat;
+  rotate: -8deg;
 }
 .bk-svcs {
   display: grid;
@@ -966,7 +1062,7 @@ button {
   gap: 4px;
   padding: 14px 16px;
   border-radius: 16px;
-  box-shadow: inset 0 0 0 1.5px rgb(16 16 20 / 0.1);
+  box-shadow: inset 0 0 0 1.5px rgb(23 33 15 / 0.1);
   transition:
     box-shadow 0.2s,
     background-color 0.2s;
@@ -976,7 +1072,7 @@ button {
 }
 .opt span {
   font-size: 14px;
-  color: rgb(16 16 20 / 0.55);
+  color: rgb(23 33 15 / 0.55);
 }
 .opt:hover {
   box-shadow: inset 0 0 0 1.5px var(--ink);
@@ -987,7 +1083,7 @@ button {
 }
 .bk-hint {
   margin: 0;
-  color: rgb(16 16 20 / 0.66);
+  color: rgb(23 33 15 / 0.66);
 }
 .bk-hint a {
   color: var(--field);
@@ -1007,12 +1103,12 @@ button {
   display: grid;
   justify-items: center;
   padding: 10px 0;
-  border-radius: 999px 999px 16px 16px / 40% 40% 16px 16px;
-  box-shadow: inset 0 0 0 1.5px rgb(16 16 20 / 0.1);
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 1.5px rgb(23 33 15 / 0.1);
 }
 .day small {
   font-size: 12px;
-  color: rgb(16 16 20 / 0.5);
+  color: rgb(23 33 15 / 0.5);
 }
 .day b {
   font-family: var(--display);
@@ -1048,7 +1144,7 @@ button {
 }
 .part-h span {
   font-weight: 500;
-  color: rgb(16 16 20 / 0.5);
+  color: rgb(23 33 15 / 0.5);
   margin-left: 6px;
 }
 .slots {
@@ -1062,7 +1158,7 @@ button {
   text-align: center;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  box-shadow: inset 0 0 0 1.5px rgb(16 16 20 / 0.1);
+  box-shadow: inset 0 0 0 1.5px rgb(23 33 15 / 0.1);
 }
 .slot:hover {
   box-shadow: inset 0 0 0 1.5px var(--ink);
@@ -1098,7 +1194,7 @@ button {
   font: inherit;
   font-size: 17px;
   color: var(--ink);
-  box-shadow: inset 0 0 0 1.5px rgb(16 16 20 / 0.1);
+  box-shadow: inset 0 0 0 1.5px rgb(23 33 15 / 0.1);
 }
 .field input:focus {
   outline: none;
@@ -1109,7 +1205,7 @@ button {
 }
 .field small {
   font-size: 13px;
-  color: rgb(16 16 20 / 0.5);
+  color: rgb(23 33 15 / 0.5);
 }
 .field em {
   font-style: normal;
@@ -1124,8 +1220,8 @@ button {
   gap: 16px;
   padding: 28px;
   border-radius: 28px;
-  background: var(--field);
-  color: #fff;
+  background: var(--field-2);
+  color: var(--cream);
 }
 .sum-h {
   margin: 0;
@@ -1163,8 +1259,8 @@ button {
 }
 .sum .btn:disabled {
   opacity: 1;
-  background: rgb(255 255 255 / 0.16);
-  color: rgb(255 255 255 / 0.7);
+  background: rgb(246 239 228 / 0.12);
+  color: rgb(246 239 228 / 0.6);
 }
 .sum-fine,
 .sum-demo {
@@ -1189,7 +1285,7 @@ button {
   justify-items: start;
   padding: clamp(24px, 3vw, 44px);
   border-radius: 28px;
-  background: #fbfbf9;
+  background: #fcf8f1;
 }
 .done-k {
   margin: 0;
@@ -1235,7 +1331,7 @@ button {
   border-radius: 20px;
   background: #fff;
   text-decoration: none;
-  box-shadow: 0 1px 2px rgb(16 16 20 / 0.06), 0 8px 24px -12px rgb(16 16 20 / 0.18);
+  box-shadow: 0 1px 2px rgb(23 33 15 / 0.06), 0 8px 24px -12px rgb(23 33 15 / 0.18);
 }
 .rv-badge {
   align-self: stretch;
@@ -1261,7 +1357,7 @@ button {
 }
 .rv-score-side small {
   font-size: 14px;
-  color: rgb(16 16 20 / 0.55);
+  color: rgb(23 33 15 / 0.55);
 }
 /* Звёзды как в 2ГИС: жёлтая заливка поверх серой, дробная оценка заливает часть звезды */
 .stars {
@@ -1271,7 +1367,7 @@ button {
 .stars i {
   width: var(--s);
   height: var(--s);
-  background: linear-gradient(90deg, #ffb81c var(--f), #dcdcd8 var(--f));
+  background: linear-gradient(90deg, #ffb81c var(--f), #e3d8c6 var(--f));
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z'/%3E%3C/svg%3E") center / contain no-repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
@@ -1290,7 +1386,7 @@ button {
   padding: 22px;
   border-radius: 20px;
   background: #fff;
-  box-shadow: 0 1px 2px rgb(16 16 20 / 0.06), 0 8px 24px -14px rgb(16 16 20 / 0.16);
+  box-shadow: 0 1px 2px rgb(23 33 15 / 0.06), 0 8px 24px -14px rgb(23 33 15 / 0.16);
 }
 .rv-top {
   display: flex;
@@ -1317,7 +1413,7 @@ button {
 }
 .rv-who small {
   font-size: 13px;
-  color: rgb(16 16 20 / 0.5);
+  color: rgb(23 33 15 / 0.5);
 }
 .rv-text {
   margin: 0;
@@ -1330,7 +1426,7 @@ button {
   gap: 4px;
   padding: 12px 14px;
   border-radius: 12px;
-  background: #f2f2ef;
+  background: #f4ece0;
   font-size: 14px;
 }
 .rv-answer b {
@@ -1338,7 +1434,7 @@ button {
 }
 .rv-answer p {
   margin: 0;
-  color: rgb(16 16 20 / 0.72);
+  color: rgb(23 33 15 / 0.72);
 }
 .rv-foot {
   display: flex;
@@ -1358,21 +1454,43 @@ button {
   font-weight: 500;
   padding: 5px 12px;
   border-radius: 999px;
-  box-shadow: inset 0 0 0 1.5px rgb(16 16 20 / 0.16);
-  color: rgb(16 16 20 / 0.6);
+  box-shadow: inset 0 0 0 1.5px rgb(23 33 15 / 0.16);
+  color: rgb(23 33 15 / 0.6);
 }
 
 /* ---------- Подвал ---------- */
+/* Подвал замыкает сайт той же сценой, что и первый экран: резкое фото бархатцев под тёмным мхом */
 .ft {
-  background: var(--field);
-  color: #fff;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--field-2);
+  color: var(--cream);
   padding-block: clamp(80px, 9vw, 140px) 36px;
 }
+.ft::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, var(--field-2) 0%, var(--field-2) 56%, rgb(20 32 16 / 0.55) 72%, rgb(20 32 16 / 0.15) 100%),
+    var(--ph) 100% 34% / auto 175% no-repeat;
+}
+.ft .btn.is-light {
+  background: var(--orange);
+  color: #1a1206;
+}
+.ft .btn.is-line {
+  box-shadow: inset 0 0 0 1.5px rgb(246 239 228 / 0.4);
+}
+/* Весь текст слева, справа остаётся рука из первого экрана */
 .ft-grid {
   display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
-  gap: clamp(40px, 6vw, 120px);
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: clamp(40px, 4vw, 64px);
   align-items: end;
+  max-width: 1010px;
 }
 .ft-city {
   margin: 0 0 14px;
@@ -1465,7 +1583,7 @@ button {
   gap: 12px;
   padding: 10px 10px 10px 20px;
   border-radius: 999px;
-  background: var(--field);
+  background: var(--field-2);
   color: #fff;
   box-shadow: 0 18px 40px -16px rgb(12 20 8 / 0.7);
   transform: translateY(140%);
@@ -1473,6 +1591,10 @@ button {
 }
 .sticky.is-on {
   transform: none;
+}
+.sticky .btn.is-light {
+  background: var(--orange);
+  color: #1a1206;
 }
 .sticky p {
   margin: 0;
@@ -1612,6 +1734,12 @@ button {
   .ft-grid {
     grid-template-columns: minmax(0, 1fr);
     align-items: start;
+  }
+  /* На телефоне фото сверху за адресом и уходит в мох к часам работы */
+  .ft::before {
+    background:
+      linear-gradient(180deg, rgb(20 32 16 / 0.62) 0%, rgb(20 32 16 / 0.9) 38%, var(--field-2) 62%),
+      var(--ph) 62% 0 / 150% auto no-repeat;
   }
 }
 @media (max-width: 640px) {

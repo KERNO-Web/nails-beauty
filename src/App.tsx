@@ -4,9 +4,12 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { CATEGORY_LABEL, masters, photoUrl, services, studio, STYLE_LABEL, works, type Category, type Style, type Work } from './data'
 import { Booking } from './Booking'
 import reviewsData from './reviews.json'
-import { book, dayPhrase, fmtDuration, fmtTime, monthDay, nearest, priceLabel, todayHours, weekHours } from './slots'
+import { book, dateOf, dayPhrase, fmtDuration, fmtTime, monthDay, nearest, plural, priceLabel, studioNow, todayHours, weekHours } from './slots'
 
 const main = services.find((s) => s.popular) ?? services[0]
+const minPrice = Math.min(...services.filter((s) => s.category !== 'design').map((s) => s.price))
+/** Пометка оранжевой ручкой на полях, как оценка «5» на первом экране */
+const Note = ({ children }: { children: React.ReactNode }) => <span className="note" aria-hidden>{children}</span>
 const tel = (p: string) => `tel:${p.replace(/[^\d+]/g, '')}`
 const go = (id: string) => (e: React.MouseEvent) => {
   e.preventDefault()
@@ -127,7 +130,6 @@ function Header() {
 
 function Hero() {
   const first = useMemo(() => nearest(main.id), [])
-  const minPrice = Math.min(...services.filter((s) => s.category !== 'design').map((s) => s.price))
   const pick = first ? { serviceId: main.id, date: first.iso, time: first.time } : {}
   const base = import.meta.env.BASE_URL
   return (
@@ -186,7 +188,7 @@ function Prices() {
       <div className="wrap prices-grid" ref={ref}>
         <div className="prices-aside">
           <h2 className="h2 rise" id="prices-h">
-            Цены
+            Цены<Note>от {minPrice.toLocaleString('ru-RU')} ₽</Note>
           </h2>
           <div className="tabs rise" role="tablist" aria-label="Раздел прайса">
             {cats.map((c) => (
@@ -241,10 +243,10 @@ function Works() {
       <div className="wrap" ref={ref}>
         <div className="works-head rise">
           <h2 className="h2" id="works-h">
-            Работы
+            Работы<Note>{works.length} {plural(works.length, 'работа', 'работы', 'работ')}</Note>
           </h2>
           <div className="works-ctl">
-            <div className="pills" role="group" aria-label="Стиль">
+            <div className="pills is-pen" role="group" aria-label="Стиль">
               <button className="pill" aria-pressed={!style} onClick={() => setStyle(null)}>
                 Все
               </button>
@@ -332,6 +334,7 @@ function Viewer({ work, onClose }: { work: Work; onClose: () => void }) {
 /* ---------- Мастера ---------- */
 
 const WD = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+const todayWd = (dateOf(studioNow().iso).getDay() + 6) % 7
 
 function Masters() {
   const ref = useEnter<HTMLDivElement>()
@@ -339,7 +342,7 @@ function Masters() {
     <section className="sec masters" id="masters" aria-labelledby="m-h">
       <div className="wrap" ref={ref}>
         <h2 className="h2 rise" id="m-h">
-          Мастера
+          Мастера<Note>{masters.length} {plural(masters.length, 'мастер', 'мастера', 'мастеров')}</Note>
         </h2>
         <ul className="mgrid">
           {masters.map((m, i) => {
@@ -358,7 +361,7 @@ function Masters() {
                 <p className="mabout">{m.about}</p>
                 <p className="mweek" aria-label={`Работает: ${WD.filter((_, d) => m.schedule[d]).join(', ')}`}>
                   {WD.map((d, k) => (
-                    <span key={d} className={m.schedule[k] ? 'is-on' : ''} aria-hidden>
+                    <span key={d} className={`${m.schedule[k] ? 'is-on' : ''} ${k === todayWd ? 'is-today' : ''}`} aria-hidden>
                       {d}
                     </span>
                   ))}
@@ -464,7 +467,7 @@ function Reviews() {
 function Footer() {
   const ref = useEnter<HTMLDivElement>()
   return (
-    <footer className="ft" id="contacts" aria-labelledby="ft-h">
+    <footer className="ft" id="contacts" aria-labelledby="ft-h" style={{ ['--ph' as string]: `url(${import.meta.env.BASE_URL}hero/photo.webp)` }}>
       <div className="wrap" ref={ref}>
         <h2 className="sr-only" id="ft-h">
           Контакты
