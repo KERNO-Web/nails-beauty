@@ -201,32 +201,12 @@ button {
   position: relative;
   width: max-content;
 }
-.grade {
-  position: absolute;
-  left: 0.02em;
-  top: 0.98em;
-  width: 0.86em;
-  height: 0.86em;
-  display: grid;
-  place-items: center;
-  padding-bottom: 0.08em;
-  font-family: 'Caveat', cursive;
-  font-weight: 700;
-  font-size: 1em;
-  letter-spacing: 0;
-  line-height: 1;
-  color: var(--orange);
-  rotate: -12deg;
-}
-.grade svg {
-  position: absolute;
-  inset: -4% -8%;
-  width: 116%;
-  height: 108%;
-  fill: none;
-  stroke: var(--orange);
-  stroke-width: 4;
-  stroke-linecap: round;
+/* Пометка ручкой под заголовком: факт, который есть у любого салона, а не игра с названием */
+.hero-h .note {
+  display: block;
+  width: max-content;
+  margin: 0.28em 0 0 0.06em;
+  font-size: clamp(30px, 3.2vw, 54px);
 }
 .hero-side {
   position: absolute;
@@ -278,12 +258,8 @@ button {
   .hl-2 {
     animation-delay: 0.08s;
   }
-  .grade {
+  .hero-h .note {
     animation: grade-in 0.5s var(--ease) 0.9s both;
-  }
-  .grade path {
-    stroke-dasharray: 360;
-    animation: draw 0.7s ease-out 1.1s both;
   }
   .hero-side {
     animation: up 0.9s var(--ease) 0.25s both;
@@ -298,11 +274,6 @@ button {
   from {
     opacity: 0;
     scale: 1.4;
-  }
-}
-@keyframes draw {
-  from {
-    stroke-dashoffset: 360;
   }
 }
 @keyframes up {

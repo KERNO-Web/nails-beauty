@@ -139,13 +139,8 @@ function Hero() {
         <span className="hl-1">Маникюр</span>
         <span className="hl-2">
           на&nbsp;пять
-          <span className="grade" aria-hidden>
-            5
-            <svg viewBox="0 0 120 120" aria-hidden>
-              <path d="M62 10C30 8 9 32 10 62c1 31 26 50 55 47 28-3 47-26 45-53C108 30 86 12 58 14" />
-            </svg>
-          </span>
         </span>
+        {rv.reviews.length > 0 && <Note>{rv.rating.toLocaleString('ru-RU', { minimumFractionDigits: 1 })} в&nbsp;2ГИС</Note>}
       </h1>
       <img className="hero-layer hero-hand" src={`${base}hero/hand.webp`} alt="Рука с маникюром: бежевый миндаль с перламутром на фоне бархатцев" />
 
