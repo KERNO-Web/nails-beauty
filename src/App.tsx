@@ -1,8 +1,9 @@
 // «На пять» — сайт студии маникюра. Сквозной приём: окна в форме ногтей (скруглённый верх),
 // на первом экране они раскрыты веером, как пальцы, дальше повторяются в работах и у мастеров.
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { CATEGORY_LABEL, heroNails, masters, photoUrl, reviews, services, studio, STYLE_LABEL, works, type Category, type Style, type Work } from './data'
+import { CATEGORY_LABEL, heroNails, masters, photoUrl, services, studio, STYLE_LABEL, works, type Category, type Style, type Work } from './data'
 import { Booking } from './Booking'
+import reviewsData from './reviews.json'
 import { book, dayPhrase, fmtDuration, fmtTime, monthDay, nearest, priceLabel, todayHours, weekHours } from './slots'
 
 const main = services.find((s) => s.popular) ?? services[0]
@@ -145,7 +146,7 @@ function Hero() {
 
       <ul className="hand" aria-label="Работы мастеров">
         {heroNails.map((n, i) => (
-          <li key={n.photo} className="nail" style={{ ['--h' as string]: n.h, ['--r' as string]: `${n.r}deg`, ['--i' as string]: i }}>
+          <li key={n.photo} className="nail" style={{ ['--h' as string]: n.h, ['--r' as string]: `${n.r}deg`, ['--i' as string]: i, ['--z' as string]: n.z, ['--pos' as string]: n.pos }}>
             <Photo id={n.photo} w={500} alt={n.alt} pos={n.pos} sizes="(min-width: 900px) 9vw, 18vw" eager />
           </li>
         ))}
@@ -373,31 +374,85 @@ function Masters() {
   )
 }
 
-/* ---------- Отзывы ---------- */
+/* ---------- Отзывы: в стиле карточки 2ГИС ---------- */
+
+type R2 = { id: string; name: string; rating: number; date: string; text: string; answer?: string }
+const rv = reviewsData as { demo?: boolean; url: string; rating: number; count: number; reviews: R2[] }
+const MONTHS_G = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
+const fullDate = (iso: string) => {
+  const [y, m, d] = iso.split('-').map(Number)
+  return `${d} ${MONTHS_G[m - 1]} ${y}`
+}
+const AVATAR = ['#E8505B', '#F29D38', '#3AA757', '#2F8FDD', '#8E5BD6', '#E0569B']
+
+function Stars({ value, size = 16 }: { value: number; size?: number }) {
+  return (
+    <span className="stars" role="img" aria-label={`Оценка ${value.toLocaleString('ru-RU')} из 5`} style={{ ['--s' as string]: `${size}px` }}>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <i key={i} style={{ ['--f' as string]: `${Math.max(0, Math.min(1, value - i)) * 100}%` }} />
+      ))}
+    </span>
+  )
+}
 
 function Reviews() {
   const ref = useEnter<HTMLDivElement>()
-  if (!reviews.length) return null
+  const [all, setAll] = useState(false)
+  if (!rv.reviews.length) return null
+  const list = all ? rv.reviews : rv.reviews.slice(0, 3)
+  const count = rv.count
   return (
     <section className="sec reviews" aria-labelledby="rev-h">
       <div className="wrap" ref={ref}>
-        <h2 className="h2 rise" id="rev-h">
-          Отзывы
-        </h2>
-        <ul className="rlist">
-          {reviews.map((r, i) => (
-            <li key={r.id} className="rcard rise" style={{ ['--i' as string]: i }}>
-              <blockquote>{r.text}</blockquote>
-              <p className="rby">
-                <b>{r.name}</b>
-                <span>
-                  {r.service}, {monthDay(r.date)}
+        <div className="rv-head rise">
+          <h2 className="h2" id="rev-h">
+            Отзывы
+          </h2>
+          <a className="rv-score" href={rv.url} target="_blank" rel="noreferrer">
+            <span className="rv-badge">2ГИС</span>
+            <b>{rv.rating.toLocaleString('ru-RU', { minimumFractionDigits: 1 })}</b>
+            <span className="rv-score-side">
+              <Stars value={rv.rating} size={20} />
+              <small>
+                {count} {count % 10 === 1 && count % 100 !== 11 ? 'оценка' : [2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100) ? 'оценки' : 'оценок'}
+              </small>
+            </span>
+          </a>
+        </div>
+        <ul className="rv-list">
+          {list.map((r, i) => (
+            <li key={r.id} className="rv rise" style={{ ['--i' as string]: i }}>
+              <div className="rv-top">
+                <span className="rv-ava" style={{ background: AVATAR[r.name.charCodeAt(0) % AVATAR.length] }} aria-hidden>
+                  {r.name.charAt(0).toUpperCase()}
                 </span>
-              </p>
-              {r.demo && <em className="rdemo">пример отзыва</em>}
+                <span className="rv-who">
+                  <b>{r.name}</b>
+                  <small>{fullDate(r.date)}</small>
+                </span>
+              </div>
+              <Stars value={r.rating} />
+              <p className="rv-text">{r.text}</p>
+              {r.answer && (
+                <div className="rv-answer">
+                  <b>Ответ организации</b>
+                  <p>{r.answer}</p>
+                </div>
+              )}
             </li>
           ))}
         </ul>
+        <div className="rv-foot rise">
+          {rv.reviews.length > 3 && (
+            <button className="btn is-line-ink" onClick={() => setAll(!all)}>
+              {all ? 'Свернуть' : 'Ещё отзывы'}
+            </button>
+          )}
+          <a className="link-ink" href={rv.url} target="_blank" rel="noreferrer">
+            Все отзывы в&nbsp;2ГИС
+          </a>
+          {rv.demo && <span className="rdemo">примеры отзывов: у салона здесь будут его отзывы из&nbsp;2ГИС</span>}
+        </div>
       </div>
     </section>
   )

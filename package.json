@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "reviews": "node scripts/reviews-2gis.mjs"
   },
   "dependencies": {
     "@fontsource-variable/golos-text": "^5.3.0",

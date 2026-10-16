@@ -1,5 +1,6 @@
 // Данные студии. Сайт — шаблон: для нового салона меняется только этот файл (и фото).
 // Демо-студия «На пять» вымышлена, это помечено в подвале. Фото — Unsplash.
+// Отзывы — src/reviews.json: у настоящего салона его отзывы из 2ГИС (scripts/reviews-2gis.mjs), в демо — примеры.
 
 export type Category = 'hands' | 'feet' | 'design'
 export type Service = { id: string; title: string; note: string; minutes: number; price: number; from?: boolean; category: Category; popular?: boolean }
@@ -8,7 +9,6 @@ export type Day = [string, string] | null
 export type Master = { id: string; name: string; nameDat: string; role: string; about: string; schedule: Day[]; services?: string[] }
 export type Style = 'nude' | 'french' | 'bright' | 'dark' | 'art'
 export type Work = { id: string; photo: string; title: string; style: Style; serviceId: string; masterId: string; pos?: string }
-export type Review = { id: string; name: string; service: string; date: string; text: string; demo?: boolean }
 
 export const studio = {
   name: 'на пять',
@@ -28,11 +28,13 @@ export const studio = {
 
 /** Пять работ на первом экране: большой палец, указательный, средний, безымянный, мизинец */
 export const heroNails = [
-  { photo: '1754799670312-8e7da8e40ad7', alt: 'Синий с золотом', h: 0.46, r: -34, pos: '50% 45%' },
-  { photo: '1641814250010-9887d86eedfd', alt: 'Пудровый с кольцом', h: 0.7, r: -11, pos: '45% 50%' },
-  { photo: '1736434518489-0eb84070017f', alt: 'Бежевый миндаль', h: 0.8, r: -2, pos: '55% 30%' },
-  { photo: '1769687209448-025548dfca8b', alt: 'Нюд с декором', h: 0.73, r: 7, pos: '50% 35%' },
-  { photo: '1604654894610-df63bc536371', alt: 'Чёрный и черепаховый дизайн', h: 0.58, r: 16, pos: '50% 40%' },
+  // Только кадры, где пальцы смотрят вверх: ногти сами оказываются у «кончика пальца».
+  // pos — где на фото ногти, z — приближение
+  { photo: '1754799670312-8e7da8e40ad7', alt: 'Синий с золотом', h: 0.4, r: -34, pos: '50% 38%', z: 1.35 },
+  { photo: '1770210257340-dc2b0f44642a', alt: 'Золотой миндаль', h: 0.6, r: -11, pos: '62% 30%', z: 1.5 },
+  { photo: '1736434518489-0eb84070017f', alt: 'Бежевый миндаль', h: 0.68, r: -2, pos: '62% 22%', z: 1.3 },
+  { photo: '1607779097040-26e80aa78e66', alt: 'Лиловый с серебром', h: 0.62, r: 7, pos: '45% 38%', z: 1.4 },
+  { photo: '1754799670410-b282791342c3', alt: 'Белый френч на длине', h: 0.5, r: 16, pos: '55% 30%', z: 1.4 },
 ]
 
 export const services: Service[] = [
@@ -91,11 +93,6 @@ export const works: Work[] = [
   { id: 'w12', photo: '1476571000482-3f8d96222bb9', title: 'Бирюзовый педикюр', style: 'bright', serviceId: 'pedi-gel', masterId: 'katya', pos: '50% 70%' },
 ]
 
-export const reviews: Review[] = [
-  { id: 'r1', demo: true, name: 'Полина', service: 'Наращивание', date: '2026-10-04', text: 'Алина отговорила меня от стилетов и сделала миндаль чуть короче. Хожу третью неделю, ни разу не зацепилась.' },
-  { id: 'r2', demo: true, name: 'Оксана', service: 'Маникюр с покрытием', date: '2026-10-09', text: 'Записалась вечером на утро, пришла к девяти, к половине одиннадцатого была на работе.' },
-  { id: 'r3', demo: true, name: 'Дарина', service: 'Роспись и декор', date: '2026-09-27', text: 'Принесла картинку из пинтереста, Вика повторила её точнее, чем я ожидала. Цена совпала с сайтом.' },
-]
 
 export const STYLE_LABEL: Record<Style, string> = { nude: 'Нюд', french: 'Френч', bright: 'Яркие', dark: 'Тёмные', art: 'Дизайн' }
 export const CATEGORY_LABEL: Record<Category, string> = { hands: 'Руки', feet: 'Ноги', design: 'Дизайн' }
