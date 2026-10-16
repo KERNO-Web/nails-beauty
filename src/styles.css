@@ -233,6 +233,20 @@ button {
   background: var(--orange);
   color: #1a1206;
 }
+/* Кнопка первого экрана: время крупно, под ним какая услуга и сколько стоит */
+.hero-btn {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding-block: 9px;
+  border-radius: 22px;
+  line-height: 1.2;
+}
+.hero-btn small {
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.72;
+}
 @media (hover: hover) {
   .btn.is-orange:hover {
     background: #ffa04a;
@@ -980,6 +994,37 @@ button {
 .bk-step + .bk-step {
   border-top: 1.5px solid rgb(23 33 15 / 0.08);
 }
+/* Заполненный шаг свёрнут в строку: номер, что выбрано, «Изменить» */
+.bk-step.is-done {
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 18px 0;
+}
+.bk-step.is-done .bk-h {
+  margin: 0;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+.bk-val {
+  margin: 0;
+  font-weight: 600;
+  font-size: 17px;
+}
+.bk-edit {
+  min-height: 40px;
+  padding: 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--field);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1.5px;
+}
+.bk-edit:hover {
+  color: var(--orange);
+}
 .bk-step.is-off {
   opacity: 0.4;
   pointer-events: none;
@@ -1594,6 +1639,11 @@ button {
   .sum {
     position: static;
   }
+  /* Под формой итог короткий: выбранное уже видно в свёрнутых шагах выше */
+  .sum-h,
+  .sum dl {
+    display: none;
+  }
   .mgrid,
   .rv-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1668,8 +1718,17 @@ button {
     text-align: right;
     font-size: 13px;
   }
+  /* На телефоне нет наведения: «Записаться» видно сразу, иначе непонятно, что строка нажимается */
+  .prow {
+    grid-template-areas: 'main price' 'main time' 'main go';
+  }
   .prow-go {
-    display: none;
+    opacity: 1;
+    transform: none;
+    margin-top: 6px;
+  }
+  .prow-go::after {
+    content: ' →';
   }
   .viewer[open] {
     grid-template-columns: minmax(0, 1fr);
@@ -1695,6 +1754,22 @@ button {
   }
   .bk-svcs {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .bk-step.is-done {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'h edit' 'v v';
+    gap: 2px 12px;
+    padding: 14px 0 16px;
+  }
+  .bk-step.is-done .bk-h {
+    grid-area: h;
+  }
+  .bk-step.is-done .bk-val {
+    grid-area: v;
+    padding-left: 42px;
+  }
+  .bk-step.is-done .bk-edit {
+    grid-area: edit;
   }
   .sticky {
     display: flex;

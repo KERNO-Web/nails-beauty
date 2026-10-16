@@ -40,6 +40,12 @@ export function Booking() {
   const timeRef = useRef<HTMLDivElement>(null)
   const formRef = useRef<HTMLDivElement>(null)
   const ref = useRef<HTMLDivElement>(null)
+  // Заполненный шаг свёрнут в строку; «Изменить» раскрывает его, новый выбор сворачивает обратно
+  const [edit, setEdit] = useState({ svc: false, master: false, time: false })
+  const close = (k: keyof typeof edit) => setEdit((e) => ({ ...e, [k]: false }))
+  useEffect(() => close('svc'), [pick.serviceId])
+  useEffect(() => close('master'), [pick.masterId])
+  useEffect(() => close('time'), [pick.time])
 
   useEffect(() => {
     const el = ref.current
@@ -70,6 +76,7 @@ export function Booking() {
 
   function choose(t: number) {
     setPick({ time: t })
+    close('time')
     setErr((e) => ({ ...e, form: undefined }))
     if (innerWidth < 1024) setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120)
   }
@@ -97,6 +104,19 @@ export function Booking() {
 
   const when = pick.date && chosen ? `${dayLabel(pick.date)}, ${monthDay(pick.date)}, ${fmtTime(chosen.time)}` : ''
   const n = (i: number, ok: boolean) => <span className={`bn ${ok ? 'is-ok' : ''}`}>{i}</span>
+  const masterName = master?.name ?? (service && eligible.length === 1 ? eligible[0].name : 'любой свободный')
+  const row = (i: number, title: React.ReactNode, value: string, k: keyof typeof edit) => (
+    <div className="bk-step is-done" ref={i === 3 ? timeRef : undefined}>
+      <h3 className="bk-h">
+        {n(i, true)}
+        {title}
+      </h3>
+      <p className="bk-val">{value}</p>
+      <button className="bk-edit" onClick={() => setEdit((e) => ({ ...e, [k]: true }))}>
+        Изменить
+      </button>
+    </div>
+  )
 
   return (
     <section className="sec booking" id="booking" aria-labelledby="bk-h">
@@ -115,11 +135,14 @@ export function Booking() {
         ) : (
           <div className="bk rise">
             <div className="bk-steps">
+              {service && !edit.svc ? (
+                row(1, 'Услуга', `${service.title}, ${priceLabel(service)}`, 'svc')
+              ) : (
               <div className="bk-step">
                 <h3 className="bk-h">{n(1, !!service)}Услуга</h3>
                 <div className="bk-svcs" role="radiogroup" aria-label="Услуга">
                   {services.map((s) => (
-                    <button key={s.id} role="radio" aria-checked={s.id === pick.serviceId} className="opt" onClick={() => setPick({ serviceId: s.id })}>
+                    <button key={s.id} role="radio" aria-checked={s.id === pick.serviceId} className="opt" onClick={() => (setPick({ serviceId: s.id }), close('svc'))}>
                       <b>{s.title}</b>
                       <span>
                         {priceLabel(s)}, {fmtDuration(s.minutes)}
@@ -128,25 +151,33 @@ export function Booking() {
                   ))}
                 </div>
               </div>
+              )}
 
+              {service && !edit.master ? (
+                row(2, 'Мастер', masterName, 'master')
+              ) : (
               <div className={`bk-step ${service ? '' : 'is-off'}`}>
                 <h3 className="bk-h">{n(2, !!service)}Мастер</h3>
                 {service && eligible.length === 1 ? (
                   <p className="bk-hint">Эту услугу делает {eligible[0].name}.</p>
                 ) : (
                   <div className="pills" role="radiogroup" aria-label="Мастер">
-                    <button className="pill" role="radio" aria-checked={!pick.masterId} onClick={() => setPick({ masterId: null })}>
+                    <button className="pill" role="radio" aria-checked={!pick.masterId} onClick={() => (setPick({ masterId: null }), close('master'))}>
                       Любой свободный
                     </button>
                     {eligible.map((m) => (
-                      <button key={m.id} className="pill" role="radio" aria-checked={pick.masterId === m.id} onClick={() => setPick({ masterId: m.id })}>
+                      <button key={m.id} className="pill" role="radio" aria-checked={pick.masterId === m.id} onClick={() => (setPick({ masterId: m.id }), close('master'))}>
                         {m.name}
                       </button>
                     ))}
                   </div>
                 )}
               </div>
+              )}
 
+              {chosen && !edit.time ? (
+                row(3, <>День и&nbsp;время</>, when, 'time')
+              ) : (
               <div className={`bk-step ${service ? '' : 'is-off'}`} ref={timeRef}>
                 <h3 className="bk-h">
                   {n(3, !!chosen)}День и&nbsp;время
@@ -204,6 +235,7 @@ export function Booking() {
                   </>
                 )}
               </div>
+              )}
 
               <div className="bk-step" ref={formRef}>
                 <h3 className="bk-h">{n(4, !!(name.trim() && contact.trim()))}Контакты</h3>
@@ -236,7 +268,7 @@ export function Booking() {
                 </div>
                 <div>
                   <dt>Мастер</dt>
-                  <dd>{master?.name ?? (service && eligible.length === 1 ? eligible[0].name : 'любой свободный')}</dd>
+                  <dd>{masterName}</dd>
                 </div>
                 <div>
                   <dt>Когда</dt>

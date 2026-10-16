@@ -68,6 +68,7 @@ const NAV = [
   { id: 'prices', label: 'Цены' },
   { id: 'works', label: 'Работы' },
   { id: 'masters', label: 'Мастера' },
+  { id: 'booking', label: 'Запись' },
   { id: 'contacts', label: 'Контакты' },
 ]
 
@@ -147,8 +148,13 @@ function Hero() {
       <div className="hero-side">
         <p className="hero-lead">{studio.lead}</p>
         <div className="hero-cta">
-          <button className="btn is-orange is-big" onClick={() => book(pick)}>
-            {first ? `Записаться: ${dayPhrase(first.iso)} в\u00a0${fmtTime(first.time)}` : 'Выбрать время'}
+          <button className="btn is-orange is-big hero-btn" onClick={() => book(pick)}>
+            <span>{first ? `Записаться: ${dayPhrase(first.iso)} в\u00a0${fmtTime(first.time)}` : 'Выбрать время'}</span>
+            {first && (
+              <small>
+                {main.title.toLowerCase()}, {priceLabel(main)}
+              </small>
+            )}
           </button>
           <a className="link" href="#prices" onClick={go('prices')}>
             Цены от&nbsp;{minPrice.toLocaleString('ru-RU')}&nbsp;₽
