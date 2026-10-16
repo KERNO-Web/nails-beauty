@@ -121,8 +121,9 @@ function Header() {
 }
 
 /* ---------- Первый экран ----------
-   Три слоя одного кадра: размытый фон из бархатцев → огромный заголовок → рука без фона поверх заголовка.
-   Слои готовит scripts/cutout.mjs из фото салона (public/hero/bg.webp и hand.webp). */
+   Два одинаковых слоя одного фото и заголовок между ними: фото целиком → заголовок → только рука.
+   Слои совпадают пиксель в пиксель, поэтому рука «выходит» из того же кадра поверх букв.
+   Готовит scripts/cutout.mjs из фото салона (public/hero/photo.webp и hand.webp). */
 
 function Hero() {
   const first = useMemo(() => nearest(main.id), [])
@@ -131,7 +132,7 @@ function Hero() {
   const base = import.meta.env.BASE_URL
   return (
     <section className="hero" aria-labelledby="hero-h">
-      <img className="hero-bg" src={`${base}hero/bg.webp`} alt="" aria-hidden />
+      <img className="hero-layer hero-photo" src={`${base}hero/photo.webp`} alt="" aria-hidden fetchPriority="high" />
       <h1 id="hero-h" className="hero-h">
         <span className="hl-1">Маникюр</span>
         <span className="hl-2">
@@ -144,7 +145,7 @@ function Hero() {
           </span>
         </span>
       </h1>
-      <img className="hero-hand" src={`${base}hero/hand.webp`} alt="Рука с маникюром: бежевый миндаль с перламутром" fetchPriority="high" />
+      <img className="hero-layer hero-hand" src={`${base}hero/hand.webp`} alt="Рука с маникюром: бежевый миндаль с перламутром на фоне бархатцев" />
 
       <div className="hero-side">
         <p className="hero-lead">{studio.lead}</p>

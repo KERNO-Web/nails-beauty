@@ -145,23 +145,35 @@ button {
   background: var(--field-2);
   isolation: isolate;
 }
-.hero-bg {
+/* Оба слоя одного фото с одинаковой геометрией: обрезка (--py) и приближение от левого края (--zoom),
+   чтобы рука ушла вправо, а бархатцы слева остались под текстом */
+.hero-layer {
   position: absolute;
   inset: 0;
-  z-index: -2;
   width: 100%;
   height: 100%;
+  max-width: none;
   object-fit: cover;
+  object-position: 50% var(--py, 17%);
+  transform: scale(var(--zoom, 1.16));
+  transform-origin: 0 0;
+  pointer-events: none;
 }
-/* Затемнение слева, где текст, и снизу — чтобы рука «выходила» из темноты */
+.hero-photo {
+  z-index: -2;
+}
+.hero-hand {
+  z-index: 2;
+}
+/* Затемнение слева под текстом и снизу под кнопкой; рука на верхнем слое не затемняется */
 .hero::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
   background:
-    linear-gradient(90deg, rgb(8 14 5 / 0.82) 0%, rgb(8 14 5 / 0.45) 45%, rgb(8 14 5 / 0.1) 75%),
-    linear-gradient(0deg, rgb(8 14 5 / 0.7), transparent 35%);
+    linear-gradient(90deg, rgb(8 14 5 / 0.72) 0%, rgb(8 14 5 / 0.38) 40%, transparent 65%),
+    linear-gradient(0deg, rgb(8 14 5 / 0.75), transparent 38%);
 }
 .hero-h {
   position: absolute;
@@ -171,7 +183,7 @@ button {
   margin: 0;
   font-family: var(--display);
   font-weight: 700;
-  font-size: clamp(56px, 12.4vw, 214px);
+  font-size: clamp(56px, 10.6vw, 190px);
   line-height: 0.84;
   letter-spacing: -0.065em;
   color: var(--cream);
@@ -182,20 +194,7 @@ button {
 }
 .hl-2 {
   position: relative;
-  margin-left: clamp(0px, 17vw, 300px);
   width: max-content;
-}
-/* Рука поверх заголовка: «на пять» уходит за пальцы */
-.hero-hand {
-  position: absolute;
-  z-index: 2;
-  right: clamp(-40px, 1vw, 40px);
-  bottom: -14svh;
-  height: 104svh;
-  width: auto;
-  max-width: none;
-  filter: drop-shadow(0 30px 40px rgb(0 0 0 / 0.45));
-  pointer-events: none;
 }
 .grade {
   position: absolute;
@@ -264,11 +263,8 @@ button {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .hero-bg {
-    animation: bg-in 1.6s var(--ease) both;
-  }
-  .hero-hand {
-    animation: hand-in 1.3s var(--ease) 0.15s both;
+  .hero-layer {
+    animation: layer-in 1.6s var(--ease) both;
   }
   .hl-1,
   .hl-2 {
@@ -288,14 +284,8 @@ button {
     animation: up 0.9s var(--ease) 0.25s both;
   }
 }
-@keyframes bg-in {
+@keyframes layer-in {
   from {
-    transform: scale(1.08);
-  }
-}
-@keyframes hand-in {
-  from {
-    transform: translateY(8%);
     opacity: 0;
   }
 }
@@ -317,14 +307,6 @@ button {
   }
 }
 
-/* Ноутбуки: рука относительно крупнее заголовка — уменьшаем и отодвигаем, чтобы «на пять» читалось */
-@media (min-width: 901px) and (max-width: 1280px) {
-  .hero-hand {
-    right: -7vw;
-    height: 90svh;
-    bottom: -10svh;
-  }
-}
 
 @media (max-width: 900px) {
   .nav,
@@ -337,10 +319,10 @@ button {
   .hl-2 {
     margin-left: 0;
   }
-  .hero-hand {
-    right: -18vw;
-    bottom: 20svh;
-    height: 66svh;
+  /* Телефон вертикальный, как фото: кадр по высоте влезает целиком, руку двигаем приближением и по горизонтали */
+  .hero-layer {
+    --zoom: 1.18;
+    object-position: 34% 0;
   }
   .hero::before {
     background:
