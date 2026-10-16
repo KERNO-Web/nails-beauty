@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 /** Шрифты первого экрана и заголовков — грузятся вместе со страницей (rel=preload), а не после CSS.
  * Иначе браузер сначала рисует системный шрифт и текст «перескакивает», когда приходит нужный */
-const PRELOAD_FONTS = /^(prata-(cyrillic|latin)-400-normal|manrope-(cyrillic|latin)-wght-normal)-.*\.woff2$/;
+const PRELOAD_FONTS = /^onest-(cyrillic|latin)-wght-normal-.*\.woff2$/
 
 function preloadFonts(): Plugin {
   let base = './'

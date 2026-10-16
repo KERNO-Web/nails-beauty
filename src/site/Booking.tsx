@@ -1,17 +1,17 @@
 // Онлайн-запись: услуга → мастер (если их несколько) → день и время → контакты.
 // Свободное время — lib/slots.ts. Куда уходит запись — lib/backend.ts (сейчас демо: браузер).
-// При внешней записи или записи через мессенджер своей сетки времени нет — только понятный вход.
+// При внешней записи или записи через мессенджер своей сетки времени нет, только понятный вход.
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { isDemo } from '../data/site'
 import type { Booking as BookingT, Data } from '../data/types'
 import { backendFor } from '../lib/backend'
 import { maskTyping, parseContact } from '../lib/contact'
+import { Check, ChevronLeft, ChevronRight } from '../lib/icons'
 import { remindHours } from '../lib/push'
 import { resetSelection, select, useSelection } from '../lib/selection'
 import { canDo, dateOf, dayFull, dayHuman, daySlots, daysAhead, fmtDuration, fmtTime, monthName, plural, priceLabel, studioToUtc, WD_SHORT, weekdayOf } from '../lib/slots'
-import { Photo } from '../lib/ui'
 import { RemindCard } from '../notify/Remind'
-import { Arrow, bookingRoute, Chevron, Out, useEnter } from './common'
+import { bookingRoute, Out, telHref, useEnter } from './common'
 
 const PARTS = [
   { label: 'Утро', to: 12 * 60 },
@@ -19,43 +19,30 @@ const PARTS = [
   { label: 'Вечер', to: 24 * 60 },
 ]
 
-const Tick = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-    <path d="M5 12.5l4.5 4.5L19 7.5" />
-  </svg>
-)
-
 export function Booking({ data }: { data: Data }) {
   const s = data.studio
   const route = bookingRoute(s)
   const ref = useEnter<HTMLDivElement>()
-  const phoneHref = s.phone ? `tel:${s.phone.replace(/[^\d+]/g, '')}` : ''
-  const head = (title: string, lead: React.ReactNode) => (
-    <div className="sec-head">
-      <p className="tag rise">Онлайн-запись</p>
-      <h2 className="d-lg rise" id="bk-h">
-        {title}
-      </h2>
-      <p className="lead rise">{lead}</p>
-    </div>
-  )
 
   if (route.kind === 'link')
     return (
-      <section className="bk" id="booking" aria-labelledby="bk-h">
+      <section className="sec bk" id="booking" aria-labelledby="bk-h">
         <div className="wrap" ref={ref}>
-          {head(
-            'Запишитесь за минуту',
-            s.booking?.mode === 'messenger' ? <>Напишите {route.via}&nbsp;— мастер предложит свободное время и&nbsp;подтвердит запись.</> : <>Свободное время и&nbsp;запись&nbsp;— {route.via}. Подтверждение придёт туда&nbsp;же.</>,
-          )}
           <div className="bk-entry rise">
-            <div>
-              <p className="d-md">Записаться {route.via}</p>
-              <p className="bk-entry-note">{s.phone ? <>Или позвоните: <a href={phoneHref}>{s.phone}</a></> : 'Откроется в новой вкладке.'}</p>
+            <h2 className="h2" id="bk-h">
+              Запись {route.via}
+            </h2>
+            <p className="bk-lead">{s.booking?.mode === 'messenger' ? 'Напишите нам, мастер предложит свободное время и подтвердит запись.' : 'Там видно свободное время мастеров. Подтверждение придёт туда же.'}</p>
+            <div className="bk-entry-actions">
+              <a className="btn is-accent" href={route.url} target="_blank" rel="noreferrer">
+                Открыть {route.label} <Out />
+              </a>
+              {s.phone && (
+                <a className="btn is-line" href={telHref(s.phone)}>
+                  {s.phone}
+                </a>
+              )}
             </div>
-            <a className="btn-a is-light" href={route.url} target="_blank" rel="noreferrer">
-              Открыть {route.label} <Out />
-            </a>
           </div>
         </div>
       </section>
@@ -63,25 +50,34 @@ export function Booking({ data }: { data: Data }) {
 
   if (!data.services.length || !data.masters.length)
     return (
-      <section className="bk" id="booking" aria-labelledby="bk-h">
+      <section className="sec bk" id="booking" aria-labelledby="bk-h">
         <div className="wrap" ref={ref}>
-          {head('Запись', 'Онлайн-запись откроется, когда студия добавит услуги и график мастеров.')}
-          {s.phone && (
-            <div className="bk-entry rise">
-              <p className="d-md">Пока&nbsp;— по&nbsp;телефону</p>
-              <a className="btn-a is-light" href={phoneHref}>
-                {s.phone}
+          <div className="bk-entry rise">
+            <h2 className="h2" id="bk-h">
+              Запись
+            </h2>
+            <p className="bk-lead">Онлайн-запись откроется, когда студия добавит услуги и график мастеров.</p>
+            {s.phone && (
+              <a className="btn is-accent" href={telHref(s.phone)}>
+                Позвонить: {s.phone}
               </a>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </section>
     )
 
   return (
-    <section className="bk" id="booking" aria-labelledby="bk-h">
+    <section className="sec bk" id="booking" aria-labelledby="bk-h">
       <div className="wrap" ref={ref}>
-        {head('Выберите удобное время', <>Видно только свободное время мастеров на&nbsp;{s.horizonDays}&nbsp;{plural(s.horizonDays, 'день', 'дня', 'дней')} вперёд. Без звонков и&nbsp;переписки.</>)}
+        <div className="bk-head rise">
+          <h2 className="h2" id="bk-h">
+            Запись
+          </h2>
+          <p className="bk-lead">
+            Видно только свободное время мастеров на {s.horizonDays}&nbsp;{plural(s.horizonDays, 'день', 'дня', 'дней')} вперёд. Без звонков и&nbsp;переписки.
+          </p>
+        </div>
         <NativeBooking data={data} />
       </div>
     </section>
@@ -182,34 +178,33 @@ function NativeBooking({ data }: { data: Data }) {
 
   const whenText = sel.date && chosenSlot ? `${dayHuman(sel.date)}, ${fmtTime(chosenSlot.time)}` : ''
   const masterLabel = master?.name ?? (eligible.length === 1 ? eligible[0].name : 'любой свободный')
+  const step = (n: number, doneStep: boolean) => <span className={`bk-n ${doneStep ? 'is-done' : ''}`}>{doneStep ? <Check size={14} /> : n}</span>
 
   return (
     <>
-      <div className="bk-card rise">
+      <div className="bk-panel rise">
         <div className="bk-steps">
-          {/* Услуга */}
           <div className="bk-step">
             <h3 className="bk-step-h">
-              <span className={`bk-dot ${service ? 'is-done' : ''}`}>{service ? <Tick /> : '1'}</span>
+              {step(1, !!service)}
               Услуга
             </h3>
-            <div className="bk-services" role="radiogroup" aria-label="Услуга">
+            <div className="bk-svcs" role="radiogroup" aria-label="Услуга">
               {data.services.map((x) => (
                 <button key={x.id} role="radio" aria-checked={x.id === sel.serviceId} className="bk-svc" onClick={() => select({ serviceId: x.id })}>
                   <b>{x.title}</b>
                   <span className="num">
-                    {priceLabel(x)} · {fmtDuration(x.minutes)}
+                    {priceLabel(x)}, {fmtDuration(x.minutes)}
                   </span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Мастер */}
           {multi && (
             <div className={`bk-step ${service ? '' : 'is-off'}`}>
               <h3 className="bk-step-h">
-                <span className={`bk-dot ${service ? 'is-done' : ''}`}>{service ? <Tick /> : '2'}</span>
+                {step(2, !!service)}
                 Мастер
               </h3>
               {service && eligible.length === 1 ? (
@@ -217,39 +212,23 @@ function NativeBooking({ data }: { data: Data }) {
               ) : service && eligible.length === 0 ? (
                 <p className="bk-hint">Эту услугу сейчас никто не делает. Выберите другую или позвоните в&nbsp;студию.</p>
               ) : (
-                <div className="bk-masters" role="radiogroup" aria-label="Мастер">
-                  <button className="bk-mp" role="radio" aria-checked={!sel.masterId} onClick={() => select({ masterId: null })}>
-                    <span className="bk-mp-pic is-any" aria-hidden>
-                      {eligible.length}
-                    </span>
-                    <span>
-                      <b>Любой мастер</b>
-                      <small>больше свободных окон</small>
-                    </span>
+                <div className="bk-ms" role="radiogroup" aria-label="Мастер">
+                  <button className="pill" role="radio" aria-checked={!sel.masterId} onClick={() => select({ masterId: null })}>
+                    Любой, больше окон
                   </button>
-                  {eligible.map((m) => {
-                    const pic = m.photo ?? data.works.find((w) => w.masterId === m.id)?.photo
-                    return (
-                      <button key={m.id} className="bk-mp" role="radio" aria-checked={sel.masterId === m.id} onClick={() => select({ masterId: m.id })}>
-                        <span className="bk-mp-pic" aria-hidden>
-                          {pic ? <Photo photo={pic} w={100} sizes="48px" alt="" loading="lazy" /> : m.name.charAt(0)}
-                        </span>
-                        <span>
-                          <b>{m.name}</b>
-                          <small>{m.role}</small>
-                        </span>
-                      </button>
-                    )
-                  })}
+                  {eligible.map((m) => (
+                    <button key={m.id} className="pill" role="radio" aria-checked={sel.masterId === m.id} onClick={() => select({ masterId: m.id })}>
+                      {m.name}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
           )}
 
-          {/* День и время */}
           <div className={`bk-step ${service ? '' : 'is-off'}`} ref={timeRef}>
             <h3 className="bk-step-h">
-              <span className={`bk-dot ${chosenSlot ? 'is-done' : ''}`}>{chosenSlot ? <Tick /> : multi ? '3' : '2'}</span>
+              {step(multi ? 3 : 2, !!chosenSlot)}
               День и&nbsp;время
               {!service && <span className="bk-step-note">сначала выберите услугу</span>}
             </h3>
@@ -257,7 +236,14 @@ function NativeBooking({ data }: { data: Data }) {
               <p className="bk-hint">
                 На&nbsp;ближайшие {data.studio.horizonDays}&nbsp;{plural(data.studio.horizonDays, 'день', 'дня', 'дней')} свободного времени нет.
                 {multi && sel.masterId ? ' Попробуйте «Любой мастер».' : ''}
-                {data.studio.phone ? <> Позвоните&nbsp;— <a href={`tel:${data.studio.phone.replace(/[^\d+]/g, '')}`}>{data.studio.phone}</a>.</> : ''}
+                {data.studio.phone ? (
+                  <>
+                    {' '}
+                    Позвоните: <a href={telHref(data.studio.phone)}>{data.studio.phone}</a>.
+                  </>
+                ) : (
+                  ''
+                )}
               </p>
             ) : (
               <>
@@ -267,12 +253,12 @@ function NativeBooking({ data }: { data: Data }) {
                     {freeCount === 0 ? (
                       <div className="bk-none">
                         <span>
-                          {slots.length ? `На ${dayHuman(sel.date)} всё занято.` : `${dayFull(sel.date)} — выходной.`}
-                          {nextFree ? ` Ближайшее свободное — ${dayHuman(nextFree.iso)}.` : ''}
+                          {slots.length ? `На ${dayHuman(sel.date)} всё занято.` : `${dayFull(sel.date)}: выходной.`}
+                          {nextFree ? ` Ближайшее свободное: ${dayHuman(nextFree.iso)}.` : ''}
                         </span>
                         {nextFree && (
-                          <button className="btn-a is-line is-sm" onClick={() => select({ date: nextFree.iso })}>
-                            Показать {dayHuman(nextFree.iso)} <Arrow size={15} />
+                          <button className="btn is-line is-sm" onClick={() => select({ date: nextFree.iso })}>
+                            Показать
                           </button>
                         )}
                       </div>
@@ -304,17 +290,15 @@ function NativeBooking({ data }: { data: Data }) {
             )}
           </div>
 
-          {/* Контакты */}
           <div className="bk-step" ref={contactsRef}>
             <h3 className="bk-step-h">
-              <span className={`bk-dot ${name.trim() && contact.trim() ? 'is-done' : ''}`}>{name.trim() && contact.trim() ? <Tick /> : multi ? '4' : '3'}</span>
+              {step(multi ? 4 : 3, !!(name.trim() && contact.trim()))}
               Как с&nbsp;вами связаться
             </h3>
             <div className="bk-fields">
               <label className="bk-field">
                 <span>Имя</span>
                 <input
-                  id="bk-name"
                   ref={nameRef}
                   className="bk-input"
                   aria-invalid={!!errors.name}
@@ -322,7 +306,6 @@ function NativeBooking({ data }: { data: Data }) {
                   value={name}
                   onChange={(e) => (setName(e.target.value), errors.name && setErrors({ ...errors, name: undefined }))}
                   autoComplete="given-name"
-                  placeholder="Как к вам обращаться"
                   enterKeyHint="next"
                 />
                 {errors.name && (
@@ -334,31 +317,34 @@ function NativeBooking({ data }: { data: Data }) {
               <label className="bk-field">
                 <span>Телефон или&nbsp;Telegram</span>
                 <input
-                  id="bk-contact"
                   ref={contactRef}
                   className="bk-input num"
                   aria-invalid={!!errors.contact}
-                  aria-describedby={errors.contact ? 'bk-contact-err' : undefined}
+                  aria-describedby={errors.contact ? 'bk-contact-err' : 'bk-contact-help'}
                   value={contact}
                   onChange={(e) => (setContact(maskTyping(e.target.value)), errors.contact && setErrors({ ...errors, contact: undefined }))}
                   autoComplete="tel"
                   inputMode={/^[@a-zA-Z]/.test(contact) ? 'text' : 'tel'}
-                  placeholder="+7 (900) 000-00-00 или @ник"
                   enterKeyHint="done"
                 />
-                {errors.contact && (
+                {errors.contact ? (
                   <span className="bk-err" id="bk-contact-err">
                     {errors.contact}
+                  </span>
+                ) : (
+                  <span className="bk-help" id="bk-contact-help">
+                    +7 900 000-00-00 или @ник
                   </span>
                 )}
               </label>
               {showNote ? (
                 <label className="bk-field is-wide">
                   <span>Пожелание мастеру</span>
-                  <textarea className="bk-input" rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Например: хочу как на фото, пришлю в Telegram" autoFocus />
+                  <textarea className="bk-input" rows={3} value={note} onChange={(e) => setNote(e.target.value)} autoFocus />
+                  <span className="bk-help">Например: хочу как на фото, пришлю в Telegram</span>
                 </label>
               ) : (
-                <button className="u-link bk-note-btn" onClick={() => setShowNote(true)}>
+                <button className="bk-more" onClick={() => setShowNote(true)}>
                   + Пожелание мастеру
                 </button>
               )}
@@ -392,17 +378,17 @@ function NativeBooking({ data }: { data: Data }) {
           </dl>
           <p className="bk-total">
             <span>Стоимость</span>
-            <b className="num">{service ? priceLabel(service) : '—'}</b>
+            <b className="num">{service ? priceLabel(service) : '0 ₽'}</b>
           </p>
           <p className="bk-form-err" role="alert">
             {errors.form ?? ''}
           </p>
-          <button className="btn-a is-light bk-submit" onClick={submit} disabled={!service || busy} aria-busy={busy}>
+          <button className="btn is-accent is-wide bk-submit" onClick={submit} disabled={!service || busy} aria-busy={busy}>
             {busy ? 'Записываем…' : !service ? 'Выберите услугу' : !ready ? 'Выберите время' : 'Записаться'}
           </button>
           <p className="bk-fine">{data.studio.confirmNote}</p>
           <p className="bk-fine is-dim">
-            Время&nbsp;— по&nbsp;часам студии{data.studio.city ? ` (${data.studio.city})` : ''}. Нажимая «Записаться», вы соглашаетесь на&nbsp;обработку имени и&nbsp;контакта для связи по&nbsp;этой записи.
+            Время по&nbsp;часам студии{data.studio.city ? ` (${data.studio.city})` : ''}. Нажимая «Записаться», вы соглашаетесь на&nbsp;обработку имени и&nbsp;контакта для связи по&nbsp;этой записи.
           </p>
           {isDemo && backend.kind === 'local-demo' && <p className="bk-demo">Демо: запись сохранится только в&nbsp;этом браузере и&nbsp;не&nbsp;уйдёт мастеру; часть окон занята для примера.</p>}
         </aside>
@@ -411,8 +397,6 @@ function NativeBooking({ data }: { data: Data }) {
     </>
   )
 }
-
-/* ---------- Лента дат ---------- */
 
 function DateStrip({ days, value, disabled, onChange }: { days: ReturnType<typeof daysAhead>; value: string | null; disabled: boolean; onChange: (iso: string) => void }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -434,15 +418,15 @@ function DateStrip({ days, value, disabled, onChange }: { days: ReturnType<typeo
   }, [value])
   useEffect(onScroll, [])
   return (
-    <div className={`bk-dates ${edge.start ? '' : 'has-before'} ${edge.end ? '' : 'has-after'}`}>
+    <div className="bk-dates">
       <div className="bk-dates-h">
         <b>{month}</b>
         <span>
           <button onClick={() => ref.current?.scrollBy({ left: -280, behavior: 'smooth' })} disabled={edge.start} aria-label="Раньше">
-            <Chevron dir="left" size={18} />
+            <ChevronLeft size={18} />
           </button>
           <button onClick={() => ref.current?.scrollBy({ left: 280, behavior: 'smooth' })} disabled={edge.end} aria-label="Позже">
-            <Chevron size={18} />
+            <ChevronRight size={18} />
           </button>
         </span>
       </div>
@@ -471,8 +455,6 @@ function DateStrip({ days, value, disabled, onChange }: { days: ReturnType<typeo
   )
 }
 
-/* ---------- Нижняя панель на телефоне ---------- */
-
 function BookBar({ service, when, price, ready, busy, error, onSubmit }: { service?: string; when?: string; price?: string; ready: boolean; busy: boolean; error?: string; onSubmit: () => void }) {
   const [inView, setInView] = useState(false)
   const [typing, setTyping] = useState(false)
@@ -490,23 +472,21 @@ function BookBar({ service, when, price, ready, busy, error, onSubmit }: { servi
   const on = inView && !typing && !!service
   if (!service) return null
   return (
-    <div className={`bookbar ${on ? 'is-on' : ''}`} aria-hidden={!on}>
-      <div className="bookbar-t">
+    <div className={`bar ${on ? 'is-on' : ''}`} aria-hidden={!on}>
+      <div className="bar-t">
         <b>{service}</b>
-        <span className={error ? 'is-err' : ''}>{error ?? (when ? `${when} · ${price}` : 'Выберите время')}</span>
+        <span className={error ? 'is-err' : ''}>{error ?? (when ? `${when}, ${price}` : 'Выберите время')}</span>
       </div>
-      <button className="btn-a" onClick={onSubmit} tabIndex={on ? 0 : -1} disabled={busy}>
+      <button className="btn is-accent" onClick={onSubmit} tabIndex={on ? 0 : -1} disabled={busy}>
         {ready ? 'Записаться' : 'Время'}
       </button>
     </div>
   )
 }
 
-/* ---------- Готово ---------- */
-
 function icsFor(data: Data, b: BookingT) {
   const s = data.services.find((x) => x.id === b.serviceId)
-  // Время — в UTC: календарь телефона в другом часовом поясе покажет визит правильно
+  // Время в UTC: календарь телефона в другом часовом поясе покажет визит правильно
   const utc = (min: number) => studioToUtc(b.date, min).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
   const text = [
     'BEGIN:VCALENDAR',
@@ -517,7 +497,7 @@ function icsFor(data: Data, b: BookingT) {
     `DTSTAMP:${utc(0).slice(0, 8)}T000000Z`,
     `DTSTART:${utc(b.start)}`,
     `DTEND:${utc(b.start + b.minutes)}`,
-    `SUMMARY:${s?.title ?? 'Маникюр'} — ${data.studio.name}`,
+    `SUMMARY:${s?.title ?? 'Маникюр'}, ${data.studio.name}`,
     `LOCATION:${[data.studio.city, data.studio.address].filter(Boolean).join(', ').replace(/,/g, '\\,')}`,
     ...remindHours(data.studio).flatMap((h) => ['BEGIN:VALARM', `TRIGGER:-PT${h}H`, 'ACTION:DISPLAY', 'DESCRIPTION:Напоминание о записи', 'END:VALARM']),
     'END:VEVENT',
@@ -535,23 +515,23 @@ function Done({ data, booking, demo, onAgain }: { data: Data; booking: BookingT;
   const s = data.services.find((x) => x.id === booking.serviceId)
   const m = data.masters.find((x) => x.id === booking.masterId)
   return (
-    <div className="bk-done" role="status">
+    <div className="bk-done rise" role="status">
       <div className="bk-done-main">
         <p className="bk-done-k">{demo ? 'Демо: запись сохранена в этом браузере' : 'Запись отправлена мастеру'}</p>
-        <h3 className="d-md">{booking.name}, вы&nbsp;записаны</h3>
-        <p className="lead">{data.studio.confirmNote}</p>
+        <h3 className="h3">{booking.name}, вы&nbsp;записаны</h3>
+        <p className="bk-lead">{data.studio.confirmNote}</p>
         <div className="bk-done-actions">
-          <button className="btn-a" onClick={() => icsFor(data, booking)}>
+          <button className="btn is-accent" onClick={() => icsFor(data, booking)}>
             Добавить в&nbsp;календарь
           </button>
           {data.studio.telegram && (
-            <a className="btn-a is-line" href={`https://t.me/${data.studio.telegram}`} target="_blank" rel="noreferrer">
+            <a className="btn is-line" href={`https://t.me/${data.studio.telegram.replace(/^@/, '')}`} target="_blank" rel="noreferrer">
               Написать мастеру <Out />
             </a>
           )}
         </div>
         <RemindCard data={data} booking={booking} />
-        <button className="u-link" onClick={onAgain}>
+        <button className="bk-more" onClick={onAgain}>
           Записаться ещё на&nbsp;одну услугу
         </button>
       </div>

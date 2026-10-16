@@ -1,8 +1,10 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Booking } from './site/Booking'
-import { Contact, Reviews, StickyCta } from './site/Bottom'
-import { Masters, Services, Works } from './site/Showcase'
-import { Header, Hero } from './site/Top'
+import { Contact, Reviews, StickyBar } from './site/Bottom'
+import { Header, Hero } from './site/Hero'
+import { Masters } from './site/Masters'
+import { Services } from './site/Services'
+import { Works } from './site/Works'
 import { RemindPrompt } from './notify/Remind'
 import { useData } from './lib/store'
 import { useMediaVersion } from './lib/media'
@@ -23,16 +25,16 @@ function useRoute() {
 
 export default function App() {
   const data = useData()
-  // Фото, загруженные с устройства, читаются из базы после старта — перерисовываем страницу, когда готовы
+  // Фото, загруженные с устройства, читаются из базы после старта: перерисовываем страницу, когда готовы
   useMediaVersion()
   const route = useRoute()
-  // Ставим на рабочий стол сайт или кабинет — у каждого свой манифест (имя, иконка, стартовая страница)
+  // Ставим на рабочий стол сайт или кабинет: у каждого свой манифест (имя, иконка, стартовая страница)
   useAdminManifest(route === 'admin')
 
-  // Тема — на <html>, чтобы её видели все слои (и окна поверх страницы); кабинет — в тех же цветах
+  // Тема на <html>, чтобы её видели все слои (и окна поверх страницы); кабинет в тех же цветах
   useEffect(() => applyTheme(data.theme), [data.theme])
   useEffect(() => {
-    document.title = route === 'admin' ? `Кабинет — ${data.studio.name}` : `${data.studio.name} — маникюр и педикюр, онлайн-запись`
+    document.title = route === 'admin' ? `Кабинет: ${data.studio.name}` : `${data.studio.name}: маникюр и педикюр, онлайн-запись`
   }, [data.studio.name, route])
 
   useEffect(() => {
@@ -62,7 +64,7 @@ function Site() {
         <Reviews data={data} />
       </main>
       <Contact data={data} />
-      <StickyCta data={data} />
+      <StickyBar data={data} />
       <RemindPrompt data={data} />
     </div>
   )

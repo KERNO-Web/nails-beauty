@@ -1,116 +1,57 @@
-// Отзывы (цитата + честные цифры студии), контакты и подвал, плавающая кнопка записи на телефоне
-import { useEffect, useState } from 'react'
-import type { Data, Review } from '../data/types'
+// Отзывы, контакты и плавающая кнопка записи на телефоне
+import { useEffect, useMemo, useState } from 'react'
+import type { Data } from '../data/types'
+import { Phone, Telegram, VK, WhatsApp } from '../lib/icons'
 import { fmtRating, reviewsCount, reviewsSource, routeUrl } from '../lib/place'
-import { dateOf, hoursSummary, MONTHS_NOM, plural } from '../lib/slots'
-import { scrollToId, typo } from '../lib/ui'
-import { Arrow, book, bookingRoute, bookLink, Chevron, Out, Pin, useEnter } from './common'
+import { dateOf, fmtTime, hoursSummary } from '../lib/slots'
+import { typo } from '../lib/ui'
+import { book, bookingRoute, dayShort, mainService, nextWindows, Out, telHref, useEnter } from './common'
 
-function reviewDate(iso: string) {
-  const d = dateOf(iso)
-  return `${MONTHS_NOM[d.getMonth()].toLowerCase()} ${d.getFullYear()}`
-}
-
-/** Отмеченный featured первым, дальше — свежие */
-function order(list: Review[]) {
-  const byDate = [...list].sort((a, b) => b.date.localeCompare(a.date))
-  const lead = byDate.find((r) => r.featured) ?? byDate[0]
-  return [lead, ...byDate.filter((r) => r !== lead)]
-}
+const MONTHS_GEN = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
 
 export function Reviews({ data }: { data: Data }) {
-  const [i, setI] = useState(0)
   const ref = useEnter<HTMLDivElement>()
   const src = reviewsSource(data.studio)
-  if (!data.reviews.length && !src) return null
-  const list = data.reviews.length ? order(data.reviews) : []
-  const r = list[i % Math.max(1, list.length)]
-  const allDemo = list.length > 0 && list.every((x) => x.demo)
-  // Цифры — только из данных студии: рейтинг и количество на картах, если указаны со ссылкой; остальное — что есть на сайте
-  const stats = [
-    src?.rating ? { n: fmtRating(src.rating), t: `оценка в ${src.name}${src.count ? `, ${reviewsCount(src.count)}` : ''}`, href: src.url } : null,
-    data.works.length ? { n: String(data.works.length), t: `${plural(data.works.length, 'работа', 'работы', 'работ')} в портфолио` } : null,
-    data.masters.length ? { n: String(data.masters.length), t: plural(data.masters.length, 'мастер', 'мастера', 'мастеров') } : null,
-    data.services.length ? { n: String(data.services.length), t: `${plural(data.services.length, 'услуга', 'услуги', 'услуг')} с ценами на сайте` } : null,
-  ].filter(Boolean).slice(0, 3) as { n: string; t: string; href?: string }[]
+  const list = [...data.reviews].sort((a, b) => Number(!!b.featured) - Number(!!a.featured) || b.date.localeCompare(a.date))
+  if (!list.length && !src) return null
+  const demo = list.some((r) => r.demo)
   return (
-    <section className="rv" id="reviews" aria-labelledby="rv-h">
-      <div className="wrap rv-in" ref={ref}>
-        <div className="rv-main">
-          <p className="tag rise">Отзывы</p>
-          <h2 className="sr-only" id="rv-h">
+    <section className="sec rev" id="reviews" aria-labelledby="rev-h">
+      <div className="wrap" ref={ref}>
+        <div className="rev-head rise">
+          <h2 className="h2" id="rev-h">
             Отзывы
           </h2>
-          {r ? (
-            <figure className="rv-quote rise" key={r.id}>
-              <blockquote>
-                <p>{typo(r.text.replace(/«/g, '„').replace(/»/g, '“'))}</p>
-              </blockquote>
-              <figcaption>
-                <span className="rv-avatar" aria-hidden>
-                  {r.name.charAt(0)}
-                </span>
-                <span>
-                  <b>{r.name}</b>
-                  <span>
-                    {[r.service, reviewDate(r.date)].filter(Boolean).join(' · ')}
-                    {r.source && (
-                      <>
-                        {' · '}
-                        {r.url ? (
-                          <a href={r.url} target="_blank" rel="noreferrer">
-                            {r.source}
-                          </a>
-                        ) : (
-                          r.source
-                        )}
-                      </>
-                    )}
-                  </span>
-                </span>
-              </figcaption>
-            </figure>
-          ) : (
-            <p className="d-md rise">Отзывы клиентов&nbsp;— в&nbsp;{src!.name}</p>
+          {src && (
+            <a className="rev-src" href={src.url} target="_blank" rel="noreferrer">
+              {src.rating ? <b className="num">{fmtRating(src.rating)}</b> : null}
+              <span>
+                {src.count ? reviewsCount(src.count) : 'Все отзывы'} на&nbsp;{src.name} <Out />
+              </span>
+            </a>
           )}
-          <div className="rv-nav rise">
-            {list.length > 1 && (
-              <>
-                <button onClick={() => setI((i - 1 + list.length) % list.length)} aria-label="Предыдущий отзыв">
-                  <Chevron dir="left" />
-                </button>
-                <span className="num" aria-live="polite">
-                  {(i % list.length) + 1} / {list.length}
-                </span>
-                <button onClick={() => setI((i + 1) % list.length)} aria-label="Следующий отзыв">
-                  <Chevron />
-                </button>
-              </>
-            )}
-            {src && (
-              <a className="u-link rv-src" href={src.url} target="_blank" rel="noreferrer">
-                Все отзывы в&nbsp;{src.name} <Out size={13} />
-              </a>
-            )}
-          </div>
-          {allDemo && <p className="rv-demo rise">Примеры отзывов для демонстрации сайта: студия и&nbsp;клиенты вымышлены.</p>}
         </div>
-        {stats.length > 0 && (
-          <ul className="rv-stats">
-            {stats.map((x) => (
-              <li key={x.t} className="rise">
-                <b className="num">{x.n}</b>
-                {x.href ? (
-                  <a href={x.href} target="_blank" rel="noreferrer">
-                    {x.t}
-                  </a>
-                ) : (
-                  <span>{x.t}</span>
-                )}
-              </li>
-            ))}
+        {list.length > 0 && (
+          <ul className="rev-list rise">
+            {list.map((r) => {
+              const d = dateOf(r.date)
+              return (
+                <li key={r.id} className="rev-card">
+                  <blockquote>{typo(r.text)}</blockquote>
+                  <p className="rev-by">
+                    <b>{r.name}</b>
+                    <span>
+                      {r.service}, {d.getDate()} {MONTHS_GEN[d.getMonth()]}
+                      {r.source ? `, ${r.source}` : ''}
+                    </span>
+                    {r.demo && <em>пример</em>}
+                  </p>
+                </li>
+              )
+            })}
           </ul>
         )}
+        {demo && <p className="rev-fine">Отзывы с пометкой «пример» показывают, как будет выглядеть блок. У настоящей студии здесь её отзывы с карт.</p>}
       </div>
     </section>
   )
@@ -119,129 +60,106 @@ export function Reviews({ data }: { data: Data }) {
 export function Contact({ data }: { data: Data }) {
   const s = data.studio
   const ref = useEnter<HTMLDivElement>()
-  const hours = data.masters.length ? hoursSummary(data) : []
-  const native = bookingRoute(s).kind === 'native'
-  const hasMap = s.map[0] !== 0 || !!s.routeUrl
+  const hours = hoursSummary(data)
   const links = [
-    s.telegram && { href: `https://t.me/${s.telegram.replace(/^@/, '')}`, label: 'Telegram' },
-    s.whatsapp && { href: `https://wa.me/${s.whatsapp.replace(/\D/g, '')}`, label: 'WhatsApp' },
-    s.vk && { href: /^https?:/.test(s.vk) ? s.vk : `https://vk.com/${s.vk}`, label: 'ВКонтакте' },
-  ].filter(Boolean) as { href: string; label: string }[]
+    s.telegram && { href: `https://t.me/${s.telegram.replace(/^@/, '')}`, label: 'Telegram', icon: <Telegram /> },
+    s.whatsapp && { href: `https://wa.me/${s.whatsapp.replace(/\D/g, '')}`, label: 'WhatsApp', icon: <WhatsApp /> },
+    s.vk && { href: `https://vk.com/${s.vk}`, label: 'ВКонтакте', icon: <VK /> },
+  ].filter(Boolean) as { href: string; label: string; icon: React.ReactNode }[]
   return (
-    <footer className="ct" id="contacts" aria-labelledby="ct-h">
+    <footer className="ft" id="contacts" aria-labelledby="ft-h">
       <div className="wrap" ref={ref}>
-        <div className="sec-head">
-          <p className="tag rise">Контакты</p>
-          <h2 className="d-lg rise" id="ct-h">
-            Как нас найти
-          </h2>
-        </div>
-        <div className="ct-grid">
-          <div className="ct-card rise">
-            {s.address && (
-              <div className="ct-addr">
-                <Pin size={22} />
-                <div>
-                  <p className="ct-addr-v">{s.address}</p>
-                  <p className="small">{[s.city, s.addressNote].filter(Boolean).join('. ')}</p>
-                </div>
-              </div>
-            )}
-            <div className="ct-btns">
-              {hasMap && (
-                <a className="btn-a" href={routeUrl(s)} target="_blank" rel="noreferrer">
-                  Построить маршрут <Out />
+        <h2 className="sr-only" id="ft-h">
+          Контакты
+        </h2>
+        <div className="ft-grid">
+          <div className="ft-main rise">
+            {s.city && <p className="ft-city">{s.city}</p>}
+            <p className="ft-addr">{s.address || s.name}</p>
+            {s.addressNote && <p className="ft-note">{typo(s.addressNote)}</p>}
+            <div className="ft-actions">
+              {s.address && (
+                <a className="btn is-ink" href={routeUrl(s)} target="_blank" rel="noreferrer">
+                  Построить маршрут
                 </a>
               )}
               {s.phone && (
-                <a className="btn-a is-line num" href={`tel:${s.phone.replace(/[^\d+]/g, '')}`}>
-                  {s.phone}
+                <a className="btn is-line" href={telHref(s.phone)}>
+                  <Phone size={18} /> <span className="num">{s.phone}</span>
                 </a>
               )}
             </div>
-            {links.length > 0 && (
-              <div className="ct-links">
-                <span className="small">Написать:</span>
-                {links.map((l) => (
-                  <a key={l.href} className="chip-a" href={l.href} target="_blank" rel="noreferrer">
-                    {l.label}
-                  </a>
-                ))}
-              </div>
-            )}
           </div>
-
-          {hours.length > 0 && (
-            <div className="ct-hours rise">
-              <p className="ct-h3">Часы работы</p>
-              <dl>
+          <div className="ft-side rise">
+            {data.masters.length > 0 && (
+              <dl className="ft-hours">
                 {hours.map((h) => (
-                  <div key={h.days} className={h.text === 'выходной' ? 'is-off' : ''}>
+                  <div key={h.days}>
                     <dt>{h.days}</dt>
-                    <dd className="num">{h.text}</dd>
+                    <dd className={`num ${h.text === 'выходной' ? 'is-off' : ''}`}>{h.text}</dd>
                   </div>
                 ))}
               </dl>
-            </div>
-          )}
-
-          <div className="ct-book rise">
-            <p className="d-sm">{native ? 'Свободное время видно сразу' : 'Запись — за минуту'}</p>
-            <p className="ct-book-t">{native ? 'Выберите услугу, мастера и окно — без звонков и ожидания ответа.' : `Запись ${bookingRoute(s).kind === 'link' ? (bookingRoute(s) as { via: string }).via : ''}.`}</p>
-            <a className="btn-a is-light" {...bookLink(data)}>
-              Записаться {native ? <Arrow /> : <Out />}
-            </a>
+            )}
+            {links.length > 0 && (
+              <ul className="ft-links">
+                {links.map((l) => (
+                  <li key={l.label}>
+                    <a href={l.href} target="_blank" rel="noreferrer">
+                      {l.icon}
+                      {l.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
-
-        <div className="ft">
-          <a className="ft-brand" href="#top" onClick={(e) => (e.preventDefault(), scrollToId('top'))}>
-            {s.name}
-          </a>
-          <p className="ft-meta">
-            © {new Date().getFullYear()} {s.name}
-            {s.city ? `, ${s.city}` : ''}
-            {s.demoNote && <span>{s.demoNote}</span>}
-          </p>
-          <a className="ft-admin" href="#/admin">
-            Кабинет мастера
-          </a>
+        <div className="ft-base">
+          <p className="ft-name">{s.name}</p>
+          {s.demoNote && <p className="ft-demo">{s.demoNote}</p>}
         </div>
       </div>
     </footer>
   )
 }
 
-/** Плавающая кнопка на телефоне: первый экран прокручен, а до записи ещё далеко */
-export function StickyCta({ data }: { data: Data }) {
+/** Телефон: после первого экрана внизу плашка с ближайшим окном. В блоке записи и в подвале прячется */
+export function StickyBar({ data }: { data: Data }) {
   const [on, setOn] = useState(false)
-  useEffect(() => {
-    const check = () => {
-      if (window.innerWidth >= 1024) return setOn(false)
-      const hero = document.querySelector('.hero-cta')
-      const bk = document.getElementById('booking')
-      if (!hero || !bk) return
-      const vh = window.innerHeight
-      const r = bk.getBoundingClientRect()
-      const past = hero.getBoundingClientRect().bottom < 0
-      const near = r.top < vh && r.bottom > 0
-      const end = window.scrollY + vh > document.documentElement.scrollHeight - 320
-      setOn(past && !near && !end && !document.querySelector('.lb'))
-    }
-    check()
-    window.addEventListener('scroll', check, { passive: true })
-    window.addEventListener('resize', check)
-    return () => (window.removeEventListener('scroll', check), window.removeEventListener('resize', check))
-  }, [])
-  if (!data.services.length) return null
   const route = bookingRoute(data.studio)
+  const main = mainService(data)
+  const first = useMemo(() => (route.kind === 'native' && main && data.masters.length ? nextWindows(data, main.id, 1)[0] : undefined), [data, main?.id, route.kind])
+  useEffect(() => {
+    const hero = document.querySelector('.hero')
+    const hide = ['booking', 'contacts'].map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[]
+    if (!hero) return
+    const state = { pastHero: false, hidden: new Set<Element>() }
+    const apply = () => setOn(state.pastHero && state.hidden.size === 0)
+    const io1 = new IntersectionObserver(([e]) => ((state.pastHero = !e.isIntersecting && e.boundingClientRect.top < 0), apply()))
+    io1.observe(hero)
+    const io2 = new IntersectionObserver((es) => {
+      for (const e of es) e.isIntersecting ? state.hidden.add(e.target) : state.hidden.delete(e.target)
+      apply()
+    })
+    hide.forEach((el) => io2.observe(el))
+    return () => (io1.disconnect(), io2.disconnect())
+  }, [])
   return (
-    <div className={`bookbar ${on ? 'is-on' : ''}`} aria-hidden={!on}>
-      <div className="bookbar-t">
-        <b>{data.studio.name}</b>
-        <span>{route.kind === 'native' ? 'Свободное время — онлайн' : `Запись ${route.via}`}</span>
-      </div>
-      <button className="btn-a" onClick={() => book(data)} tabIndex={on ? 0 : -1}>
+    <div className={`sticky ${on ? 'is-on' : ''}`} aria-hidden={!on}>
+      <p>
+        {first ? (
+          <>
+            <small>Ближайшее окно</small>
+            <b className="num">
+              {dayShort(first.iso)}, {fmtTime(first.time)}
+            </b>
+          </>
+        ) : (
+          <b>{data.studio.name}</b>
+        )}
+      </p>
+      <button className="btn is-accent" tabIndex={on ? 0 : -1} onClick={() => book(data, first && main ? { serviceId: main.id, date: first.iso, time: first.time } : {})}>
         Записаться
       </button>
     </div>

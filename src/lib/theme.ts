@@ -20,9 +20,11 @@ export type Palette = {
 }
 
 export const PRESETS: Record<ThemePreset, Palette> = {
-  mulberry: { label: 'Бордо', bg: '#F6F1EB', surface: '#FFFCF8', panel: '#ECDDD8', ink: '#1E1720', accent: '#5B2030', soft: '#CDAEB7', muted: '#A5958B' },
-  taupe: { label: 'Какао', bg: '#F5F0E9', surface: '#FFFCF7', panel: '#E7DBCD', ink: '#211915', accent: '#4A3126', soft: '#C9A98D', muted: '#A3958A' },
-  rose: { label: 'Слива', bg: '#F7F1EF', surface: '#FFFBFA', panel: '#EDDCE1', ink: '#231A22', accent: '#5E2A4E', soft: '#D4B0C2', muted: '#A6929C' },
+  // Ключи оставлены прежними (на них ссылаются файлы салонов), цвета с версии 4 «Свободное окно»:
+  // холодная бумага, почти чёрный текст и один насыщенный цвет лака
+  mulberry: { label: 'Красный лак', bg: '#EFEFEC', surface: '#FAFAF8', panel: '#E3E3DF', ink: '#151517', accent: '#C21F32', soft: '#EDC3C7', muted: '#9C9C98' },
+  taupe: { label: 'Кобальт', bg: '#EEEFF1', surface: '#FAFAFB', panel: '#E1E3E8', ink: '#141519', accent: '#2440B4', soft: '#C3CBEA', muted: '#9A9CA3' },
+  rose: { label: 'Олива', bg: '#EFEFEA', surface: '#FAFAF7', panel: '#E2E3DB', ink: '#16170F', accent: '#4E5E28', soft: '#CDD3B8', muted: '#9B9C92' },
 }
 
 function rgb(hex: string) {
