@@ -18,17 +18,16 @@ async function open(suffix = '', opts = {}) {
 {
   const { page, ctx, errors } = await open()
   // 1. Цены
-  const prices = await page.$$eval('.svc-row', (rows) => rows.map((r) => r.querySelector('.svc-name').textContent + '=' + r.querySelector('.svc-price').textContent.replace(/\s/g, ' ')))
+  const prices = await page.$$eval('.menu-item', (rows) => rows.map((r) => r.querySelector('.menu-name').firstChild.textContent + '=' + r.querySelector('.menu-price').textContent.replace(/\s/g, ' ').replace(/^от/, 'от ')))
   const want = ['Маникюр + покрытие=2 200 ₽', 'Маникюр=1 200 ₽', 'Наращивание=от 3 200 ₽', 'Коррекция=от 2 800 ₽', 'Педикюр + покрытие=2 600 ₽', 'Дизайн=от 400 ₽', 'Снятие=400 ₽']
   ok(JSON.stringify(prices) === JSON.stringify(want), `7 цен из демо: ${prices.join('; ')}`)
   ok(!(await page.content()).includes('4 000'), '4 000 ₽ нигде на странице')
   // 2. Услуга из меню → запись
-  await page.click('.svc-row >> nth=0')
+  await page.click('.menu-item >> nth=0')
   await page.waitForTimeout(800)
-  ok((await page.textContent('.bk-picked b')) === 'Маникюр + покрытие', 'Маникюр + покрытие подставился в запись')
+  ok((await page.textContent('.bk-svc[aria-checked="true"] b')) === 'Маникюр + покрытие', 'Маникюр + покрытие подставился в запись')
   // 3. Мастер: Анна; ограничение услуг Веры
-  await page.click('.bk-picked .bk-change')
-  await page.click('.bk-opt:has-text("Наращивание")')
+  await page.click('.bk-svc:has-text("Наращивание")')
   const masters = await page.$$eval('.bk-mp b', (b) => b.map((x) => x.textContent))
   const hint = await page.textContent('.bk-hint')
   ok(!masters.includes('Вера') && hint?.includes('Анна'), `Наращивание: выбора нет, «${hint}»`)
@@ -46,8 +45,8 @@ async function open(suffix = '', opts = {}) {
   await page.fill('#bk-contact', '+79131234567')
   await page.click('.bk-submit')
   await page.waitForTimeout(400)
-  ok((await page.textContent('.bk-done-title'))?.includes('Тест'), 'успех: «Тест, вы записаны»')
-  ok((await page.textContent('.bk-done .eyebrow'))?.includes('Демо'), 'успех честно помечен как демо')
+  ok((await page.textContent('.bk-done h3'))?.includes('Тест'), 'успех: «Тест, вы записаны»')
+  ok((await page.textContent('.bk-done-k'))?.includes('Демо'), 'успех честно помечен как демо')
   const [dl] = await Promise.all([page.waitForEvent('download'), page.click('text=Добавить в')])
   const ics = await (await dl.createReadStream()).toArray().then((c) => Buffer.concat(c).toString())
   ok(/DTSTART:\d{8}T\d{6}Z/.test(ics) && ics.includes('VALARM'), '.ics в UTC с напоминаниями')
@@ -61,20 +60,20 @@ async function open(suffix = '', opts = {}) {
 {
   // 6. Работа → запись с мастером и услугой
   const { page, ctx } = await open()
-  await page.click('.flt-btn:has-text("Анна")')
-  const n = await page.$$eval('.tile', (t) => t.length)
-  await page.click('.tile-img >> nth=0')
-  ok(await page.isVisible('.lbx'), `лайтбокс открылся (работ Анны: ${n})`)
+  await page.click('.chip-a:has-text("Анна")')
+  const n = await page.$$eval('.wk-item', (t) => t.length)
+  await page.click('.wk-img >> nth=0')
+  ok(await page.isVisible('.lb'), `лайтбокс открылся (работ Анны: ${n})`)
   await page.keyboard.press('ArrowRight')
-  ok((await page.textContent('.lbx-top span'))?.startsWith('2 /'), 'стрелка → следующая')
-  await page.click('.lbx .cta')
+  ok((await page.textContent('.lb-top span'))?.startsWith('2 /'), 'стрелка → следующая')
+  await page.click('.lb .btn-a')
   await page.waitForTimeout(700)
   const sum = await page.$$eval('.bk-sum dd', (d) => d.map((x) => x.textContent))
   ok(sum[1] === 'Анна', `из работы: мастер Анна, услуга ${sum[0]}`)
   await page.goto(base)
-  await page.click('.tile-img >> nth=0')
+  await page.click('.wk-img >> nth=0')
   await page.keyboard.press('Escape')
-  ok(!(await page.isVisible('.lbx')), 'Esc закрывает лайтбокс')
+  ok(!(await page.isVisible('.lb')), 'Esc закрывает лайтбокс')
   await ctx.close()
 }
 
@@ -93,8 +92,16 @@ async function open(suffix = '', opts = {}) {
   // 8. Внешняя запись: нет своей сетки, кнопки ведут в сервис
   const { page, ctx } = await open('?fixture=ekaterina')
   ok((await page.$$('.bk-day')).length === 0, 'внешняя запись: ленты дат нет')
-  const hrefs = await page.$$eval('a.cta', (a) => a.map((x) => x.getAttribute('href')))
+  const hrefs = await page.$$eval('a.btn-a', (a) => a.map((x) => x.getAttribute('href')))
   ok(hrefs.filter((h) => h.includes('fake-dikidi')).length >= 3, `кнопки «Записаться» → DIKIDI (${hrefs.length})`)
+  await ctx.close()
+}
+
+{
+  // 8б. Запись через WhatsApp: ссылки wa.me с готовым текстом, своей сетки нет
+  const { page, ctx } = await open('?fixture=whatsapp')
+  const hrefs = await page.$$eval('a.btn-a', (a) => a.map((x) => x.getAttribute('href')))
+  ok((await page.$$('.bk-day')).length === 0 && hrefs.some((h) => h.startsWith('https://wa.me/79000000005')), 'запись через WhatsApp: кнопки → wa.me')
   await ctx.close()
 }
 
@@ -103,8 +110,8 @@ async function open(suffix = '', opts = {}) {
   const { page, ctx } = await open('?fixture=sparse')
   const html = await page.content()
   ok(!html.includes('Не должно появиться') && !html.includes('Анна') && !html.includes('Вера'), 'нет вымышленного содержимого LUMI')
-  ok(!(await page.$('.bk-demo')), 'нет пометки «демо-режим» (настоящая студия)')
-  ok(!(await page.$('#masters h2'))?.textContent || (await page.textContent('#masters h2')) === 'Мастер', 'один мастер — «Мастер»')
+  ok(!(await page.$('.bk-demo')), 'нет пометки «демо» (настоящая студия)')
+  ok((await page.textContent('#masters h2')) === 'Ваш мастер', 'один мастер — «Ваш мастер»')
   ok((await page.$$('.bk-mp')).length === 0, 'один мастер — шага выбора мастера нет')
   await ctx.close()
 }
@@ -117,7 +124,7 @@ async function open(suffix = '', opts = {}) {
     await page.waitForTimeout(150)
   }
   ok(errors.length === 0, `кабинет: 6 вкладок без ошибок ${errors.join(' | ')}`)
-  await page.click('button:has-text("Тёплый тауп")')
+  await page.click('button:has-text("Какао")')
   ok((await page.evaluate(() => document.documentElement.dataset.palette)) === 'taupe', 'палитра меняется из кабинета')
   await ctx.close()
 }

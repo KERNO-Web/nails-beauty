@@ -1,24 +1,24 @@
-/* Основа публичного сайта: типографика и общие элементы. Классы кабинета (styles.css) здесь не используются */
+/* Основа сайта: типографика, контейнер, кнопки, метки. Кабинет живёт на styles.css и сюда не смотрит */
 
 .site {
-  background: var(--color-paper);
-  color: var(--color-ink);
-  font-family: var(--font-text);
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-family: var(--f-text);
   font-size: 16px;
-  line-height: 1.55;
-  font-optical-sizing: auto;
+  line-height: 1.6;
+  font-weight: 450;
   font-kerning: normal;
-  font-variant-numeric: lining-nums proportional-nums;
+  font-variant-numeric: lining-nums;
   overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
 }
 .site ::selection {
-  background: var(--color-wine);
-  color: var(--on-wine);
+  background: var(--c-accent);
+  color: var(--on-accent);
 }
 .site :focus-visible {
-  outline: 2px solid var(--color-wine);
+  outline: 2px solid var(--c-accent);
   outline-offset: 3px;
-  border-radius: 1px;
 }
 :where(.site) :where(h1, h2, h3, p, figure, blockquote, dl, dd, ul) {
   margin: 0;
@@ -28,140 +28,229 @@
   list-style: none;
 }
 :where(.site) a {
+  color: inherit;
   text-decoration: none;
 }
-.tnum {
+:where(.site) button {
+  font: inherit;
+  color: inherit;
+}
+.num {
   font-variant-numeric: lining-nums tabular-nums;
 }
 
-/* Контейнер: 12 колонок по сетке */
-.frame {
+.wrap {
   width: 100%;
-  max-width: calc(var(--max) + var(--inset) * 2);
+  max-width: calc(var(--max) + var(--pad) * 2);
   margin: 0 auto;
-  padding-inline: var(--inset);
-}
-.grid12 {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  column-gap: var(--gap);
+  padding-inline: var(--pad);
 }
 
-/* ---------- Шрифтовая система ---------- */
+/* ---------- Шрифтовая система ----------
+   Prata — только от 30px: у неё контрастные штрихи, мелко она рябит.
+   Manrope — 13…22px, плотные веса 500–700 для интерфейса. */
 
-/* Заголовок главы: Tenor, крупно и плотно. Трекинг подобран на кириллице, не одинаковый для всех кеглей */
-.h-chapter {
-  font-family: var(--font-display);
+.d-xl,
+.d-lg,
+.d-md,
+.d-sm {
+  font-family: var(--f-display);
   font-weight: 400;
-  font-size: clamp(40px, 4.6vw, 70px);
-  line-height: 1.02;
-  letter-spacing: -0.022em;
-  text-wrap: balance;
   font-synthesis: none;
+  text-wrap: balance;
 }
-.eyebrow {
-  font-size: 11.5px;
-  line-height: 1.45;
-  font-weight: 620;
-  letter-spacing: 0.075em;
-  text-transform: uppercase;
-  color: var(--color-muted);
+.d-lg {
+  font-size: clamp(42px, 4.4vw, 68px);
+  line-height: 1.04;
+  letter-spacing: -0.018em;
 }
-.intro {
-  font-size: clamp(16px, 1.3vw, 19px);
-  line-height: 1.45;
-  max-width: 34ch;
-  color: var(--ink-soft);
+.d-md {
+  font-size: clamp(32px, 3vw, 46px);
+  line-height: 1.1;
+  letter-spacing: -0.012em;
+}
+.d-sm {
+  font-size: clamp(26px, 2.1vw, 32px);
+  line-height: 1.16;
+  letter-spacing: -0.008em;
+}
+/* Метка раздела: строчными, с короткой чертой — не «всё капсом» */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--c-accent);
+}
+.tag::before {
+  content: '';
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+}
+.lead {
+  font-size: clamp(16px, 1.3vw, 18px);
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 40ch;
   text-wrap: pretty;
 }
-.body-text {
-  font-size: 16px;
-  line-height: 1.58;
-  max-width: 52ch;
-  color: var(--ink-soft);
-  text-wrap: pretty;
+.small {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+/* Шапка раздела: заголовок слева, пояснение и действие справа по нижней линии */
+.sec-head {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: 20px var(--gap);
+  align-items: end;
+  margin-bottom: clamp(36px, 4vw, 60px);
+}
+.sec-head .tag {
+  grid-column: 1 / -1;
+}
+.sec-head .lead {
+  justify-self: end;
+  max-width: 38ch;
+}
+@media (max-width: 899px) {
+  .sec-head {
+    grid-template-columns: 1fr;
+  }
+  .sec-head .lead {
+    justify-self: start;
+  }
 }
 
 /* ---------- Кнопки ---------- */
 
-.cta {
-  --cta-bg: var(--color-wine);
-  --cta-fg: var(--on-wine);
+.btn-a {
+  --b-bg: var(--c-accent);
+  --b-fg: var(--on-accent);
+  --b-bd: var(--c-accent);
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  min-height: 52px;
-  padding: 0 24px;
-  border: 1px solid var(--cta-bg);
-  border-radius: var(--radius-ui);
-  background: var(--cta-bg);
-  color: var(--cta-fg);
-  font-family: var(--font-text);
+  gap: 10px;
+  min-height: 54px;
+  padding: 0 28px;
+  border: 1px solid var(--b-bd);
+  border-radius: var(--pill);
+  background: var(--b-bg);
+  color: var(--b-fg);
+  font-family: var(--f-text);
   font-size: 15px;
-  font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: 0.005em;
+  font-weight: 650;
+  line-height: 1;
   white-space: nowrap;
   cursor: pointer;
   transition:
-    background-color var(--t-mid) var(--ease),
-    color var(--t-mid) var(--ease),
-    border-color var(--t-mid) var(--ease);
+    background-color 220ms var(--ease),
+    color 220ms var(--ease),
+    border-color 220ms var(--ease),
+    transform 220ms var(--ease);
   -webkit-tap-highlight-color: transparent;
 }
-.cta:hover {
-  --cta-bg: var(--wine-deep);
+.btn-a:hover {
+  --b-bg: var(--accent-2);
+  --b-bd: var(--accent-2);
 }
-.cta .i-arrow {
-  transition: transform var(--t-mid) var(--ease);
+.btn-a:active {
+  transform: scale(0.98);
 }
-.cta:hover .i-arrow {
-  transform: translateX(4px);
+.btn-a .i {
+  transition: transform 220ms var(--ease);
 }
-.cta--ghost {
-  --cta-bg: transparent;
-  --cta-fg: var(--color-ink);
-  border-color: var(--line-strong);
+.btn-a:hover .i {
+  transform: translateX(3px);
 }
-.cta--ghost:hover {
-  --cta-bg: transparent;
-  border-color: var(--color-ink);
+.btn-a.is-line {
+  --b-bg: transparent;
+  --b-fg: var(--c-ink);
+  --b-bd: var(--line-2);
 }
-.cta--light {
-  --cta-bg: var(--color-white);
-  --cta-fg: var(--color-wine);
+.btn-a.is-line:hover {
+  --b-bd: var(--c-ink);
 }
-.cta--light:hover {
-  --cta-bg: var(--color-paper);
+.btn-a.is-light {
+  --b-bg: var(--c-surface);
+  --b-fg: var(--c-accent);
+  --b-bd: var(--c-surface);
 }
-.cta--sm {
-  min-height: 40px;
-  padding: 0 16px;
+.btn-a.is-light:hover {
+  --b-bg: var(--c-bg);
+  --b-bd: var(--c-bg);
+}
+.btn-a.is-ghost-light {
+  --b-bg: transparent;
+  --b-fg: var(--on-accent);
+  --b-bd: var(--accent-line);
+}
+.btn-a.is-ghost-light:hover {
+  --b-bd: var(--on-accent);
+}
+.btn-a.is-sm {
+  min-height: 42px;
+  padding: 0 18px;
   font-size: 14px;
 }
-.cta[disabled] {
-  cursor: not-allowed;
+.btn-a[disabled] {
   opacity: 0.45;
+  cursor: not-allowed;
 }
 
-/* Текстовая ссылка с подчёркиванием-линией */
-.line-link {
+.u-link {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 0;
+  gap: 6px;
+  min-height: 40px;
   font-size: 15px;
-  font-weight: 560;
+  font-weight: 650;
   color: inherit;
-  background: linear-gradient(currentColor, currentColor) 0 calc(100% - 2px) / 100% 1px no-repeat;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+  text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
+  transition: text-decoration-color 200ms var(--ease);
   cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
 }
-.line-link .i-arrow {
-  transition: transform var(--t-mid) var(--ease);
+.u-link:hover {
+  text-decoration-color: currentColor;
 }
-.line-link:hover .i-arrow {
-  transform: translateX(4px);
+
+/* Чипсы фильтров */
+.chip-a {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--pill);
+  background: transparent;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition:
+    background-color 200ms var(--ease),
+    color 200ms var(--ease),
+    border-color 200ms var(--ease);
+}
+.chip-a:hover {
+  border-color: var(--c-ink);
+  color: var(--c-ink);
+}
+.chip-a[aria-pressed='true'] {
+  background: var(--c-ink);
+  border-color: var(--c-ink);
+  color: var(--c-bg);
 }
 
 .sr-only {
@@ -176,24 +265,27 @@
   border: 0;
 }
 
-/* Появление глав: смысловыми группами, небольшой сдвиг */
-.enter {
+/* Появление при прокрутке */
+.rise {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(24px);
   transition:
-    opacity 480ms var(--ease-out),
-    transform 480ms var(--ease-out);
+    opacity 700ms var(--ease-out),
+    transform 700ms var(--ease-out);
 }
-.is-in .enter,
-.enter.is-in {
+.is-in .rise,
+.rise.is-in {
   opacity: 1;
   transform: none;
 }
-.is-in .enter:nth-child(2) {
-  transition-delay: 70ms;
+.is-in .rise:nth-child(2) {
+  transition-delay: 80ms;
 }
-.is-in .enter:nth-child(3) {
-  transition-delay: 140ms;
+.is-in .rise:nth-child(3) {
+  transition-delay: 160ms;
+}
+.is-in .rise:nth-child(4) {
+  transition-delay: 240ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -205,7 +297,7 @@
     transition-duration: 1ms !important;
     transition-delay: 0ms !important;
   }
-  .enter {
+  .rise {
     opacity: 1;
     transform: none;
   }

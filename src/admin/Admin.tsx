@@ -739,14 +739,14 @@ function StudioTab({ data }: { data: Data }) {
             <span className="adm-inline">
               {(Object.keys(PRESETS) as ThemePreset[]).map((id) => (
                 <button key={id} className={`btn btn-sm ${(t.preset ?? 'mulberry') === id ? 'btn-primary' : 'btn-line'}`} onClick={() => setTheme({ preset: id, accent: undefined })}>
-                  <span className="adm-swatch" style={{ background: PRESETS[id].wine, width: 14, height: 14 }} aria-hidden /> {PRESETS[id].label}
+                  <span className="adm-swatch" style={{ background: PRESETS[id].accent, width: 14, height: 14 }} aria-hidden /> {PRESETS[id].label}
                 </button>
               ))}
             </span>
           </Field>
           <Field label="Свой тёмный акцент (необязательно; слишком светлый затемнится сам)" wide group>
             <span className="adm-inline">
-              <input type="color" value={paletteOf(t).wine} onChange={(e) => setTheme({ accent: e.target.value })} aria-label="Свой цвет акцента" />
+              <input type="color" value={paletteOf(t).accent} onChange={(e) => setTheme({ accent: e.target.value })} aria-label="Свой цвет акцента" />
               {t.accent && (
                 <button className="btn btn-sm btn-line" onClick={() => setTheme({ accent: undefined })}>
                   Цвет палитры
@@ -844,9 +844,25 @@ function StudioTab({ data }: { data: Data }) {
         <h2 className="adm-h2">Запись</h2>
         <div className="adm-grid">
           <Field label="Где записываются клиенты" wide>
-            <select className="input" value={s.booking?.mode ?? 'native'} onChange={(e) => set({ booking: e.target.value === 'external' ? { mode: 'external', url: s.booking?.mode === 'external' ? s.booking.url : '', name: s.booking?.mode === 'external' ? s.booking.name : 'DIKIDI' } : { mode: 'native' } })}>
+            <select
+              className="input"
+              value={s.booking?.mode === 'messenger' ? `messenger-${s.booking.channel}` : (s.booking?.mode ?? 'native')}
+              onChange={(e) => {
+                const v = e.target.value
+                set({
+                  booking:
+                    v === 'external'
+                      ? { mode: 'external', url: s.booking?.mode === 'external' ? s.booking.url : '', name: s.booking?.mode === 'external' ? s.booking.name : 'DIKIDI' }
+                      : v === 'messenger-whatsapp' || v === 'messenger-telegram'
+                        ? { mode: 'messenger', channel: v === 'messenger-whatsapp' ? 'whatsapp' : 'telegram' }
+                        : { mode: 'native' },
+                })
+              }}
+            >
               <option value="native">На этом сайте (выбор времени здесь)</option>
               <option value="external">В своём сервисе записи (DIKIDI, YCLIENTS…)</option>
+              <option value="messenger-whatsapp">Через WhatsApp студии (номер — в контактах)</option>
+              <option value="messenger-telegram">Через Telegram студии (ник — в контактах)</option>
             </select>
           </Field>
           {s.booking?.mode === 'external' && (

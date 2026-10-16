@@ -4,22 +4,25 @@ import type { Theme, ThemePreset } from '../data/types'
 
 export type Palette = {
   label: string
-  paper: string
-  canvas: string
+  /** Фон страницы — тёплый фарфор */
+  bg: string
+  /** Белая поверхность карточек */
+  surface: string
+  /** Мягкое цветное поле (панель фото, мастера) */
+  panel: string
   ink: string
-  /** Тёмный фирменный цвет: кнопки, тёмные поля */
-  wine: string
-  /** Мягкий акцент: мелкие детали */
-  rose: string
-  line: string
-  white: string
+  /** Тёмный акцент: кнопки, тёмные поля */
+  accent: string
+  /** Мягкий второй тон */
+  soft: string
+  /** Служебный тон — только для линий и декора, не для текста */
   muted: string
 }
 
 export const PRESETS: Record<ThemePreset, Palette> = {
-  mulberry: { label: 'Шелковица', paper: '#F7F4F0', canvas: '#EEE8E4', ink: '#241C20', wine: '#552A3A', rose: '#D8A1A6', line: '#D4CBCB', white: '#FFFCFB', muted: '#6D6266' },
-  taupe: { label: 'Тёплый тауп', paper: '#F6F4F0', canvas: '#ECE7E0', ink: '#22201D', wine: '#3B332D', rose: '#C38E63', line: '#D7CFC5', white: '#FFFDFA', muted: '#6A635C' },
-  rose: { label: 'Пыльная роза', paper: '#F8F3F1', canvas: '#F0E5E2', ink: '#2A1D22', wine: '#7A2E4C', rose: '#E2A3B1', line: '#DDCCCC', white: '#FFFBFB', muted: '#725F66' },
+  mulberry: { label: 'Бордо', bg: '#F6F1EB', surface: '#FFFCF8', panel: '#ECDDD8', ink: '#1E1720', accent: '#5B2030', soft: '#CDAEB7', muted: '#A5958B' },
+  taupe: { label: 'Какао', bg: '#F5F0E9', surface: '#FFFCF7', panel: '#E7DBCD', ink: '#211915', accent: '#4A3126', soft: '#C9A98D', muted: '#A3958A' },
+  rose: { label: 'Слива', bg: '#F7F1EF', surface: '#FFFBFA', panel: '#EDDCE1', ink: '#231A22', accent: '#5E2A4E', soft: '#D4B0C2', muted: '#A6929C' },
 }
 
 function rgb(hex: string) {
@@ -49,13 +52,13 @@ const isHex = (s?: string): s is string => !!s && /^#([0-9a-f]{3}|[0-9a-f]{6})$/
 function darkAccent(color: string, p: Palette) {
   let c = rgb(color)
   const ink = rgb(p.ink)
-  for (let i = 0; i < 12 && contrast(hex(c), p.white) < 7; i++) c = c.map((v, k) => v * 0.85 + ink[k] * 0.15)
+  for (let i = 0; i < 12 && contrast(hex(c), p.surface) < 7; i++) c = c.map((v, k) => v * 0.85 + ink[k] * 0.15)
   return hex(c)
 }
 
 export function paletteOf(t: Theme): Palette {
   const p = PRESETS[t.preset ?? 'mulberry'] ?? PRESETS.mulberry
-  return isHex(t.accent) && t.accent.toLowerCase() !== p.wine.toLowerCase() ? { ...p, wine: darkAccent(t.accent, p) } : p
+  return isHex(t.accent) && t.accent.toLowerCase() !== p.accent.toLowerCase() ? { ...p, accent: darkAccent(t.accent, p) } : p
 }
 
 export function applyTheme(t: Theme) {
@@ -63,18 +66,12 @@ export function applyTheme(t: Theme) {
   const root = document.documentElement
   const st = root.style
   root.dataset.palette = t.preset ?? 'mulberry'
-  st.setProperty('--color-paper', p.paper)
-  st.setProperty('--color-canvas', p.canvas)
-  st.setProperty('--color-ink', p.ink)
-  st.setProperty('--color-wine', p.wine)
-  st.setProperty('--color-rose', p.rose)
-  st.setProperty('--color-line', p.line)
-  st.setProperty('--color-white', p.white)
-  st.setProperty('--color-muted', p.muted)
+  const set: Record<string, string> = { bg: p.bg, surface: p.surface, panel: p.panel, ink: p.ink, accent: p.accent, soft: p.soft, muted: p.muted }
+  for (const [k, v] of Object.entries(set)) st.setProperty(`--c-${k}`, v)
   // Кабинет и окна уведомлений считают цвета от этих трёх
-  st.setProperty('--accent', p.wine)
-  st.setProperty('--on-accent', p.white)
-  st.setProperty('--paper', p.paper)
+  st.setProperty('--accent', p.accent)
+  st.setProperty('--on-accent', p.surface)
+  st.setProperty('--paper', p.bg)
   st.setProperty('--ink', p.ink)
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', p.paper)
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', p.bg)
 }

@@ -126,10 +126,12 @@ export type Theme = {
   nailShape?: NailShape
 }
 
-/** Как клиент записывается. native — запись на сайте; external — кнопки ведут в DIKIDI/YCLIENTS и т.п. */
+/** Как клиент записывается. native — запись на сайте; external — кнопки ведут в DIKIDI/YCLIENTS и т.п.;
+ * messenger — кнопки открывают WhatsApp или Telegram студии с готовым текстом (номер/ник — из контактов студии) */
 export type BookingMode =
   | { mode: 'native' }
   | { mode: 'external'; url: string; /** «DIKIDI», «YCLIENTS» — подпись к кнопке */ name?: string }
+  | { mode: 'messenger'; channel: 'whatsapp' | 'telegram' }
 
 export type Studio = {
   name: string

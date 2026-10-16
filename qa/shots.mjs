@@ -19,7 +19,7 @@ for (const s of list) {
   await page.goto(base + suffix, { waitUntil: 'networkidle' })
   await page.evaluate(() => document.fonts.ready)
   // Для снимков: показать всё сразу (без анимации появления)
-  await page.addStyleTag({ content: '.enter,.band .tile{opacity:1!important;transform:none!important;transition:none!important}' })
+  await page.addStyleTag({ content: '.enter,.band .tile,.rise{opacity:1!important;transform:none!important;transition:none!important}' })
   if (process.env.SCROLL) {
     await page.evaluate((id) => document.getElementById(id)?.scrollIntoView(), process.env.SCROLL)
   }
@@ -47,7 +47,7 @@ for (const s of list) {
       }
       await el.scrollIntoViewIfNeeded()
       await page.waitForTimeout(700)
-      await page.addStyleTag({ content: '.hdr{position:static!important}' })
+      await page.addStyleTag({ content: '.hdr,.hd{position:static!important}.bookbar{display:none!important}' })
       await el.screenshot({ path: `qa/shots/${name}-${s}-${id}.png` })
       console.log(`qa/shots/${name}-${s}-${id}.png`)
     }

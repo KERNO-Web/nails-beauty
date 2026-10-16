@@ -1,248 +1,249 @@
-// Отзывы, контакты и финал страницы, плавающая кнопка записи на телефоне
+// Отзывы (цитата + честные цифры студии), контакты и подвал, плавающая кнопка записи на телефоне
 import { useEffect, useState } from 'react'
 import type { Data, Review } from '../data/types'
 import { fmtRating, reviewsCount, reviewsSource, routeUrl } from '../lib/place'
-import { dateOf, hoursSummary, MONTHS_NOM } from '../lib/slots'
+import { dateOf, hoursSummary, MONTHS_NOM, plural } from '../lib/slots'
 import { scrollToId, typo } from '../lib/ui'
-import { Arrow, book, bookHref, ext, externalBooking, Out, useEnter } from './common'
+import { Arrow, book, bookingRoute, bookLink, Chevron, Out, Pin, useEnter } from './common'
 
-/** Дата отзыва: «сентябрь 2026» */
 function reviewDate(iso: string) {
   const d = dateOf(iso)
   return `${MONTHS_NOM[d.getMonth()].toLowerCase()} ${d.getFullYear()}`
 }
 
-/** До четырёх отзывов: отмеченный featured, дальше самые свежие. Остальные — по ссылке на источник */
-function pickReviews(list: Review[]) {
+/** Отмеченный featured первым, дальше — свежие */
+function order(list: Review[]) {
   const byDate = [...list].sort((a, b) => b.date.localeCompare(a.date))
-  const lead = byDate.find((r) => r.featured) ?? byDate.find((r) => r.text.length >= 80) ?? byDate[0]
-  return [lead, ...byDate.filter((r) => r !== lead)].slice(0, 4)
+  const lead = byDate.find((r) => r.featured) ?? byDate[0]
+  return [lead, ...byDate.filter((r) => r !== lead)]
 }
 
-const PREVIEW = 240
-
 export function Reviews({ data }: { data: Data }) {
-  const [idx, setIdx] = useState(0)
-  const [open, setOpen] = useState(false)
+  const [i, setI] = useState(0)
   const ref = useEnter<HTMLDivElement>()
   const src = reviewsSource(data.studio)
   if (!data.reviews.length && !src) return null
-  const picked = data.reviews.length ? pickReviews(data.reviews) : []
-  const r = picked[Math.min(idx, picked.length - 1)]
-  const long = !!r && r.text.length > PREVIEW + 30
-  const text = r ? (long && !open ? r.text.slice(0, r.text.lastIndexOf(' ', PREVIEW)) + '…' : r.text) : ''
-  const choose = (i: number) => (setIdx(i), setOpen(false))
-  const allDemo = picked.length > 0 && picked.every((x) => x.demo)
+  const list = data.reviews.length ? order(data.reviews) : []
+  const r = list[i % Math.max(1, list.length)]
+  const allDemo = list.length > 0 && list.every((x) => x.demo)
+  // Цифры — только из данных студии: рейтинг и количество на картах, если указаны со ссылкой; остальное — что есть на сайте
+  const stats = [
+    src?.rating ? { n: fmtRating(src.rating), t: `оценка в ${src.name}${src.count ? `, ${reviewsCount(src.count)}` : ''}`, href: src.url } : null,
+    data.works.length ? { n: String(data.works.length), t: `${plural(data.works.length, 'работа', 'работы', 'работ')} в портфолио` } : null,
+    data.masters.length ? { n: String(data.masters.length), t: plural(data.masters.length, 'мастер', 'мастера', 'мастеров') } : null,
+    data.services.length ? { n: String(data.services.length), t: `${plural(data.services.length, 'услуга', 'услуги', 'услуг')} с ценами на сайте` } : null,
+  ].filter(Boolean).slice(0, 3) as { n: string; t: string; href?: string }[]
   return (
-    <section className="rv" id="reviews" aria-labelledby="rv-title">
-      <div className="frame grid12" ref={ref}>
-        <div className="rv-side enter">
-          <h2 className="h-chapter" id="rv-title">
+    <section className="rv" id="reviews" aria-labelledby="rv-h">
+      <div className="wrap rv-in" ref={ref}>
+        <div className="rv-main">
+          <p className="tag rise">Отзывы</p>
+          <h2 className="sr-only" id="rv-h">
             Отзывы
           </h2>
-          {/* Оценка и количество — только из настроек студии и только со ссылкой на публичную страницу */}
-          {src && (
-            <a className="rv-source" href={src.url} {...ext}>
-              {src.rating ? (
-                <>
-                  <b className="tnum">{fmtRating(src.rating)}</b>
-                  <span>
-                    {src.count ? `${reviewsCount(src.count)} в ${src.name}` : `оценка в ${src.name}`}
-                    <Out />
-                  </span>
-                </>
-              ) : (
-                <span>
-                  Отзывы в&nbsp;{src.name} <Out />
-                </span>
-              )}
-            </a>
-          )}
-          {allDemo && <p className="rv-demo">Примеры отзывов для демонстрации сайта: студия и&nbsp;клиенты вымышлены.</p>}
-        </div>
-
-        {r && (
-          <div className="rv-stage enter">
-            <figure className="rv-quote" key={r.id}>
-              <blockquote id="rv-text" aria-live="polite">
-                <p>{typo(text)}</p>
+          {r ? (
+            <figure className="rv-quote rise" key={r.id}>
+              <blockquote>
+                <p>{typo(r.text.replace(/«/g, '„').replace(/»/g, '“'))}</p>
               </blockquote>
-              {long && (
-                <button className="rv-more" aria-expanded={open} aria-controls="rv-text" onClick={() => setOpen((v) => !v)}>
-                  {open ? 'Свернуть' : 'Читать полностью'}
-                </button>
-              )}
               <figcaption>
-                <b>{r.name}</b>
-                <span>
-                  {[r.service, reviewDate(r.date)].filter(Boolean).join(' · ')}
-                  {r.source && (
-                    <>
-                      {' · '}
-                      {r.url ? (
-                        <a href={r.url} {...ext}>
-                          {r.source}
-                        </a>
-                      ) : (
-                        r.source
-                      )}
-                    </>
-                  )}
+                <span className="rv-avatar" aria-hidden>
+                  {r.name.charAt(0)}
                 </span>
-                {r.demo && !allDemo && <em className="rv-demo-tag">пример для демо</em>}
+                <span>
+                  <b>{r.name}</b>
+                  <span>
+                    {[r.service, reviewDate(r.date)].filter(Boolean).join(' · ')}
+                    {r.source && (
+                      <>
+                        {' · '}
+                        {r.url ? (
+                          <a href={r.url} target="_blank" rel="noreferrer">
+                            {r.source}
+                          </a>
+                        ) : (
+                          r.source
+                        )}
+                      </>
+                    )}
+                  </span>
+                </span>
               </figcaption>
             </figure>
-            {picked.length > 1 && (
-              <div className="rv-pick" role="group" aria-label="Другие отзывы">
-                {picked.map((x, i) => (
-                  <button key={x.id} className="rv-tab" aria-pressed={i === idx} onClick={() => choose(i)}>
-                    <b>{x.name}</b>
-                    <span>{x.service}</span>
-                  </button>
-                ))}
-              </div>
+          ) : (
+            <p className="d-md rise">Отзывы клиентов&nbsp;— в&nbsp;{src!.name}</p>
+          )}
+          <div className="rv-nav rise">
+            {list.length > 1 && (
+              <>
+                <button onClick={() => setI((i - 1 + list.length) % list.length)} aria-label="Предыдущий отзыв">
+                  <Chevron dir="left" />
+                </button>
+                <span className="num" aria-live="polite">
+                  {(i % list.length) + 1} / {list.length}
+                </span>
+                <button onClick={() => setI((i + 1) % list.length)} aria-label="Следующий отзыв">
+                  <Chevron />
+                </button>
+              </>
+            )}
+            {src && (
+              <a className="u-link rv-src" href={src.url} target="_blank" rel="noreferrer">
+                Все отзывы в&nbsp;{src.name} <Out size={13} />
+              </a>
             )}
           </div>
+          {allDemo && <p className="rv-demo rise">Примеры отзывов для демонстрации сайта: студия и&nbsp;клиенты вымышлены.</p>}
+        </div>
+        {stats.length > 0 && (
+          <ul className="rv-stats">
+            {stats.map((x) => (
+              <li key={x.t} className="rise">
+                <b className="num">{x.n}</b>
+                {x.href ? (
+                  <a href={x.href} target="_blank" rel="noreferrer">
+                    {x.t}
+                  </a>
+                ) : (
+                  <span>{x.t}</span>
+                )}
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </section>
   )
 }
 
-/** Финал: как найти студию, связь, одна кнопка записи, подвал */
 export function Contact({ data }: { data: Data }) {
   const s = data.studio
   const ref = useEnter<HTMLDivElement>()
   const hours = data.masters.length ? hoursSummary(data) : []
-  const extB = externalBooking(s)
-  const links = [
-    s.phone && { href: `tel:${s.phone.replace(/[^\d+]/g, '')}`, label: s.phone, kind: 'Телефон' },
-    s.telegram && { href: `https://t.me/${s.telegram}`, label: `@${s.telegram}`, kind: 'Telegram', ext: true },
-    s.whatsapp && { href: `https://wa.me/${s.whatsapp}`, label: 'Написать', kind: 'WhatsApp', ext: true },
-    s.vk && { href: /^https?:/.test(s.vk) ? s.vk : `https://vk.com/${s.vk}`, label: 'Сообщество', kind: 'ВКонтакте', ext: true },
-  ].filter(Boolean) as { href: string; label: string; kind: string; ext?: boolean }[]
+  const native = bookingRoute(s).kind === 'native'
   const hasMap = s.map[0] !== 0 || !!s.routeUrl
+  const links = [
+    s.telegram && { href: `https://t.me/${s.telegram.replace(/^@/, '')}`, label: 'Telegram' },
+    s.whatsapp && { href: `https://wa.me/${s.whatsapp.replace(/\D/g, '')}`, label: 'WhatsApp' },
+    s.vk && { href: /^https?:/.test(s.vk) ? s.vk : `https://vk.com/${s.vk}`, label: 'ВКонтакте' },
+  ].filter(Boolean) as { href: string; label: string }[]
   return (
-    <footer className="ct" id="contacts" aria-labelledby="ct-title">
-      <div className="frame" ref={ref}>
-        <div className="ct-top grid12">
-          <h2 className="h-chapter ct-title enter" id="ct-title">
+    <footer className="ct" id="contacts" aria-labelledby="ct-h">
+      <div className="wrap" ref={ref}>
+        <div className="sec-head">
+          <p className="tag rise">Контакты</p>
+          <h2 className="d-lg rise" id="ct-h">
             Как нас найти
           </h2>
-          {s.address ? (
-            <div className="ct-addr enter">
-              <p className="eyebrow">{s.city || 'Адрес'}</p>
-              <p className="ct-addr-main">{s.address}</p>
-              {s.addressNote && <p className="ct-addr-note">{typo(s.addressNote)}</p>}
+        </div>
+        <div className="ct-grid">
+          <div className="ct-card rise">
+            {s.address && (
+              <div className="ct-addr">
+                <Pin size={22} />
+                <div>
+                  <p className="ct-addr-v">{s.address}</p>
+                  <p className="small">{[s.city, s.addressNote].filter(Boolean).join('. ')}</p>
+                </div>
+              </div>
+            )}
+            <div className="ct-btns">
               {hasMap && (
-                <a className="line-link" href={routeUrl(s)} {...ext}>
+                <a className="btn-a" href={routeUrl(s)} target="_blank" rel="noreferrer">
                   Построить маршрут <Out />
                 </a>
               )}
+              {s.phone && (
+                <a className="btn-a is-line num" href={`tel:${s.phone.replace(/[^\d+]/g, '')}`}>
+                  {s.phone}
+                </a>
+              )}
             </div>
-          ) : null}
-        </div>
+            {links.length > 0 && (
+              <div className="ct-links">
+                <span className="small">Написать:</span>
+                {links.map((l) => (
+                  <a key={l.href} className="chip-a" href={l.href} target="_blank" rel="noreferrer">
+                    {l.label}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
 
-        <div className="ct-grid grid12">
           {hours.length > 0 && (
-            <div className="ct-col ct-hours">
-              <p className="eyebrow">Часы работы</p>
+            <div className="ct-hours rise">
+              <p className="ct-h3">Часы работы</p>
               <dl>
                 {hours.map((h) => (
                   <div key={h.days} className={h.text === 'выходной' ? 'is-off' : ''}>
                     <dt>{h.days}</dt>
-                    <dd className="tnum">{h.text}</dd>
+                    <dd className="num">{h.text}</dd>
                   </div>
                 ))}
               </dl>
             </div>
           )}
-          {links.length > 0 && (
-            <div className="ct-col ct-links">
-              <p className="eyebrow">Связь</p>
-              <ul>
-                {links.map((l) => (
-                  <li key={l.href}>
-                    <span>{l.kind}</span>
-                    <a href={l.href} {...(l.ext ? ext : {})}>
-                      {l.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          <div className="ct-col ct-book">
-            <p className="ct-book-text">{extB ? 'Свободное время мастеров — в сервисе записи студии.' : 'Свободное время видно сразу, запись занимает минуту.'}</p>
-            <a className="cta" href={bookHref(s)} {...(extB ? ext : { onClick: (e: React.MouseEvent) => (e.preventDefault(), book(data)) })}>
-              Записаться онлайн {extB ? <Out /> : <Arrow />}
+
+          <div className="ct-book rise">
+            <p className="d-sm">{native ? 'Свободное время видно сразу' : 'Запись — за минуту'}</p>
+            <p className="ct-book-t">{native ? 'Выберите услугу, мастера и окно — без звонков и ожидания ответа.' : `Запись ${bookingRoute(s).kind === 'link' ? (bookingRoute(s) as { via: string }).via : ''}.`}</p>
+            <a className="btn-a is-light" {...bookLink(data)}>
+              Записаться {native ? <Arrow /> : <Out />}
             </a>
           </div>
         </div>
 
-        {/* Эхо первого экрана: то же название и та же линия */}
-        <div className="ct-mark">
-          <span className="ct-mark-name">{s.name}</span>
-          <span className="ct-mark-rule" aria-hidden />
-          <a className="ct-up" href="#top" onClick={(e) => (e.preventDefault(), scrollToId('top'))}>
-            Наверх
+        <div className="ft">
+          <a className="ft-brand" href="#top" onClick={(e) => (e.preventDefault(), scrollToId('top'))}>
+            {s.name}
           </a>
-        </div>
-
-        <div className="ct-legal">
-          <span>
+          <p className="ft-meta">
             © {new Date().getFullYear()} {s.name}
             {s.city ? `, ${s.city}` : ''}
-          </span>
-          {s.demoNote && <span className="ct-demo">{s.demoNote}</span>}
-          <a href="#/admin">Кабинет мастера</a>
+            {s.demoNote && <span>{s.demoNote}</span>}
+          </p>
+          <a className="ft-admin" href="#/admin">
+            Кабинет мастера
+          </a>
         </div>
       </div>
     </footer>
   )
 }
 
-/** Кнопка «Записаться» внизу экрана на телефоне — когда первый экран уже прокручен, а до записи ещё далеко */
+/** Плавающая кнопка на телефоне: первый экран прокручен, а до записи ещё далеко */
 export function StickyCta({ data }: { data: Data }) {
   const [on, setOn] = useState(false)
-  const extB = externalBooking(data.studio)
   useEffect(() => {
     const check = () => {
       if (window.innerWidth >= 1024) return setOn(false)
-      const hero = document.querySelector('.hero-actions')
+      const hero = document.querySelector('.hero-cta')
       const bk = document.getElementById('booking')
       if (!hero || !bk) return
       const vh = window.innerHeight
       const r = bk.getBoundingClientRect()
-      const pastHero = hero.getBoundingClientRect().bottom < 0
-      const nearBooking = r.top < vh && r.bottom > 0
-      const atEnd = window.scrollY + vh > document.documentElement.scrollHeight - 360
-      setOn(pastHero && !nearBooking && !atEnd && !document.querySelector('.lbx'))
+      const past = hero.getBoundingClientRect().bottom < 0
+      const near = r.top < vh && r.bottom > 0
+      const end = window.scrollY + vh > document.documentElement.scrollHeight - 320
+      setOn(past && !near && !end && !document.querySelector('.lb'))
     }
     check()
     window.addEventListener('scroll', check, { passive: true })
     window.addEventListener('resize', check)
-    return () => {
-      window.removeEventListener('scroll', check)
-      window.removeEventListener('resize', check)
-    }
+    return () => (window.removeEventListener('scroll', check), window.removeEventListener('resize', check))
   }, [])
   if (!data.services.length) return null
+  const route = bookingRoute(data.studio)
   return (
     <div className={`bookbar ${on ? 'is-on' : ''}`} aria-hidden={!on}>
-      <div className="bookbar-text">
+      <div className="bookbar-t">
         <b>{data.studio.name}</b>
-        <span>{extB ? 'Онлайн-запись' : 'Свободное время — онлайн'}</span>
+        <span>{route.kind === 'native' ? 'Свободное время — онлайн' : `Запись ${route.via}`}</span>
       </div>
-      {extB ? (
-        <a className="cta" href={extB.url} {...ext} tabIndex={on ? 0 : -1}>
-          Записаться <Out />
-        </a>
-      ) : (
-        <button className="cta" onClick={() => book(data)} tabIndex={on ? 0 : -1}>
-          Записаться
-        </button>
-      )}
+      <button className="btn-a" onClick={() => book(data)} tabIndex={on ? 0 : -1}>
+        Записаться
+      </button>
     </div>
   )
 }

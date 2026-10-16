@@ -11,8 +11,8 @@
     "sites": "node scripts/build-sites.mjs"
   },
   "dependencies": {
-    "@fontsource-variable/onest": "^5.3.1",
-    "@fontsource/tenor-sans": "^5.3.0",
+    "@fontsource-variable/manrope": "^5.3.0",
+    "@fontsource/prata": "^5.3.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },

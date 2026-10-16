@@ -4,10 +4,10 @@
    Три цвета темы (--accent, --paper, --ink) и форма ногтя (--nail) приходят из данных студии — lib/theme.ts.
    Всё остальное считается от них, поэтому новая студия = новые три цвета, без правки стилей. */
 :root {
-  --accent: #552a3a;
-  --on-accent: #fffcfb;
-  --paper: #f7f4f0;
-  --ink: #241c20;
+  --accent: #5b2030;
+  --on-accent: #fffcf8;
+  --paper: #f6f1eb;
+  --ink: #1e1720;
   --nail: none;
 
   --bg: var(--paper);
@@ -33,11 +33,11 @@
   --shadow-sm: 0 1px 2px rgba(14, 15, 26, 0.05), 0 6px 18px -8px rgba(14, 15, 26, 0.14);
   --shadow: 0 1px 2px rgba(14, 15, 26, 0.04), 0 24px 48px -20px rgba(14, 15, 26, 0.3);
 
-  /* Два шрифта на всё: Tenor Sans — название студии, Onest — интерфейс кабинета (заголовки тоже) */
-  --font-display: 'Tenor Sans', 'Onest Variable', Arial, sans-serif;
-  --font-heading: 'Onest Variable', system-ui, sans-serif;
+  /* Два шрифта на всё: Prata — название студии, Manrope — интерфейс кабинета (заголовки тоже) */
+  --font-display: 'Prata', Georgia, serif;
+  --font-heading: 'Manrope Variable', system-ui, sans-serif;
   --font-hero: var(--font-display);
-  --font-ui: 'Onest Variable', 'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-ui: 'Manrope Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --gutter: 16px;
   --max: 1200px;

@@ -16,9 +16,10 @@
 Вымышленное содержимое LUMI берётся только при `"base": "lumi-demo"` (так устроен `lumi.json`).
 Сборка не пропустит салон без `studio.name`, `studio.address`, услуг или с ценой 0.
 
-Оформление: `"theme": { "preset": "mulberry" | "taupe" | "rose" }`, по желанию `"accent": "#7F363F"` (тёмный).
+Оформление: `"theme": { "preset": "mulberry" | "taupe" | "rose" }` (Бордо, Какао, Слива), по желанию `"accent": "#7F363F"` (тёмный).
 Если у салона уже есть DIKIDI/YCLIENTS: `"booking": { "mode": "external", "url": "https://…", "name": "DIKIDI" }` —
-кнопки ведут туда, своей сетки времени на сайте нет.
+кнопки ведут туда, своей сетки времени на сайте нет. Запись через мессенджер:
+`"booking": { "mode": "messenger", "channel": "whatsapp" }` (номер берётся из `studio.whatsapp`).
 
 ```json
 {
