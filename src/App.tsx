@@ -1,7 +1,7 @@
 // «На пять» — сайт студии маникюра. Сквозной приём: окна в форме ногтей (скруглённый верх),
 // на первом экране они раскрыты веером, как пальцы, дальше повторяются в работах и у мастеров.
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { CATEGORY_LABEL, heroNails, masters, photoUrl, services, studio, STYLE_LABEL, works, type Category, type Style, type Work } from './data'
+import { CATEGORY_LABEL, masters, photoUrl, services, studio, STYLE_LABEL, works, type Category, type Style, type Work } from './data'
 import { Booking } from './Booking'
 import reviewsData from './reviews.json'
 import { book, dayPhrase, fmtDuration, fmtTime, monthDay, nearest, priceLabel, todayHours, weekHours } from './slots'
@@ -120,49 +120,52 @@ function Header() {
   )
 }
 
-/* ---------- Первый экран (одобрен) ---------- */
+/* ---------- Первый экран ---------- */
+// Одна работа в высокой арке. «на пять» заходит на арку поверх фото, рядом учительская «5» ручкой:
+// маникюр на пять — буквально оценка за работу. Оранжевый взят из бархатцев на фото.
+
+const HERO_PHOTO = { id: '1736434518489-0eb84070017f', alt: 'Бежевый миндаль на фоне бархатцев', pos: '58% 35%' }
 
 function Hero() {
   const first = useMemo(() => nearest(main.id), [])
   const minPrice = Math.min(...services.filter((s) => s.category !== 'design').map((s) => s.price))
+  const pick = first ? { serviceId: main.id, date: first.iso, time: first.time } : {}
   return (
     <section className="hero" aria-labelledby="hero-h">
-      <div className="hero-copy">
-        <h1 id="hero-h" className="hero-h">
-          Маникюр
-          <br />
+      <div className="arch">
+        <Photo id={HERO_PHOTO.id} w={900} alt={HERO_PHOTO.alt} pos={HERO_PHOTO.pos} sizes="(min-width: 900px) 42vw, 100vw" eager />
+      </div>
+
+      <h1 id="hero-h" className="hero-h">
+        <span className="hl-1">Маникюр</span>
+        <span className="hl-2">
           на&nbsp;пять
-        </h1>
+          <span className="grade" aria-hidden>
+            5
+            <svg viewBox="0 0 120 120" aria-hidden>
+              <path d="M62 10C30 8 9 32 10 62c1 31 26 50 55 47 28-3 47-26 45-53C108 30 86 12 58 14" />
+            </svg>
+          </span>
+        </span>
+      </h1>
+
+      <div className="hero-side">
         <p className="hero-lead">{studio.lead}</p>
         <div className="hero-cta">
-          <button className="btn is-light is-big" onClick={() => book(first ? { serviceId: main.id, date: first.iso, time: first.time } : {})}>
-            Выбрать время
+          <button className="btn is-orange is-big" onClick={() => book(pick)}>
+            {first ? `Записаться: ${dayPhrase(first.iso)} в\u00a0${fmtTime(first.time)}` : "Выбрать время"}
           </button>
           <a className="link" href="#prices" onClick={go('prices')}>
             Цены от&nbsp;{minPrice.toLocaleString('ru-RU')}&nbsp;₽
           </a>
         </div>
+        <p className="hero-info">
+          <a href={studio.map} target="_blank" rel="noreferrer">
+            {studio.address}
+          </a>
+          <span>{todayHours()}</span>
+        </p>
       </div>
-
-      <ul className="hand" aria-label="Работы мастеров">
-        {heroNails.map((n, i) => (
-          <li key={n.photo} className="nail" style={{ ['--h' as string]: n.h, ['--r' as string]: `${n.r}deg`, ['--i' as string]: i, ['--z' as string]: n.z, ['--pos' as string]: n.pos }}>
-            <Photo id={n.photo} w={500} alt={n.alt} pos={n.pos} sizes="(min-width: 900px) 9vw, 18vw" eager />
-          </li>
-        ))}
-      </ul>
-
-      <p className="hero-info">
-        <a href={studio.map} target="_blank" rel="noreferrer">
-          {studio.address}
-        </a>
-        <span>{todayHours()}</span>
-        {first && (
-          <span className="hero-next">
-            Ближайшее окно: {dayPhrase(first.iso)} в&nbsp;{fmtTime(first.time)}
-          </span>
-        )}
-      </p>
     </section>
   )
 }

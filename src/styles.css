@@ -130,134 +130,172 @@ button {
   text-decoration-thickness: 1.5px;
 }
 
-/* ---------- Первый экран ---------- */
+/* ---------- Первый экран ----------
+   Арка с работой справа. Заголовок огромный, вторая строка «на пять» заходит на арку поверх фото.
+   Учительская «5» ручкой — оранжевая, как бархатцы на фото: второй акцент к кобальту. */
+:root {
+  --orange: #ff6a3d;
+}
 .hero {
   position: relative;
-  color: var(--on-field);
   min-height: 100svh;
   overflow: hidden;
+  color: var(--on-field);
   background:
     radial-gradient(120% 80% at 80% 110%, var(--field-2), transparent 60%),
     var(--field);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: space-between;
+  padding: calc(var(--hd) + clamp(24px, 5vh, 64px)) var(--pad) clamp(28px, 5vh, 56px);
 }
-.hero-copy {
-  position: relative;
-  z-index: 2;
-  padding: calc(var(--hd) + clamp(32px, 7vh, 88px)) var(--pad) 0;
-  max-width: 50%;
+.arch {
+  position: absolute;
+  z-index: 0;
+  right: var(--pad);
+  top: calc(var(--hd) + 12px);
+  bottom: 0;
+  width: min(40vw, 640px);
+  overflow: hidden;
+  border-radius: 999px 999px 0 0;
+}
+.arch img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Лёгкое затемнение слева: белые буквы поверх фото читаются, цвет работы не тускнеет */
+.arch::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgb(10 14 60 / 0.42), transparent 45%);
+  pointer-events: none;
 }
 .hero-h {
+  position: relative;
+  z-index: 2;
   margin: 0;
   font-family: var(--display);
   font-weight: 700;
-  font-size: clamp(48px, 7.2vw, 124px);
-  line-height: 0.95;
-  letter-spacing: -0.055em;
+  font-size: clamp(56px, 11.2vw, 196px);
+  line-height: 0.86;
+  letter-spacing: -0.065em;
+}
+.hero-h span {
+  display: block;
+  white-space: nowrap;
+}
+.hl-2 {
+  position: relative;
+  /* вторая строка сдвинута вправо и ложится на арку */
+  margin-left: clamp(0px, 22vw, 360px);
+  width: max-content;
+}
+.grade {
+  /* Оценка под второй строкой, на чистом кобальте: заполняет пустоту между заголовком и текстом */
+  position: absolute;
+  left: 0.02em;
+  top: 0.98em;
+  width: 0.86em;
+  height: 0.86em;
+  display: grid;
+  place-items: center;
+  padding-bottom: 0.08em;
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  font-size: 1.05em;
+  letter-spacing: 0;
+  line-height: 1;
+  color: var(--orange);
+  rotate: -12deg;
+}
+.grade svg {
+  position: absolute;
+  inset: -4% -8%;
+  width: 116%;
+  height: 108%;
+  fill: none;
+  stroke: var(--orange);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.hero-side {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: clamp(20px, 3vh, 32px);
+  max-width: 440px;
 }
 .hero-lead {
-  margin: clamp(20px, 3vh, 32px) 0 0;
-  max-width: 30ch;
-  font-size: clamp(17px, 1.4vw, 21px);
-  line-height: 1.4;
+  margin: 0;
+  font-size: clamp(17px, 1.35vw, 20px);
+  line-height: 1.45;
   color: var(--on-field-2);
 }
 .hero-cta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 16px 28px;
-  margin-top: clamp(28px, 4.4vh, 48px);
+  gap: 14px 26px;
 }
-
-/* Рука из пяти окон: пальцы веером от общего основания под нижним краем экрана */
-.hand {
-  position: absolute;
-  z-index: 1;
-  right: clamp(0px, 4vw, 80px);
-  bottom: -14svh;
-  width: min(54vw, 880px);
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  gap: 3px;
+.btn.is-orange {
+  background: var(--orange);
+  color: var(--ink);
 }
-.nail {
-  position: relative;
-  flex: 0 0 19.5%;
-  height: calc(var(--h) * 100svh);
-  border-radius: 999px 999px 40px 40px / 50% 50% 40px 40px;
-  overflow: hidden;
-  background: var(--field-2);
-  transform-origin: 50% 100%;
-  transform: rotate(var(--r));
-  box-shadow:
-    0 30px 60px -30px rgb(8 12 60 / 0.6),
-    inset 0 0 0 1px rgb(255 255 255 / 0.14);
+@media (hover: hover) {
+  .btn.is-orange:hover {
+    background: #ff8460;
+  }
 }
-/* Низ пальца растворяется в кобальте: рука «поднимается» из цвета, разные фоны фото не спорят */
-.nail::after {
-  content: '';
-  position: absolute;
-  inset: 45% 0 0;
-  background: linear-gradient(to bottom, rgb(43 59 209 / 0), var(--field) 92%);
-  pointer-events: none;
-}
-/* Большой палец ниже и шире, ближе к ладони */
-.nail:first-child {
-  flex-basis: 21%;
-  margin-right: -2%;
-  translate: 0 -2svh;
-}
-.nail img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: var(--pos) !important;
-  transform: scale(var(--z, 1));
-  transform-origin: var(--pos);
-  display: block;
-}
-
 .hero-info {
-  position: relative;
-  z-index: 2;
   margin: 0;
-  padding: clamp(24px, 3.6vh, 40px) var(--pad) 0;
-  max-width: 44%;
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-wrap: wrap;
+  gap: 4px 22px;
   font-size: 15px;
   color: var(--on-field-2);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .nail {
-    animation: grow 1.1s var(--ease) both;
-    animation-delay: calc(0.15s + var(--i) * 0.07s);
-    transform-origin: bottom;
+  .arch img {
+    animation: arch-in 1.4s var(--ease) both;
   }
-  .hero-h,
-  .hero-lead,
-  .hero-cta {
+  .hl-1,
+  .hl-2 {
     animation: up 0.9s var(--ease) both;
   }
-  .hero-lead {
+  .hl-2 {
     animation-delay: 0.08s;
   }
-  .hero-cta {
-    animation-delay: 0.16s;
+  .grade {
+    animation: grade-in 0.5s var(--ease) 0.7s both;
+  }
+  .grade path {
+    stroke-dasharray: 360;
+    animation: draw 0.7s ease-out 0.9s both;
+  }
+  .hero-side {
+    animation: up 0.9s var(--ease) 0.2s both;
   }
 }
-@keyframes grow {
+@keyframes arch-in {
   from {
-    transform: rotate(0deg) translateY(30%);
+    transform: scale(1.08);
+    opacity: 0;
+  }
+}
+@keyframes grade-in {
+  from {
+    opacity: 0;
+    scale: 1.4;
+  }
+}
+@keyframes draw {
+  from {
+    stroke-dashoffset: 360;
   }
 }
 @keyframes up {
@@ -267,47 +305,39 @@ button {
   }
 }
 
-/* ---------- Телефон ---------- */
 @media (max-width: 900px) {
   .nav,
   .hd .btn {
     display: none;
   }
   .hero {
-    display: flex;
-    flex-direction: column;
-  }
-  .hero-copy {
-    max-width: none;
-    padding-top: calc(var(--hd) + 8px);
+    padding-top: calc(var(--hd) + 20px);
+    align-content: start;
+    gap: 0;
   }
   .hero-h {
-    font-size: clamp(44px, 13.4vw, 72px);
+    font-size: clamp(48px, 15vw, 96px);
   }
-  .hand {
+  .hl-2 {
+    margin-left: 0;
+  }
+  .arch {
     position: relative;
     right: auto;
-    width: auto;
-    height: auto;
-    flex: 1 1 auto;
-    min-height: 300px;
-    margin: 32px var(--pad) 0;
-    gap: 8px;
-  }
-  .hand {
+    top: auto;
     bottom: auto;
-    justify-content: center;
-    margin-bottom: -60px;
+    width: auto;
+    height: 52svh;
+    margin: -0.42em calc(-1 * var(--pad)) 0 22%;
+    order: 2;
+    font-size: clamp(48px, 15vw, 96px);
   }
-  .nail {
-    height: calc(var(--h) * 52svh);
-    transform: rotate(calc(var(--r) * 0.55));
+  .hero-h {
+    order: 1;
   }
-  .hero-info {
-    position: static;
-    padding: 16px var(--pad) 20px;
-    justify-content: space-between;
-    background: var(--field);
+  .hero-side {
+    order: 3;
+    margin-top: 24px;
   }
 }
 
@@ -1531,17 +1561,7 @@ button {
     margin-top: 20px;
     color: var(--field);
   }
-  .hero-info {
-    flex-direction: row;
-    flex-wrap: wrap;
-    max-width: none;
-    gap: 6px 20px;
-  }
-  .hero-next {
-    flex-basis: 100%;
-    color: #fff;
-    font-weight: 600;
-  }
+
   .prices-grid {
     grid-template-columns: minmax(0, 1fr);
   }
