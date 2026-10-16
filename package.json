@@ -1,25 +1,23 @@
 {
-  "name": "nail-studio",
+  "name": "na-pyat",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview",
-    "typecheck": "tsc -b",
-    "sites": "node scripts/build-sites.mjs"
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@fontsource-variable/onest": "^5.3.1",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "@fontsource-variable/golos-text": "^5.3.0",
+    "@fontsource-variable/unbounded": "^5.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
-    "playwright": "^1.64.1",
     "typescript": "^7.0.2",
     "vite": "^8.3.4"
   }

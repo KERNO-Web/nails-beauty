@@ -1,71 +1,68 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
-import { Booking } from './site/Booking'
-import { Contact, Reviews, StickyBar } from './site/Bottom'
-import { Header, Hero } from './site/Hero'
-import { Masters } from './site/Masters'
-import { Services } from './site/Services'
-import { Works } from './site/Works'
-import { RemindPrompt } from './notify/Remind'
-import { useData } from './lib/store'
-import { useMediaVersion } from './lib/media'
-import { useAdminManifest } from './lib/push'
-import { applyTheme } from './lib/theme'
+// Прототип первого экрана «На пять» — на одобрение. Остальной сайт строится после.
+// Идея: пять окон в форме ногтей поднимаются снизу экрана разной высоты, как пальцы руки.
+// В каждом окне — настоящая работа. Окна прячут неудачный кадр, поэтому приём выдерживает любые фото салона.
 
-const Admin = lazy(() => import('./admin/Admin'))
+const photo = (id: string, w: number) => `https://images.unsplash.com/photo-${id}?w=${w}&q=75&auto=format&fit=crop`
 
-function useRoute() {
-  const [hash, setHash] = useState(location.hash)
-  useEffect(() => {
-    const on = () => setHash(location.hash)
-    window.addEventListener('hashchange', on)
-    return () => window.removeEventListener('hashchange', on)
-  }, [])
-  return hash.startsWith('#/admin') ? 'admin' : 'site'
-}
+/** Пальцы веером от общего основания под краем экрана: высота — доля экрана, r — наклон */
+const NAILS = [
+  // Ладонью к нам: большой палец слева, отведён в сторону
+  { id: '1754799670312-8e7da8e40ad7', alt: 'Синий с золотом', h: 0.46, r: -34, pos: '50% 45%' },
+  { id: '1641814250010-9887d86eedfd', alt: 'Пудровый с кольцом', h: 0.7, r: -11, pos: '45% 50%' },
+  { id: '1736434518489-0eb84070017f', alt: 'Бежевый миндаль', h: 0.8, r: -2, pos: '55% 30%' },
+  { id: '1769687209448-025548dfca8b', alt: 'Нюд с декором', h: 0.73, r: 7, pos: '50% 35%' },
+  { id: '1604654894610-df63bc536371', alt: 'Чёрный и черепаховый дизайн', h: 0.58, r: 16, pos: '50% 40%' },
+]
 
-export default function App() {
-  const data = useData()
-  // Фото, загруженные с устройства, читаются из базы после старта: перерисовываем страницу, когда готовы
-  useMediaVersion()
-  const route = useRoute()
-  // Ставим на рабочий стол сайт или кабинет: у каждого свой манифест (имя, иконка, стартовая страница)
-  useAdminManifest(route === 'admin')
-
-  // Тема на <html>, чтобы её видели все слои (и окна поверх страницы); кабинет в тех же цветах
-  useEffect(() => applyTheme(data.theme), [data.theme])
-  useEffect(() => {
-    document.title = route === 'admin' ? `Кабинет: ${data.studio.name}` : `${data.studio.name}: маникюр и педикюр, онлайн-запись`
-  }, [data.studio.name, route])
-
-  useEffect(() => {
-    if (route === 'site') window.scrollTo(0, 0)
-  }, [route])
-
-  if (route === 'admin')
-    return (
-      <Suspense fallback={null}>
-        <Admin />
-      </Suspense>
-    )
-  return <Site />
-}
-
-function Site() {
-  const data = useData()
+export function App() {
   return (
     <div className="site">
-      <Header data={data} />
-      <main>
-        <Hero data={data} />
-        <Services data={data} />
-        <Works data={data} />
-        <Masters data={data} />
-        <Booking data={data} />
-        <Reviews data={data} />
-      </main>
-      <Contact data={data} />
-      <StickyBar data={data} />
-      <RemindPrompt data={data} />
+      <header className="hd">
+        <a className="logo" href="#">
+          на&nbsp;пять
+        </a>
+        <nav className="nav" aria-label="Разделы">
+          <a href="#">Цены</a>
+          <a href="#">Работы</a>
+          <a href="#">Мастера</a>
+          <a href="#">Контакты</a>
+        </nav>
+        <a className="btn is-light" href="#">
+          Записаться
+        </a>
+      </header>
+
+      <section className="hero" aria-labelledby="hero-h">
+        <div className="hero-copy">
+          <h1 id="hero-h" className="hero-h">
+            Маникюр
+            <br />
+            на&nbsp;пять
+          </h1>
+          <p className="hero-lead">Студия в&nbsp;центре Красноярска. Свободное время видно сразу, запись за&nbsp;минуту.</p>
+          <div className="hero-cta">
+            <a className="btn is-light is-big" href="#">
+              Выбрать время
+            </a>
+            <a className="link" href="#">
+              Цены от&nbsp;1&nbsp;200&nbsp;₽
+            </a>
+          </div>
+        </div>
+
+        <ul className="hand" aria-label="Работы мастеров">
+          {NAILS.map((n, i) => (
+            <li key={n.id} className="nail" style={{ ['--h' as string]: n.h, ['--r' as string]: `${n.r}deg`, ['--i' as string]: i }}>
+              <img src={photo(n.id, 600)} srcSet={`${photo(n.id, 400)} 400w, ${photo(n.id, 800)} 800w`} sizes="(min-width: 900px) 12vw, 20vw" alt={n.alt} style={{ objectPosition: n.pos }} />
+            </li>
+          ))}
+        </ul>
+
+        <p className="hero-info">
+          <span>пр. Мира, 30</span>
+          <span>Сегодня до&nbsp;21:00</span>
+        </p>
+      </section>
     </div>
   )
 }

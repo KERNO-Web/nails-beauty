@@ -1,8 +1,5 @@
 node_modules
 dist
 .work
-*.tsbuildinfo
 .DS_Store
-.playwright-mcp
-out
-qa/shots/
+*.tsbuildinfo
