@@ -1358,6 +1358,18 @@ button {
 }
 
 /* ---------- Планшет и телефон ---------- */
+/* На средних экранах рука доходит до левого края: строку с адресом ставим под кнопку, а не под пальцы */
+@media (min-width: 901px) and (max-width: 1280px) {
+  .hero-info {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 44%;
+    padding: 28px var(--pad) 0;
+  }
+}
 @media (max-width: 1100px) {
   .hd-phone {
     display: none;
